@@ -35,7 +35,7 @@ typedef Eigen::Map<MatrixIn> MapIn;
 typedef Eigen::Map<MatrixOut> MapOut;
 
 
-void predict_compound_block(
+void predict_compound_block_eigen(
    const double in[num_comp][num_feat],
    double out[num_comp][num_proteins]
 )
@@ -49,6 +49,56 @@ void predict_compound_block(
    //        (nc        x        nl) * (nl * np)
    //        (nc             x               np)
    map_out = (map_in * map_f0.transpose()) * map_u1;
+
+   std::cout << __func__ << ":\n" << map_out << std::endl;
+}
+
+
+
+void predict_compound_block_c(
+   const double in[num_comp][num_feat],
+   double out[num_comp][num_proteins]
+)
+{
+    int c, d, k;
+    double tmp[num_comp][num_latent];
+
+    //       ((nc x nf) * (nf * nl)) * (nl * np)
+    //       (nc        x        nl) * (nl * np)
+    //       (nc             x               np)
+    // out = (in * f0.transpose()) * u1;
+
+    // tmp = in * F0
+    for (c = 0; c < num_comp; c++)
+    {
+        for (d = 0; d < num_latent; d++)
+        {
+            double sum = .0;
+            for (k = 0; k < num_feat; k++)
+            {
+                sum = sum + in[c][k] * F0[d][k];
+            }
+
+            tmp[c][d] = sum;
+        }
+    }
+    // out = tmp * u1
+    for (c = 0; c < num_comp; c++)
+    {
+        for (d = 0; d < num_proteins; d++)
+        {
+            double sum = .0;
+            for (k = 0; k < num_latent; k++)
+            {
+                sum = sum + tmp[c][k] * U1[k][d];
+            }
+
+            out[c][d] = sum;
+        }
+    }
+
+    MapOut map_out(&out[0][0]);
+    std::cout << __func__ << ":\n" <<  map_out << std::endl;
 }
 
 int main()
@@ -64,9 +114,16 @@ int main()
         {0.96, 1.29},
     };
 
-    double output_predictions[num_comp][num_proteins];
+    double output_pred1[num_comp][num_proteins];
+    double output_pred2[num_comp][num_proteins];
 
-    predict_compound_block(input_features, output_predictions);
+    predict_compound_block_eigen(input_features, output_pred1);
+    predict_compound_block_c(input_features, output_pred2);
+
+    MapOut map_out1(&output_pred1[0][0]);
+    MapOut map_out2(&output_pred2[0][0]);
+
+    std::cout << "diff: " << (map_out1 - map_out2).norm() << std::endl;
 
     return 0;
 }
