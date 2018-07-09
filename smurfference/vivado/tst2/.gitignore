@@ -1,0 +1,9 @@
+Debug
+.apc
+.cproject
+.project
+.settings
+.vivado_hls_log_all.xml
+solution*
+vivado_hls.app
+*.log
