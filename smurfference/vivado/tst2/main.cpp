@@ -32,7 +32,7 @@ int main()
 
     double output_pred2[num_comp][num_proteins];
 
-    predict_compound_block_c(input_features, output_pred2);
+    predict_compound_block_hls(input_features, output_pred2);
 
     printf("output = \n");
     hls::print_matrix<num_comp, num_proteins, double, hls::NoTranspose>(output_pred2, "   ");
