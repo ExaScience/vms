@@ -1,4 +1,4 @@
-open_project -reset tst2
+open_project -reset hls
 set_top predict_compound_block_c
 add_files predict_tst2.cpp
 add_files predict_tst2.h
