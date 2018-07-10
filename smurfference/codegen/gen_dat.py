@@ -50,28 +50,56 @@ const double sample_1_U0_latents[4][3] = {
 
     return f.getvalue()
 
-def gen_sample(sample):
+def gen_sample(sample, selection):
+    if (sample.iter < selection[0] or sample.iter > selection[1]):
+        return "// skip sample %d\n" % sample.iter
+
     ret = ""
     for i, U in enumerate(sample.latents):
-        ret += gen_mat(U, "const double", "s%d_U%d" % (sample.iter, i))
+        ret += gen_mat(U, "double", "s%d_U%d" % (sample.iter, i))
+    for i, F in enumerate(sample.betas):
+        ret += gen_mat(F, "double", "s%d_F%d" % (sample.iter, i))
 
     return ret
 
-
-
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-
 parser.add_argument('root', metavar='root-file', type=str, help='root file')
-
-parser.add_argument('--samples', dest='samples', default='all',
-                    help='sample or samples to include (e.g. 1, 2-10, all)')
-
+parser.add_argument('--selection', dest='selection', default='all', help='sample or samples to include (e.g. 1, 2-10, all)')
+parser.add_argument('--output', dest='output', default='smurff_model.h', help='output file')
 args = parser.parse_args()
 
+def parse_selection(str):
+    s = str.split("-")
+    if (str == "all"):
+        selection = (0, 9999)
+    elif (len(s) == 1):
+        selection = (int(s[0]), int(s[0]))
+    elif (len(s) == 2):
+        if s[0] == "": s[0] = 0
+        if s[1] == "": s[1] = 9999
+        selection = ( int(s[0]), int(s[1]))
+    else:
+        raise ValueError("Could not parse sample selection: " + args.samples)
+
+    return selection
+
+selection = parse_selection(args.selection)
 session = smurff.PredictSession.fromRootFile(args.root)
 
+
+output = ""
+output += gen_int("num_latent", session.num_latent())
+output += gen_int("num_comp", session.data_shape()[0])
+output += gen_int("num_proteins", session.data_shape()[1])
+output += gen_int("num_feat", session.beta_shape()[0])
+
 for sample in session.samples:
-    print(gen_sample(sample))
+    output += gen_sample(sample, selection)
+
+with open(args.output, "w") as os:
+    os.write(output)
+
+
 
 
 
