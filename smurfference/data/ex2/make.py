@@ -1,35 +1,81 @@
-#!/usr/bin/env python
-
-import urllib.request
-import matrix_io as mio
+import requests
 import os
 from hashlib import sha256
-import smurff
 
-urls = [
-        (
-            "http://homes.esat.kuleuven.be/~jsimm/chembl-IC50-346targets.mm",
-            "10c3e1f989a7a415a585a175ed59eeaa33eff66272d47580374f26342cddaa88",
-            "chembl-IC50-346targets.mm",
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params = { 'id' : id }, stream = True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = { 'id' : id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
+
+    save_response_content(response, destination)    
+
+    session.close()
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+
+def sha256_from(filename):
+    with open(filename, "rb") as f:
+        sha = sha256(f.read()).hexdigest()
+
+    return sha
+
+def download():
+    urls = [
+            ( 
+                "1MI2gXqc0-PM77qxReYQrmO1QyAITMBZ0",
+                "f49c480076ee43f5635bd957a07c44a8a06133d10985c683b9260930831eb163",
+                "side_c2v.ddm",
             ),
-        (
-            "http://homes.esat.kuleuven.be/~jsimm/chembl-IC50-compound-feat.mm",
-            "f9fe0d296272ef26872409be6991200dbf4884b0cf6c96af8892abfd2b55e3bc",
-            "chembl-IC50-compound-feat.mm", 
+            ( 
+                "1OpvOLh0fwFQQRDyp8vYdAGU_CIy9WNCP",
+                "9b8e458612a72d7051463d761248c54edfcb8bbfc73266536a5791fa5b047da2",
+                "test.sdm",
             ),
-        ]
+            ( 
+                "1TGq9qSkKa7fvnwdJ2g5drTTaNTwlnOYF",
+                "f6d9315f2c905146275caa1e1b03e380d870c33166caec81c2bdb35a7efe77ef",
+                "train.sdm",
+            ),
+    ]
+ 
+    for id, expected_sha, output in urls:
+        if os.path.isfile(output):
+            actual_sha = sha256_from(output)
+            if (expected_sha == actual_sha):
+                print("already have %s" % output)
+                continue
 
-for url, expected_sha, output in urls:
-    if os.path.isfile(output):
-        actual_sha = sha256(open(output, "rb").read()).hexdigest()
-        if (expected_sha == actual_sha):
-            continue
+        print("download %s" % output)
+        download_file_from_google_drive(id, output)
+        actual_sha = sha256_from(output)
+        assert (expected_sha == actual_sha)
 
-    print("download %s" % output)
-    urllib.request.urlretrieve(url, output)
+if __name__ == "__main__":
+    download()
 
-ic50 = mio.read_matrix("chembl-IC50-346targets.mm")
-ic50_train, ic50_test = smurff.make_train_test(ic50, 0.2)
-
-mio.write_matrix("chembl-IC50-346targets-train.mm", ic50_train)
-mio.write_matrix("chembl-IC50-346targets-test.mm", ic50_test)
+# shapes:
+# side_c2v.ddm : (46738, 469)
+# side_ecfp6_counts_var005.sdm : (46738, 13132) nnz: 1663083 (0.27%)
+# side_ecfp6_folded_dense.ddm : (46738, 1024)
+# test.sdm : (46738, 114) 21740
+# train.sdm : (46738, 114) 37640
