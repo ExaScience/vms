@@ -13,15 +13,15 @@ def parse_selection(str):
     if (str == "all"):
         selection = (0, 9999)
     elif (len(s) == 1):
-        selection = (int(s[0]), int(s[0]))
+        selection = (int(s[0]), int(s[0])+1)
     elif (len(s) == 2):
         if s[0] == "": s[0] = 0
         if s[1] == "": s[1] = 9999
-        selection = ( int(s[0]), int(s[1]))
+        selection = ( int(s[0]), int(s[1]+1))
     else:
         raise ValueError("Could not parse sample selection: " + args.samples)
 
-    return selection
+    return range(*selection)
 
 def gen_int(name, value):
     """Generates code for an int:
@@ -74,57 +74,66 @@ def gen_sample(sample):
     return ret
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-parser.add_argument('root', metavar='root-file', type=str, help='root file')
-parser.add_argument('--selection', dest='selection', default='all', help='sample or samples to include (e.g. 1, 2-10, all)')
-parser.add_argument('--model-out', dest='model_out', default='smurff_model.h', help='model output file')
+parser.add_argument('--samples', dest='sel_samples', default='all', help='sample or samples to include (e.g. 1, 2-10, all)')
 
+parser.add_argument('--root', metavar='root-file', type=str, help='root file', required=True)
+parser.add_argument('--out-prefix', dest='prefix', default='smurff_', help='output file prefix')
 
-parser.add_argument('--testbench', dest='tb_in', default=None, help='testbench input file')
+parser.add_argument('--testbench', dest='tb_in', default=None, help='testbench input file', required=True)
 parser.add_argument('--testbench-out', dest='tb_out', default='smurff_tb.h', help='testbench output file')
+
 args = parser.parse_args()
 
 
-selection = parse_selection(args.selection)
+selected_samples = parse_selection(args.sel_samples)
+
 session = smurff.PredictSession.fromRootFile(args.root)
 
 num_latent = session.num_latent()
-num_comp, num_proteins = session.data_shape()
-num_feat = session.beta_shape()[0]
+num_compounds, num_proteins = session.data_shape()
+num_features = session.beta_shape()[0]
 
-model_output = ""
-model_output += gen_int("num_latent", num_latent)
-model_output += gen_int("num_comp", num_comp)
-model_output += gen_int("num_proteins", num_proteins)
-model_output += gen_int("num_feat", num_feat)
+const_output = ""
+const_output += gen_int("num_latent", num_latent)
+const_output += gen_int("num_compounds", num_compounds)
+const_output += gen_int("num_proteins", num_proteins)
+const_output += gen_int("num_features", num_features)
 
-if (args.tb_in):
-    tb_output = ""
-    #generate testbench
-    tb_in_matrix = mio.read_matrix(args.tb_in)
+#generate testbench
+tb_in_matrix = mio.read_matrix(args.tb_in)
+(tb_num_compounds, tb_num_features) = tb_in_matrix.shape
+if tb_num_compounds > 10: tb_num_compounds = 10
+tb_in_matrix = tb_in_matrix[:tb_num_compounds,:]
 
-    (tb_num_comp, tb_num_feat) = tb_in_matrix.shape
+assert tb_num_features == num_features
+const_output += gen_int("tb_num_compounds", tb_num_compounds)
 
-    assert tb_num_feat == num_feat
-    tb_output += gen_int("tb_num_comp", tb_num_comp)
-    tb_output += gen_mat(tb_in_matrix, "double", "tb_input")
+tb_output = ""
+tb_output += gen_mat(tb_in_matrix, "double", "tb_input")
 
 #generate model
+model_output = ""
 for sample in session.samples:
-    if (sample.iter < selection[0] or sample.iter > selection[1]):
+    if (not sample.iter in selected_samples):
         model_output += "// skip sample %d\n" % sample.iter
-        tb_output += "// skip sample %d\n" % sample.iter
+        continue
 
     model_output += gen_sample(sample)
 
-    if (args.tb_in):
-        predictions = []
-        np.apply_along_axis( lambda f: predictions.append(sample.predict((f, None))), axis=1, arr=tb_in_matrix )
-        tb_ref_matrix = np.stack(predictions)
-        tb_output += gen_mat(tb_ref_matrix, "double", "s%d_tb_ref" % sample.iter)
+    predictions = []
+    for comp in range(tb_num_compounds):
+        feat = tb_in_matrix[comp, :]
+        predictions.append(sample.predict((feat, None)))
 
-with open(args.model_out, "w") as os:
+    tb_ref_matrix = np.stack(predictions)
+    tb_output += gen_mat(tb_ref_matrix, "double", "s%d_tb_ref" % sample.iter)
+
+with open(args.prefix + "const.h", "w") as os:
+    os.write(const_output)
+
+with open(args.prefix + "model.h", "w") as os:
     os.write(model_output)
 
-with open(args.tb_out, "w") as os:
+with open(args.prefix + "tb.h", "w") as os:
     os.write(tb_output)
 
