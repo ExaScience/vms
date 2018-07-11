@@ -3,6 +3,7 @@
 import matrix_io as mio
 import smurff
 import numpy as np
+import scipy as sp
 import sys
 import os.path as pth
 import io
@@ -95,7 +96,10 @@ const_output += gen_int("num_features", num_features)
 
 #generate testbench
 tb_file = pth.join(session.root_dir, session.options.get("side_info_0_0", "file"))
-tb_in_matrix = mio.read_matrix(tb_file).todense()
+tb_in_matrix = mio.read_matrix(tb_file)
+if sp.sparse.issparse(tb_in_matrix):
+    tb_in_matrix = tb_in_matrix.todense()
+
 (tb_num_compounds, tb_num_features) = tb_in_matrix.shape
 if tb_num_compounds > 10: tb_num_compounds = 10
 tb_in_matrix = tb_in_matrix[:tb_num_compounds,:]
