@@ -9,8 +9,17 @@ void predict_compound_block_c(
    double out[tb_num_compounds][num_proteins]
 )
 {
+#pragma HLS ARRAY_PARTITION variable=out complete dim=2
+#pragma HLS ARRAY_PARTITION variable=in complete dim=2
+#pragma HLS INTERFACE ap_fifo port=out
+#pragma HLS INTERFACE ap_fifo port=in
+
 	int c, d, k;
-    double tmp[tb_num_compounds][num_latent];
+    double tmp[num_latent];
+#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
+
+    double in_buf[num_features];
+#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
 
     //       ((nc x nf) * (nf * nl)) * (nl * np)
     //       (nc        x        nl) * (nl * np)
@@ -23,31 +32,32 @@ void predict_compound_block_c(
 	for (c = 0; c < tb_num_compounds; c++)
     {
 #pragma HLS PIPELINE II=1
+
+		for (k = 0; k < num_features; k++) {
+			in_buf[k] = in[c][k];
+		}
+
         predict_compound_block_c_loop12:
 		for (d = 0; d < num_latent; d++)
         {
-#pragma HLS UNROLL
-            double sum = .0;
+			double sum = .0;
             predict_compound_block_c_loop13:
 			for (k = 0; k < num_features; k++)
             {
-#pragma HLS UNROLL
-                sum = sum + in[c][k] * F0[d][k];
+                sum = sum + in_buf[k] * F0[d][k];
             }
 
-            tmp[c][d] = sum;
+            tmp[d] = sum;
         }
 
     	predict_compound_block_c_loop22:
         for (d = 0; d < num_proteins; d++)
         {
-#pragma HLS UNROLL
             double sum = .0;
             predict_compound_block_c_loop23:
             for (k = 0; k < num_latent; k++)
             {
-#pragma HLS UNROLL
-                sum = sum + tmp[c][k] * U1[k][d];
+                sum = sum + tmp[k] * U1[k][d];
             }
 
             out[c][d] = sum;
