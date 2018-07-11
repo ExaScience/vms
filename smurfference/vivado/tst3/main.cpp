@@ -1,29 +1,26 @@
-#include <iostream>
-
-#include "hls/linear_algebra/utils/x_hls_matrix_utils.h"
-#include "hls/linear_algebra/utils/x_hls_matrix_tb_utils.h"
+#include <cstdio>
 
 #include "smurff_const.h"
 #include "smurff_tb.h"
 
+#include "predict.h"
+
 int main()
 {
-    double tb_output[tb_num_comp][tb_num_proteins];
+    double tb_output[tb_num_compounds][num_proteins];
 
     predict_compound_block_c(tb_input, tb_output);
 
-    printf("output = \n");
-    hls::print_matrix<num_comp, num_proteins, double, hls::NoTranspose>(output_pred2, "   ");
+    int nerrors = 0;
+    for(int c=0; c<tb_num_compounds; c++)
+        for(int p=0; p<num_proteins; p++)
+            if (tb_output[c][p] - s1_tb_ref[c][p] > 0.0001)
+            {
+                printf("error at [%d][%d]: %f != %f\n", c, p, tb_output[c][p], s1_tb_ref[c][p]);
+                nerrors++;
+            }
 
-    // Generate error ratio and compare against threshold value
-    // - LAPACK error measurement method
-    // - Threshold taken from LAPACK test functions
-    if ( difference_ratio<tb_num_comp, num_proteins>(tb_output,tb_ref) > 30.0 ) {
-      printf("  --> error\n");
-      return(1);
-    }
-    return(0);
+    printf("%d errors\n", nerrors);
 
-
-    return 0;
+    return nerrors;
 }
