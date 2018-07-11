@@ -51,7 +51,7 @@ const double sample_1_U0_latents[4][3] = {
     hdr += gen_int(varname + "_cols", M.shape[1])
     hdr += typename + " " + varname + "[%d][%d] = {" % M.shape
     ftr = "};"
-    fmt = "    { " + "%+.2f, " * (M.shape[1] - 1) + "%+.2f },"
+    fmt = "    { " + "%+.8f, " * (M.shape[1] - 1) + "%+.8f },"
 
     f = io.StringIO() 
 
@@ -74,33 +74,28 @@ def gen_sample(sample):
     return ret
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-parser.add_argument('--samples', dest='sel_samples', default='all', help='sample or samples to include (e.g. 1, 2-10, all)')
-
-parser.add_argument('--root', metavar='root-file', type=str, help='root file', required=True)
 parser.add_argument('--out-prefix', dest='prefix', default='smurff_', help='output file prefix')
-
-parser.add_argument('--testbench', dest='tb_in', default=None, help='testbench input file', required=True)
-parser.add_argument('--testbench-out', dest='tb_out', default='smurff_tb.h', help='testbench output file')
+parser.add_argument('--samples', dest='sel_samples', default='all', help='sample or samples to include (e.g. 1, 2-10, all)')
+parser.add_argument('--root', metavar='root-file', type=str, help='root file', required=True)
 
 args = parser.parse_args()
-
-
 selected_samples = parse_selection(args.sel_samples)
 
-session = smurff.PredictSession.fromRootFile(args.root)
+session = smurff.PredictSession(args.root)
 
 num_latent = session.num_latent()
 num_compounds, num_proteins = session.data_shape()
 num_features = session.beta_shape()[0]
 
-const_output = ""
+const_output = "#pragma once\n"
 const_output += gen_int("num_latent", num_latent)
 const_output += gen_int("num_compounds", num_compounds)
 const_output += gen_int("num_proteins", num_proteins)
 const_output += gen_int("num_features", num_features)
 
 #generate testbench
-tb_in_matrix = mio.read_matrix(args.tb_in)
+tb_file = pth.join(session.root_dir, session.options.get("side_info_0_0", "file"))
+tb_in_matrix = mio.read_matrix(tb_file).todense()
 (tb_num_compounds, tb_num_features) = tb_in_matrix.shape
 if tb_num_compounds > 10: tb_num_compounds = 10
 tb_in_matrix = tb_in_matrix[:tb_num_compounds,:]
@@ -122,7 +117,8 @@ for sample in session.samples:
 
     predictions = []
     for comp in range(tb_num_compounds):
-        feat = tb_in_matrix[comp, :]
+        feat = np.array(tb_in_matrix[comp, :])
+        feat = np.squeeze(feat)
         predictions.append(sample.predict((feat, None)))
 
     tb_ref_matrix = np.stack(predictions)
