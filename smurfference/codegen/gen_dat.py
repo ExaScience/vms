@@ -118,10 +118,13 @@ def gen_file(suffix, content):
         os.write(content)
 
 #generate model
+model_output = ""
 for sample in session.samples:
     gen_file("sample_%d.h" % sample.iter, gen_sample(sample, tb_in_matrix))
+    model_output += '#include "%ssample_%d.h"\n' % (args.prefix, sample.iter)
 
 gen_file("const.h", const_output)
+gen_file("model.h", model_output)
 gen_file("tb.h", tb_output)
 gen_file("types.h", gen_types())
 
