@@ -1,12 +1,13 @@
+#include "predict.h"
+
 #include "smurff_const.h"
 #include "smurff_model.h"
 
-#define F0 s1_F0
-#define U1 s1_U1
+using namespace sample_0;
 
 void predict_compound_block_c(
-   const double in[tb_num_compounds][num_features],
-   double out[tb_num_compounds][num_proteins]
+   const double in[num_compounds][num_features],
+   double out[num_compounds][num_proteins]
 )
 {
 #pragma HLS ARRAY_RESHAPE variable=out complete dim=2
@@ -31,7 +32,7 @@ void predict_compound_block_c(
 
     // tmp = in * F0
     predict_compound_block_c_loop11:
-	for (c = 0; c < tb_num_compounds; c++)
+	for (c = 0; c < num_compounds; c++)
     {
 #pragma HLS PIPELINE II=1
 
@@ -46,7 +47,7 @@ void predict_compound_block_c(
             predict_compound_block_c_loop13:
 			for (k = 0; k < num_features; k++)
             {
-                sum = sum + in_buf[k] * F0[d][k];
+                sum = sum + in_buf[k] * F[d][k];
             }
 
             tmp[d] = sum;
@@ -59,7 +60,7 @@ void predict_compound_block_c(
             predict_compound_block_c_loop23:
             for (k = 0; k < num_latent; k++)
             {
-                sum = sum + tmp[k] * U1[k][d];
+                sum = sum + tmp[k] * U[k][d];
             }
 
             out[c][d] = sum;
