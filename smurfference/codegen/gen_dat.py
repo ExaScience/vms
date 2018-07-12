@@ -31,7 +31,7 @@ def gen_mat(M, typename, varname, indent = ""):
 
 const int sample_1_U0_latents_rows = 4;
 const int sample_1_U0_latents_cols = 3;
-const U0_type sample_1_U0_latents[4][3] = {
+const U_type sample_1_U0_latents[4][3] = {
     { 0.22, 1.40, 1.15 },
     { -0.26, 0.74, 2.48 },
     { -0.62, 0.29, 0.17 },
@@ -57,15 +57,15 @@ const U0_type sample_1_U0_latents[4][3] = {
 
     return f.getvalue()
 
-def gen_sample(i, U, F, tb):
+def gen_sample(i, U, B, tb):
     # (nc x np) = ((nc x nf) * (nf x nl)) * (nl x np)
     # default="nc=10,np=15,nf=8,nl=4,ns=2"
-    P = np.matmul(np.matmul(tb, F.transpose()), U)
+    P = np.matmul(np.matmul(tb, B.transpose()), U)
 
     return  "namespace sample_%d {\n\n" % i \
-        + gen_mat(U, "Uin_type",  "U", "  ") + "\n" \
-        + gen_mat(F, "Fin_type",  "F", "  ") + "\n" \
-        + gen_mat(P, "Pout_type", "P", "  ") + "\n" \
+        + gen_mat(U, "U_type", "U", "  ") + "\n" \
+        + gen_mat(B, "B_type", "B", "  ") + "\n" \
+        + gen_mat(P, "P_type", "P", "  ") + "\n" \
         + "} // end namespace sample_%d\n" % i
 
 def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
@@ -94,7 +94,7 @@ def gen_session(root):
         tb_in_matrix = tb_in_matrix.todense()
 
     (num_compounds, tb_num_features) = tb_in_matrix.shape
-    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+    gen_file("tb.h", gen_mat(tb_in_matrix, "F_type", "tb_input"))
 
     assert tb_num_features == num_features
 
@@ -113,7 +113,7 @@ def gen_random(num_compounds, num_proteins, num_features, num_latent, num_sample
 
     # tb_input
     tb_in_matrix = np.random.normal(size=(num_compounds, num_features))
-    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+    gen_file("tb.h", gen_mat(tb_in_matrix, "F_type", "tb_input"))
 
     model_output = ""
     for sample in range(num_samples):
@@ -123,7 +123,7 @@ def gen_random(num_compounds, num_proteins, num_features, num_latent, num_sample
         model_output += '#include "%ssample_%d.h"\n' % (prefix, sample)
 
     gen_file("model.h", model_output)
-    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+    gen_file("tb.h", gen_mat(tb_in_matrix, "F_type", "tb_input"))
 
     
 
