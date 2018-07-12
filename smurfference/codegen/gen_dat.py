@@ -9,6 +9,13 @@ import os.path as pth
 import io
 import argparse
 
+prefix = "smurff_"
+
+def gen_file(suffix, content):
+    with open(prefix + suffix, "w") as os:
+        os.write(content)
+
+
 def gen_int(name, value, indent = ""):
     """Generates code for an int:
     
@@ -50,81 +57,86 @@ const U0_type sample_1_U0_latents[4][3] = {
 
     return f.getvalue()
 
-def gen_sample(sample, tb_in_matrix):
-    ret = "namespace sample_%d {\n\n" % sample.iter
-    for i, U in enumerate(sample.latents):
-        ret += gen_mat(U, "Uin_type", "U%d" % i, "  ") + "\n"
+def gen_sample(i, U, F, tb):
+    P = tb * F * U
 
-    for i, F in enumerate(sample.betas):
-        ret += gen_mat(F, "Fin_type", "F%d" % i, "  ") + "\n"
+    return  "namespace sample_%d {\n\n" % i \
+        + gen_mat(U, "Uin_type",  "U", "  ") + "\n" \
+        + gen_mat(F, "Fin_type",  "F", "  ") + "\n" \
+        + gen_mat(P, "Pout_type", "P", "  ") + "\n" \
+        + "} // end namespace sample_%d\n" % i
 
-    predictions = []
-    for comp in range(tb_in_matrix.shape[0]):
-        feat = np.array(tb_in_matrix[comp, :])
-        feat = np.squeeze(feat)
-        predictions.append(sample.predict((feat, None)))
+def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
+    const_output = "#pragma once\n"
+    const_output += gen_int("num_compounds", num_compounds)
+    const_output += gen_int("num_proteins",  num_proteins)
+    const_output += gen_int("num_features",  num_features)
+    const_output += gen_int("num_latent",    num_latent)
+    const_output += gen_int("num_samples",   num_samples)
+    gen_file("const.h", const_output)
 
-    tb_ref_matrix = np.stack(predictions)
-    ret += gen_mat(tb_ref_matrix, "Pout_type", "s%d_tb_ref" % sample.iter, "  ") + "\n"
+def gen_session(root):
+    session = smurff.PredictSession(args.root)
 
-    ret += "} // end namespace sample_%d\n" % sample.iter
+    num_latent = session.num_latent()
+    num_compounds, num_proteins = session.data_shape()
+    num_features = session.beta_shape()[0]
+    num_samples = len(session.samples)
 
-    return ret
+    gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples)
 
-def gen_types():
-    output = "#pragma once\n"
-    output += "typedef double Fin_type;\n"
-    output += "typedef double Uin_type;\n"
-    output += "typedef double Uout_type;\n"
-    output += "typedef double Pout_type;\n"
-    return output
+    #generate testbench
+    tb_file = pth.join(session.root_dir, session.options.get("side_info_0_0", "file"))
+    tb_in_matrix = mio.read_matrix(tb_file)
+    if sp.sparse.issparse(tb_in_matrix):
+        tb_in_matrix = tb_in_matrix.todense()
+
+    (num_compounds, tb_num_features) = tb_in_matrix.shape
+    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+
+    assert tb_num_features == num_features
+
+    #generate model
+    model_output = ""
+    for sample in session.samples:
+        U = sample.latents[1]
+        F = sample.betas[0]
+        gen_file("sample_%d.h" % sample.iter, gen_sample(sample.iter, U, F, tb_in_matrix))
+        model_output += '#include "%ssample_%d.h"\n' % (prefix, sample.iter)
+
+    gen_file("model.h", model_output)
+
+def gen_random(num_compounds, num_proteins, num_features, num_latent, num_samples):
+    gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples)
+
+    # tb_input
+    tb_in_matrix = np.random.normal(size=(num_compounds, num_features))
+    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+
+    model_output = ""
+    for sample in range(num_samples):
+        U = np.random.normal(size=(num_latent, num_proteins))
+        F = np.random.normal(size=(num_compounds, num_features))
+        gen_file("sample_%d.h" % sample, gen_sample(sample, U, F, tb_in_matrix))
+        model_output += '#include "%ssample_%d.h"\n' % (prefix, sample)
+
+    gen_file("model.h", model_output)
+    gen_file("tb.h", gen_mat(tb_in_matrix, "Fin_type", "tb_input"))
+
+    
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-parser.add_argument('--out-prefix', dest='prefix', default='smurff_', help='output file prefix')
-parser.add_argument('--root', metavar='root-file', type=str, help='root file', required=True)
-
+parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default=None)
+parser.add_argument('--size', metavar='NC,NP,NF,NL,NS', dest="size", type=str, 
+    help="num_compounds,num_proteins,num_features,num_latent,num_samples", default="10,15,8,4,2")
 args = parser.parse_args()
 
-session = smurff.PredictSession(args.root)
+if args.root_file:
+    gen_session(args.root_file)
+elif args.size:
+    from ast import literal_eval
+    gen_random(*literal_eval(args.size))
+else:
+    raise ValueError("Please provide either --size or --root")
 
-num_latent = session.num_latent()
-num_compounds, num_proteins = session.data_shape()
-num_features = session.beta_shape()[0]
-
-const_output = "#pragma once\n"
-const_output += gen_int("num_latent", num_latent)
-const_output += gen_int("num_compounds", num_compounds)
-const_output += gen_int("num_proteins", num_proteins)
-const_output += gen_int("num_features", num_features)
-
-#generate testbench
-tb_file = pth.join(session.root_dir, session.options.get("side_info_0_0", "file"))
-tb_in_matrix = mio.read_matrix(tb_file)
-if sp.sparse.issparse(tb_in_matrix):
-    tb_in_matrix = tb_in_matrix.todense()
-
-(tb_num_compounds, tb_num_features) = tb_in_matrix.shape
-if tb_num_compounds > 10: tb_num_compounds = 10
-tb_in_matrix = tb_in_matrix[:tb_num_compounds,:]
-
-assert tb_num_features == num_features
-const_output += gen_int("tb_num_compounds", tb_num_compounds)
-
-tb_output = ""
-tb_output += gen_mat(tb_in_matrix, "Fin_type", "tb_input")
-
-def gen_file(suffix, content):
-    with open(args.prefix + suffix, "w") as os:
-        os.write(content)
-
-#generate model
-model_output = ""
-for sample in session.samples:
-    gen_file("sample_%d.h" % sample.iter, gen_sample(sample, tb_in_matrix))
-    model_output += '#include "%ssample_%d.h"\n' % (args.prefix, sample.iter)
-
-gen_file("const.h", const_output)
-gen_file("model.h", model_output)
-gen_file("tb.h", tb_output)
-gen_file("types.h", gen_types())
 
