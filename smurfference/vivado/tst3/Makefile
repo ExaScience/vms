@@ -1,7 +1,11 @@
 
 CXXFLAGS=-g -O0 -fsanitize=address 
-CXXFLAGS+=-std=c++11 -DDT_OBSERVED_DOUBLE 
 
+# observed double
+#CXXFLAGS+=-std=c++11 -DDT_OBSERVED_DOUBLE 
+
+# systemc types
+CXXFLAGS+=-DDT_SC_FIXED 
 LDFLAGS=-lsystemc
 
 BINARY  = native
