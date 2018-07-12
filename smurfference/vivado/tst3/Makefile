@@ -1,16 +1,15 @@
 
 CXXFLAGS=-g -O0 -fsanitize=address 
-CXXFLAGS+=-DDT_DOUBLE
+CXXFLAGS+=-std=c++11 -DDT_OBSERVED_DOUBLE 
 
 LDFLAGS=-lsystemc
 
-FILES=main.cpp predict.cpp
-BINARY=native
-
--include Makefile.deps
-
-$(BINARY): Makefile.deps $(FILES)
+BINARY  = native
+FILES   = $(wildcard *.cpp)
+HEADERS = $(wildcard *.h)
+ 
+all: $(BINARY)
+ 
+$(BINARY): $(FILES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(FILES) -o $(BINARY) $(LDFLAGS)
 
-Makefile.deps: $(FILES) $(HEADERS)
-	makedepend -- $(CFLAGS) -- $(FILES) -f- > Makefile.deps
