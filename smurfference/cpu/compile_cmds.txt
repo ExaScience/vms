@@ -1,0 +1,27 @@
+ 2091  icpc -g -O3 -march=native -std=c++11 main.cpp predict.cpp -o native 
+ 2092  icpc -flto -g -O3 -march=native -std=c++11 main.cpp predict.cpp -o native 
+ 2093  icpc --help
+ 2094  icpc -h | less
+ 2095  icpc --help | less
+ 2096  icpc -ipo -g -O3 -march=native -std=c++11 main.cpp predict.cpp -o native 
+ 2098  icpc --help | less
+ 2099  icpc -parallel -ipo -g -O3 -march=native -std=c++11 main.cpp predict.cpp -o native 
+ 2101  icpc --help | less
+ 2102  icpc -fast -parallel -ipo -g -O3 -march=native -std=c++11 main.cpp predict.cpp -o native 
+ 2129  icpc -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2130  icpc -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2132  icpc-DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2133  icpc -DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2134  icpc -DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native -mkl
+ 2137  icpc -DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native -mkl
+ 2139  icpc -DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native -mkl
+ 2141  icpc -DEIGEN_USE_MKL_ALL  -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native -mkl
+ 2143  icpc -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2144  icpc -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2146  icpc -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2148  icpc -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2150  icpc -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2152  icpc -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2154  icpc -DEIGEN_USE_MKL_ALL  -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native -mkl
+ 2156  icpc -qopenmp -g -O3 -march=native -std=c++11 -I/opt/software/Eigen/3.3.4/include main.cpp predict.cpp -o native 
+ 2163  history  |grep icpc > compile_cmds.txt 
