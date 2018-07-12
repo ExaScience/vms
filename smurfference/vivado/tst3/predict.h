@@ -8,12 +8,13 @@
 // these seem to work with normally distributed
 // inputs and models
 
-const int WL = 8;
-typedef sc_fixed<WL,5>  U_type;
-typedef sc_fixed<WL,4>  F_type;
-typedef sc_fixed<WL,6>  P_type;
-typedef sc_fixed<WL,3>  B_type;
+const int WL = 16;
+typedef sc_fixed<WL,5>    U_type;
+typedef sc_fixed<WL,4>    F_type;
+typedef sc_fixed<WL,6>    P_type;
+typedef sc_fixed<WL,3>    B_type;
 typedef sc_fixed<2*WL,6>  S_type;
+typedef sc_fixed<2*WL,6>  T_type;
 
 const double epsilon = 1./(WL-8);
 
@@ -24,6 +25,7 @@ typedef double  F_type;
 typedef double  P_type;
 typedef double  B_type;
 typedef double  S_type;
+typedef double  T_type;
 
 const double epsilon = 0.00001;
 
@@ -31,7 +33,7 @@ const double epsilon = 0.00001;
 
 #include <vector>
 
-enum types { U_id, F_id, P_id, B_id, S_id, ntypes };
+enum types { U_id, F_id, P_id, B_id, S_id, T_id, ntypes };
 
 extern std::vector<double> values[ntypes];
 
@@ -67,6 +69,7 @@ typedef od<F_id> F_type;
 typedef od<P_id> P_type;
 typedef od<B_id> B_type;
 typedef od<S_id> S_type;
+typedef od<T_id> T_type;
 
 const double epsilon = 0.00001;
 

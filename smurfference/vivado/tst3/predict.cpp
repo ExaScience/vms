@@ -18,7 +18,7 @@ void predict_compound_block_c(
 #pragma HLS INTERFACE ap_fifo port=in
 
     int c, d, k;
-    U_type tmp[num_latent];
+    T_type tmp[num_latent];
     //#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
     F_type in_buf[num_features];
