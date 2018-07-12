@@ -7,13 +7,15 @@
 
 // these seem to work with normally distributed
 // inputs and models
-typedef sc_fixed<16,5>  U_type;
-typedef sc_fixed<16,4>  F_type;
-typedef sc_fixed<16,6>  P_type;
-typedef sc_fixed<16,3>  B_type;
-typedef sc_fixed<32,6>  S_type;
 
-const double epsilon = 0.01;
+const int WL = 8;
+typedef sc_fixed<WL,5>  U_type;
+typedef sc_fixed<WL,4>  F_type;
+typedef sc_fixed<WL,6>  P_type;
+typedef sc_fixed<WL,3>  B_type;
+typedef sc_fixed<2*WL,6>  S_type;
+
+const double epsilon = 1./(WL-8);
 
 #elif defined(DT_DOUBLE)
 
