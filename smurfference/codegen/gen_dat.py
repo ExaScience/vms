@@ -42,7 +42,7 @@ const U0_type sample_1_U0_latents[4][3] = {
     """
     hdr = gen_int(varname + "_rows", M.shape[0], indent)
     hdr += gen_int(varname + "_cols", M.shape[1], indent)
-    hdr += indent + typename + " " + varname + "[%d][%d] = {" % M.shape
+    hdr += indent + "const " + typename + " " + varname + "[%d][%d] = {" % M.shape
     ftr = "};"
     fmt = indent + "  { " + "%+.8f, " * (M.shape[1] - 1) + "%+.8f },"
 
@@ -58,7 +58,9 @@ const U0_type sample_1_U0_latents[4][3] = {
     return f.getvalue()
 
 def gen_sample(i, U, F, tb):
-    P = tb * F * U
+    # (nc x np) = ((nc x nf) * (nf x nl)) * (nl x np)
+    # default="nc=10,np=15,nf=8,nl=4,ns=2"
+    P = np.matmul(np.matmul(tb, F.transpose()), U)
 
     return  "namespace sample_%d {\n\n" % i \
         + gen_mat(U, "Uin_type",  "U", "  ") + "\n" \
@@ -116,7 +118,7 @@ def gen_random(num_compounds, num_proteins, num_features, num_latent, num_sample
     model_output = ""
     for sample in range(num_samples):
         U = np.random.normal(size=(num_latent, num_proteins))
-        F = np.random.normal(size=(num_compounds, num_features))
+        F = np.random.normal(size=(num_latent, num_features))
         gen_file("sample_%d.h" % sample, gen_sample(sample, U, F, tb_in_matrix))
         model_output += '#include "%ssample_%d.h"\n' % (prefix, sample)
 
