@@ -23,6 +23,7 @@ using namespace Eigen;
 
 int main()
 {
+    const int N = 1000000;
     P_type tb_output[num_compounds][num_proteins];
 
     printf("num_compounds = %d\n", num_compounds);
@@ -33,17 +34,21 @@ int main()
 
     typedef Map<Matrix<double, Dynamic, Dynamic, RowMajor>> MapT;
     typedef Map<const Matrix<double, Dynamic, Dynamic, RowMajor>> CMapT;
+
+    double *many_tb_inputs = (double *)malloc(sizeof(double) * N * num_compounds * num_features);
     
     MapT tb_output_map(&tb_output[0][0], num_compounds, num_proteins);
-    CMapT tb_input_map(&tb_input[0][0], num_compounds, num_features);
     CMapT B_map(&B[0][0], num_latent, num_features);
     CMapT U_map(&U[0][0], num_latent, num_proteins);
 
     double start = tick();
 #pragma omp parallel for
-    for(int i=0; i<1000000; ++i)
-        // tb_output_map = tb_input_map * B_map.transpose() * U_map;
+    for(int i=0; i<N; ++i)
+    {
+        //CMapT tb_input_map(many_tb_inputs + (i * num_compounds * num_features), num_compounds, num_features);
+        //tb_output_map = tb_input_map * B_map.transpose() * U_map;
         predict_compound_block_c(tb_input, tb_output);
+    }
     double stop = tick();
 
     int nerrors = 0;
