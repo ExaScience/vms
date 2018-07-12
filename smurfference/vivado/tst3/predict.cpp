@@ -9,17 +9,19 @@ void predict_compound_block_c(
    double out[tb_num_compounds][num_proteins]
 )
 {
-#pragma HLS ARRAY_PARTITION variable=out complete dim=2
-#pragma HLS ARRAY_PARTITION variable=in complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=out complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=in complete dim=2
+//#pragma HLS ARRAY_PARTITION variable=out complete dim=2
+//#pragma HLS ARRAY_PARTITION variable=in complete dim=2
 #pragma HLS INTERFACE ap_fifo port=out
 #pragma HLS INTERFACE ap_fifo port=in
 
 	int c, d, k;
     double tmp[num_latent];
-#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
+//#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
     double in_buf[num_features];
-#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
+//#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
 
     //       ((nc x nf) * (nf * nl)) * (nl * np)
     //       (nc        x        nl) * (nl * np)
