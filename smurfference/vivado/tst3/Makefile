@@ -14,6 +14,6 @@ HEADERS = $(wildcard *.h)
  
 all: $(BINARY)
  
-$(BINARY): $(FILES) $(HEADERS)
+$(BINARY): $(FILES) $(HEADERS) Makefile
 	$(CXX) $(CXXFLAGS) $(FILES) -o $(BINARY) $(LDFLAGS)
 
