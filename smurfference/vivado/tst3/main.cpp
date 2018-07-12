@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 #include <cmath>
 
 #include "predict.h"
@@ -12,7 +12,7 @@ using namespace sample_0;
 
 int main()
 {
-    double tb_output[num_compounds][num_proteins];
+    Pout_type tb_output[num_compounds][num_proteins];
 
     printf("num_compounds = %d\n", num_compounds);
     printf("num_proteins  = %d\n", num_proteins);
@@ -25,11 +25,14 @@ int main()
     int nerrors = 0;
     for(int c=0; c<num_compounds; c++)
         for(int p=0; p<num_proteins; p++)
-            if (fabs(tb_output[c][p] - P[c][p]) >  0.0001)
+        {
+            auto diff = std::abs(tb_output[c][p] - P[c][p]);
+            if (diff > 0.0001)
             {
-                printf("error at [%d][%d]: %f != %f\n", c, p, tb_output[c][p], P[c][p]);
+                std::cerr<< "error at [" << c << "][" << p << "]: " << tb_output[c][p] << " != " <<  P[c][p] << std::endl;
                 nerrors++;
             }
+        }
 
     printf("%d errors\n", nerrors);
 

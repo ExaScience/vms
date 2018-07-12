@@ -6,8 +6,8 @@
 using namespace sample_0;
 
 void predict_compound_block_c(
-   const double in[num_compounds][num_features],
-   double out[num_compounds][num_proteins]
+   const Tin_type in[num_compounds][num_features],
+   Pout_type out[num_compounds][num_proteins]
 )
 {
 #pragma HLS ARRAY_RESHAPE variable=out complete dim=2
@@ -18,10 +18,10 @@ void predict_compound_block_c(
 #pragma HLS INTERFACE ap_fifo port=in
 
 	int c, d, k;
-    double tmp[num_latent];
+    Uin_type tmp[num_latent];
 //#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
-    double in_buf[num_features];
+    Tin_type in_buf[num_features];
 //#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
 
     //       ((nc x nf) * (nf * nl)) * (nl * np)
@@ -43,7 +43,7 @@ void predict_compound_block_c(
         predict_compound_block_c_loop12:
 		for (d = 0; d < num_latent; d++)
         {
-			double sum = .0;
+			S_type sum = .0;
             predict_compound_block_c_loop13:
 			for (k = 0; k < num_features; k++)
             {
@@ -56,7 +56,7 @@ void predict_compound_block_c(
     	predict_compound_block_c_loop22:
         for (d = 0; d < num_proteins; d++)
         {
-            double sum = .0;
+            S_type sum = .0;
             predict_compound_block_c_loop23:
             for (k = 0; k < num_latent; k++)
             {
