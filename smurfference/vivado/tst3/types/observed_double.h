@@ -1,5 +1,7 @@
 #include <vector>
 
+#define DT_OBSERVED_DOUBLE
+
 enum types { U_id, F_id, P_id, B_id, S_id, T_id, ntypes };
 
 extern std::vector<double> values[ntypes];
