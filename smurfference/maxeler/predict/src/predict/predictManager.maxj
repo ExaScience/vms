@@ -1,0 +1,36 @@
+package predict;
+
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
+import com.maxeler.platform.max5.manager.MAX5CManager;
+
+public class predictManager extends MAX5CManager {
+
+	public static final String kernelName = "predictKernel";
+	
+	public predictManager(EngineParameters params) {
+		super(params);
+
+		double U[][] = { { 1, 2 }, {3, 4} };
+		double B[][] = { { 1, 2 }, {3, 4} };
+		
+		final KernelBlock kernel = addKernel(new predictKernel(makeKernelParameters(kernelName),
+				2, 2, 2, 2, U, B));
+		
+		//-- features go in
+		final DFELink f = addStreamFromCPU("features");
+		kernel.getInput("features") <== f;
+
+		//-- predictions come out
+		final DFELink p = addStreamToCPU("predictions");
+		p <== kernel.getOutput("predictions");
+	}
+
+	public static void main(final String[] argv) {
+		final EngineParameters params = new EngineParameters(argv);
+		final predictManager manager = new predictManager(params);
+		manager.build();
+	}
+
+}

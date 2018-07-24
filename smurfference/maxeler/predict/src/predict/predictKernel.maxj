@@ -1,0 +1,62 @@
+package predict;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEFix;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEFix.SignMode;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
+
+public class predictKernel extends Kernel {
+	
+	public predictKernel(final KernelParameters parameters,
+			int num_compounds,
+			int num_features,
+			int num_proteins,
+			int num_latent,
+			double B[][],
+			double U[][]
+			) {
+		super(parameters);
+
+		// Fix types
+		DFEFix FType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+		DFEFix BType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+		DFEFix SType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+		DFEFix TType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+
+		// vector types
+		DFEVectorType<DFEVar> InType = new DFEVectorType<DFEVar>(FType, num_features);
+		DFEVectorType<DFEVar> OutType = new DFEVectorType<DFEVar>(FType, num_proteins);
+
+		DFEVector<DFEVar> features_in = io.input("features", InType);
+		DFEVector<DFEVar> predictions_out = OutType.newInstance(this);
+		
+		DFEVar tmp[] = new DFEVar[num_latent];
+
+		for (int d = 0; d < num_latent; d++)
+		{
+			DFEVar sum = constant.var(SType, .0);
+			for (int k = 0; k < num_features; k++)
+			{
+				sum = sum + features_in[k] * B[d][k];
+			}
+			tmp[d] = sum;
+		}
+
+		// Output
+		for (int d = 0; d < num_proteins; d++)
+		{
+			DFEVar sum2 = constant.var(SType, .0);
+			for (int k = 1; k < num_latent; k++)
+			{
+				sum2 = sum2 + tmp[k] * U[k][d];
+			}
+
+			predictions_out[d] <== sum2;
+		}
+		
+		io.output("predictions", predictions_out, OutType);
+	}
+}
