@@ -4,6 +4,7 @@ import com.maxeler.maxcompiler.v2.build.EngineParameters;
 import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.platform.max5.manager.MAX5CManager;
+import org.la4j.matrix;
 
 public class predictManager extends MAX5CManager {
 
@@ -15,8 +16,15 @@ public class predictManager extends MAX5CManager {
 		double U[][] = { { 1, 2 }, {3, 4} };
 		double B[][] = { { 1, 2 }, {3, 4} };
 		
-		final KernelBlock kernel = addKernel(new predictKernel(makeKernelParameters(kernelName),
-				2, 2, 2, 2, U, B));
+		final KernelBlock kernel = addKernel(new
+			predictKernel(makeKernelParameters(kernelName),
+				2, // num compounds
+				2, // num features
+				2, // num proteins
+				2, // num latent
+				U, // latent model (num latent x num proteins)
+				B  // link matrix  (num features x num latent)
+			));
 		
 		//-- features go in
 		final DFELink f = addStreamFromCPU("features");

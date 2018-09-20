@@ -22,9 +22,9 @@ public class predictKernel extends Kernel {
 
 		// Fix types
 		DFEFix FType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
-		DFEFix BType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+		//DFEFix BType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
 		DFEFix SType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
-		DFEFix TType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
+		//DFEFix TType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
 
 		// vector types
 		DFEVectorType<DFEVar> InType = new DFEVectorType<DFEVar>(FType, num_features);
