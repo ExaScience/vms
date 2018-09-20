@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="build">
+<project default="build"  xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
     Build system for DFE Project.
     Ant 'target' parameter represents Maxfile Generation Parameters.
@@ -133,5 +133,12 @@
 			<jvmarg line="${jvmargs}"/>
 			<classpath path="${MAXDESTDIR}:${MAXCLASSPATH}:${CLASSPATH}"/>
 		</java>
+	</target>
+	<target name="resolve" description="Use ivy to resolve classpaths">
+		<ivy:cachepath pathid="compile.path">
+			<dependency org="org.la4j" name="la4j" rev="0.6.0" conf="default">
+				<exclude org="javax.transaction"/>
+			</dependency>
+		</ivy:cachepath>
 	</target>
 </project>
