@@ -1,27 +1,43 @@
 package predict;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import com.maxeler.maxcompiler.v2.build.EngineParameters;
 import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
 import com.maxeler.platform.max5.manager.MAX5CManager;
-import org.la4j.matrix;
+
+import org.la4j.Matrix;
 
 public class predictManager extends MAX5CManager {
 
 	public static final String kernelName = "predictKernel";
+
+	static String readFile(String path, Charset encoding) 
+			  throws IOException 
+			{
+			  byte[] encoded = Files.readAllBytes(Paths.get(path));
+			  return new String(encoded, encoding);
+			}
+	
+	static Matrix readMM(String path)
+	{
+		String Us = readFile("test.txt", StandardCharsets.UTF_8);
+		return Matrix.fromMatrixMarket(Us);
+	}
 	
 	public predictManager(EngineParameters params) {
 		super(params);
-
-		double U[][] = { { 1, 2 }, {3, 4} };
-		double B[][] = { { 1, 2 }, {3, 4} };
+		
+		Matrix U = readMM("U");
+		Matrix B = readMM("B");
 		
 		final KernelBlock kernel = addKernel(new
 			predictKernel(makeKernelParameters(kernelName),
-				2, // num compounds
-				2, // num features
-				2, // num proteins
-				2, // num latent
 				U, // latent model (num latent x num proteins)
 				B  // link matrix  (num features x num latent)
 			));

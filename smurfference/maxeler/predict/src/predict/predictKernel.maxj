@@ -1,5 +1,7 @@
 package predict;
 
+import org.la4j.Matrix;
+
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
 import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEFix;
@@ -11,14 +13,14 @@ import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
 public class predictKernel extends Kernel {
 	
 	public predictKernel(final KernelParameters parameters,
-			int num_compounds,
-			int num_features,
-			int num_proteins,
-			int num_latent,
-			double B[][],
-			double U[][]
+			Matrix B,
+			Matrix U
 			) {
 		super(parameters);
+		
+		int num_features = B.rows();
+		int num_latent = B.columns();
+		int num_proteins = U.columns();
 
 		// Fix types
 		DFEFix FType = dfeFixOffset(32, 4, SignMode.TWOSCOMPLEMENT);
@@ -40,7 +42,7 @@ public class predictKernel extends Kernel {
 			DFEVar sum = constant.var(SType, .0);
 			for (int k = 0; k < num_features; k++)
 			{
-				sum = sum + features_in[k] * B[d][k];
+				sum = sum + features_in[k] * B.get(d, k);
 			}
 			tmp[d] = sum;
 		}
@@ -51,7 +53,7 @@ public class predictKernel extends Kernel {
 			DFEVar sum2 = constant.var(SType, .0);
 			for (int k = 1; k < num_latent; k++)
 			{
-				sum2 = sum2 + tmp[k] * U[k][d];
+				sum2 = sum2 + tmp[k] * U.get(k,  d);
 			}
 
 			predictions_out[d] <== sum2;
