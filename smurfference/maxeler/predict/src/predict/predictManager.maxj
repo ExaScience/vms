@@ -27,7 +27,7 @@ public class predictManager extends MAX5CManager {
 	static Matrix readMM(String path)
 	  throws IOException 
 	{
-		String Us = readFile("test.txt", StandardCharsets.UTF_8);
+		String Us = readFile(path, StandardCharsets.UTF_8);
 		return Matrix.fromMatrixMarket(Us);
 	}
 
@@ -35,14 +35,17 @@ public class predictManager extends MAX5CManager {
 	  throws IOException 
 	{
 		super(params);
+                setAllowNonMultipleTransitions(true);
 
-		Matrix U = readMM("U");
-		Matrix B = readMM("B");
+		Matrix U = readMM("data/sample-1-U1-latents.mtx");
+                System.out.format("U: %d x %d\n", U.rows(), U.columns());
+		Matrix B = readMM("data/sample-1-F0-link.mtx");
+                System.out.format("B: %d x %d\n", B.rows(), B.columns());
 
 		final KernelBlock kernel = addKernel(new
 				predictKernel(makeKernelParameters(kernelName),
 					U, // latent model (num latent x num proteins)
-					B  // link matrix  (num features x num latent)
+					B  // link matrix  (num latent x num features)
 					));
 
 		//-- features go in

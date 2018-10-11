@@ -18,8 +18,8 @@ public class predictKernel extends Kernel {
 			) {
 		super(parameters);
 		
-		int num_features = B.rows();
-		int num_latent = B.columns();
+		int num_features = B.columns();
+		int num_latent = B.rows();
 		int num_proteins = U.columns();
 
 		// Fix types
@@ -37,14 +37,14 @@ public class predictKernel extends Kernel {
 		
 		DFEVar tmp[] = new DFEVar[num_latent];
 
-		for (int d = 0; d < num_latent; d++)
+		for (int k = 0; k < num_latent; k++)
 		{
 			DFEVar sum = constant.var(SType, .0);
-			for (int k = 0; k < num_features; k++)
+			for (int f = 0; f < num_features; f++)
 			{
-				sum = sum + features_in[k] * B.get(d, k);
+				sum = sum + features_in[f] * B.get(k, f);
 			}
-			tmp[d] = sum;
+			tmp[k] = sum;
 		}
 
 		// Output
