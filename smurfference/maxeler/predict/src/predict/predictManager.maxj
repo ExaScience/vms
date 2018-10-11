@@ -25,23 +25,26 @@ public class predictManager extends MAX5CManager {
 			}
 	
 	static Matrix readMM(String path)
+	  throws IOException 
 	{
 		String Us = readFile("test.txt", StandardCharsets.UTF_8);
 		return Matrix.fromMatrixMarket(Us);
 	}
-	
-	public predictManager(EngineParameters params) {
+
+	public predictManager(EngineParameters params) 
+	  throws IOException 
+	{
 		super(params);
-		
+
 		Matrix U = readMM("U");
 		Matrix B = readMM("B");
-		
+
 		final KernelBlock kernel = addKernel(new
-			predictKernel(makeKernelParameters(kernelName),
-				U, // latent model (num latent x num proteins)
-				B  // link matrix  (num features x num latent)
-			));
-		
+				predictKernel(makeKernelParameters(kernelName),
+					U, // latent model (num latent x num proteins)
+					B  // link matrix  (num features x num latent)
+					));
+
 		//-- features go in
 		final DFELink f = addStreamFromCPU("features");
 		kernel.getInput("features") <== f;
@@ -51,7 +54,9 @@ public class predictManager extends MAX5CManager {
 		p <== kernel.getOutput("predictions");
 	}
 
-	public static void main(final String[] argv) {
+	public static void main(final String[] argv)
+	  throws IOException 
+	{
 		final EngineParameters params = new EngineParameters(argv);
 		final predictManager manager = new predictManager(params);
 		manager.build();
