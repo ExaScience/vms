@@ -105,8 +105,9 @@
 	</target>
 
 	<target name="compile" description="Compiles files from source directories.">
-		<maxjcompiler srcdir="${MAXSOURCEDIRS}" destdir="${MAXDESTDIR}" debug="true" debuglevel="lines,vars,source" source="${javaVersionSource}" target="${javaVersionTarget}" failonerror="true">
-			<classpath path="${MAXCLASSPATH}"/>
+		<maxjcompiler srcdir="${MAXSOURCEDIRS}" destdir="${MAXDESTDIR}" debug="true" debuglevel="lines,vars,source" 
+			source="${javaVersionSource}" target="${javaVersionTarget}" failonerror="true">
+			<classpath path="${MAXCLASSPATH}:la4j.jar"/>
 		</maxjcompiler>
 	</target>
 
@@ -131,7 +132,7 @@
 			<env key="CLASSPATH" value="${CLASSPATH}"/>
 			<arg line="${parameters} ${args}"/>
 			<jvmarg line="${jvmargs}"/>
-			<classpath path="${MAXDESTDIR}:${MAXCLASSPATH}:${CLASSPATH}"/>
+			<classpath path="${MAXDESTDIR}:${MAXCLASSPATH}:${CLASSPATH}:la4j.jar"/>
 		</java>
 	</target>
 	<target name="resolve" description="Use ivy to resolve classpaths">
