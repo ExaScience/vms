@@ -10,13 +10,13 @@ import java.nio.file.Paths;
 import com.maxeler.maxcompiler.v2.build.EngineParameters;
 import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
-import com.maxeler.platform.max5.manager.MAX5CManager;
+import com.maxeler.platform.max5.manager.Max5LimaManager;
 
 import org.la4j.Matrix;
 
 import predict.DimensionMismatchException;
 
-public class predictManager extends MAX5CManager {
+public class predictManager extends Max5LimaManager {
 
 	public static final String kernelName = "predictKernel";
 	public static final int align_to_bits = 128;
