@@ -49,10 +49,10 @@ public class predictManager extends MAX5CManager {
 		super(params);
 
 		Matrix U = readMM("data/sample-1-U1-latents.mtx");
-		System.out.format("U: %d x %d\n", U.rows(), U.columns());
+		System.out.format("U: %d x %d - max: %e, min: %e\n", U.rows(), U.columns(), U.max(), U.min());
 		
 		Matrix B = readMM("data/sample-1-F0-link.mtx");
-		System.out.format("B: %d x %d\n", B.rows(), B.columns());
+		System.out.format("B: %d x %d- max: %e, min: %e\n", B.rows(), B.columns(), B.max(), B.min());
 
 		if (U.rows() != B.rows()) 
 		{

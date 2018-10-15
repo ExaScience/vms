@@ -1,2 +1,5 @@
 bin
 builds
+*.jar
+*.o
+predictSim
