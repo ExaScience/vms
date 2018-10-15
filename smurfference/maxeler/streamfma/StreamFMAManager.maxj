@@ -1,0 +1,24 @@
+package streamfma;
+
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
+import com.maxeler.platform.max5.manager.Max5LimaManager;
+
+class StreamFMAManager extends Max5LimaManager {
+
+	private static final String kernel_name = "StreamFMAKernel";
+
+	public StreamFMAManager(EngineParameters arg0) {
+		super(arg0);
+		KernelBlock kernel = addKernel(new StreamFMAKernel(makeKernelParameters(kernel_name)));
+		kernel.getInput("a") <== addStreamFromCPU("a");
+		kernel.getInput("b") <== addStreamFromCPU("b");
+		kernel.getInput("c") <== addStreamFromCPU("c");
+		addStreamToCPU("output") <== kernel.getOutput("output");
+	}
+
+	public static void main(String[] args) {
+		StreamFMAManager manager = new StreamFMAManager(new EngineParameters(args));
+		manager.build();
+	}
+}

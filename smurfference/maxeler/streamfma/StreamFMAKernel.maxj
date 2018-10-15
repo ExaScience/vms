@@ -1,0 +1,26 @@
+package streamfma;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEType;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+
+class StreamFMAKernel extends Kernel {
+
+	private static final DFEType type = dfeFloat(8,24);
+
+	protected StreamFMAKernel(KernelParameters parameters) {
+		super(parameters);
+
+		DFEVar a = io.input("a", type);
+		DFEVar b = io.input("b", type);
+		DFEVar c = io.input("c", type);
+
+		DFEVar alpha = io.scalarInput("alpha", type);
+
+		c = c+alpha*a*b;
+
+		io.output("output", c, type);
+	}
+
+}
