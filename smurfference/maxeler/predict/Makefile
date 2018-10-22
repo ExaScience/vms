@@ -2,24 +2,31 @@
 PLATFORM=5
 SRCDIR=src
 
-CLASSPATH=$(MAXCOMPILERDIR)/lib/Max$(PLATFORM)Platform.jar:$(MAXCOMPILERDIR)/lib/MaxCompiler.jar:la4j.jar:src:build
 
-MAIN=predict.predictManager
+MAIN=$(MAXNAME).$(MAXNAME)Manager
+DFE_NAME=MAX5C
+MAXNAME=predict
+
+CLASSPATH=$(MAXCOMPILERDIR)/lib/Max$(PLATFORM)Platform.jar:$(MAXCOMPILERDIR)/lib/MaxCompiler.jar:la4j.jar:build
 
 SRCFILES=$(wildcard $(SRCDIR)/*/*.maxj)
-CLSFILES=$(patsubst %.maxj,%.class,$(SRCFILES))
+CLSFILES=$(patsubst src/%.maxj,build/%.class,$(SRCFILES))
 
-DFEMAXFILE=./predict_MAX5C_DFE/results/predict.max
-SIMMAXFILE=./predict_MAX5C_DFE_SIM/results/predict.max
+DFEMAXFILE=./$(MAXNAME)_$(DFE_NAME)_DFE/results/$(MAXNAME).max
+SIMMAXFILE=./$(MAXNAME)_$(DFE_NAME)_DFE_SIM/results/$(MAXNAME).max
 SIMFILE=
 
-all: $(DFEMAXFILE) $(SIMMAXFILE)
+.PHONY: sim hw
+
+sim: $(SIMMAXFILE)
+
+hw: $(DFEMAXFILE)
 
 $(DFEMAXFILE): $(CLSFILES)
-	java -XX:+UseSerialGC -Xmx2048m -cp $(CLASSPATH) $(MAIN) DFEModel=MAIA maxFileName=predict target=DFE  enableMPCX=true
+	java -cp $(CLASSPATH) $(MAIN) DFEModel=MAIA maxFileName=$(MAXNAME) target=DFE  enableMPCX=true
 
 $(SIMMAXFILE): $(CLSFILES)
-	java -XX:+UseSerialGC -Xmx2048m -cp $(CLASSPATH) $(MAIN) DFEModel=MAIA maxFileName=predict target=DFE_SIM  enableMPCX=true
+	java -cp $(CLASSPATH) $(MAIN) DFEModel=MAIA maxFileName=$(MAXNAME) target=DFE_SIM  enableMPCX=true
 
 $(CLSFILES): la4j.jar $(SRCFILES)
 	maxjc -d build -1.7 -cp $(CLASSPATH) $(SRCFILES)
