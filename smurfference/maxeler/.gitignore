@@ -1,0 +1,6 @@
+bin
+build
+*.jar
+*.o
+*DFE/
+*DFE_SIM/
