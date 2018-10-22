@@ -4,3 +4,4 @@
 . /opt/rh/devtoolset-7/enable
 
 export LM_LICENSE_FILE=/opt/xilinx/licenses/XilinxES.lic
+unset DISPLAY
