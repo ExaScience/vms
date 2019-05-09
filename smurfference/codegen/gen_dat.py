@@ -134,9 +134,9 @@ def gen_session(root):
 
         num_samples += 1
 
-    model_output += "\nsample samples[%d] = {\n" % num_samples
+    model_output += "\nconst sample samples[%d] = {\n" % num_samples
     for i in range(num_samples):
-        model_output += " { sample_%d::U, sample_%d::mu, sample_%d::B },\n" % (i, i, i) 
+        model_output += " sample(sample_%d::U, sample_%d::mu, sample_%d::B ),\n" % (i, i, i) 
     model_output += "};\n\n"
 
     gen_file("model.h", model_output)
