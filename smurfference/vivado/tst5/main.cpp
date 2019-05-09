@@ -26,7 +26,7 @@ int main()
             double o = (double)tb_output[c][p];
             double r = (double)tb_ref[c][p];
             // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
-            if (std::abs(o - r) > 0.0001)
+            if (std::abs(o - r) > epsilon)
             {
                 printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
                 nerrors++;

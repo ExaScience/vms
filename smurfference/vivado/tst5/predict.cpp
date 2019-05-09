@@ -62,7 +62,7 @@ predict_compound_block_c_loop11:
         predict_compound_block_c_loop22:
             for (d = 0; d < num_proteins; d++)
             {
-                P_type sum = .0;
+                S_type sum = .0;
             predict_compound_block_c_loop23:
                 for (k = 0; k < num_latent; k++)
                 {
