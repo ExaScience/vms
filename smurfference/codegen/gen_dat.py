@@ -57,11 +57,42 @@ const U_type sample_1_U0_latents[4][3] = {
 
     return f.getvalue()
 
-def gen_sample(i, U, B):
+def gen_vec(V, typename, varname, indent = ""):
+    """Generate C code for vector V,
+    Something like:
+
+const int gate_1_U0_latents_size = 3;
+const U_type gate_1_U0_latents[3] = {
+    { 0.22, 1.40, 1.15 }
+};
+
+
+    """
+    decl  = gen_int(varname + "_size", V.shape[0], indent)
+    decl += indent + "extern const " + typename + " " + varname + "[%d];\n" % V.shape
+
+    hdr = indent + "const " + typename + " " + varname + "[%d] = {" % V.shape
+    ftr = indent + "};"
+    fmt = indent + " %+.8f,"
+
+    f = io.StringIO() 
+    np.savetxt(f, V,
+            fmt = fmt,
+            header = hdr,
+            footer = ftr,
+            newline = "\n",
+            comments = "")
+
+    return decl + f.getvalue()
+
+
+
+def gen_sample(i, U, mu, B):
     # (nc x np) = ((nc x nf) * (nf x nl)) * (nl x np)
 
     return  "namespace sample_%d {\n\n" % i \
         + gen_mat(U, "U_type", "U", "  ") + "\n" \
+        + gen_vec(mu, "mu_type", "mu", "  ") + "\n" \
         + gen_mat(B, "B_type", "B", "  ") + "\n" \
         + "} // end namespace sample_%d\n" % i
 
@@ -94,11 +125,12 @@ def gen_session(root):
     for sample in session.samples():
         num_samples += 1
         U = sample.latents[1]
+        mu = sample.mus[0]
         F = sample.betas[0]
-        P = np.matmul(np.matmul(tb_in_matrix, F.transpose()), U)
+        P = np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U)
         predictions.append(P)
 
-        gen_file("sample_%d.h" % sample.iter, gen_sample(sample.iter, U, F))
+        gen_file("sample_%d.h" % sample.iter, gen_sample(sample.iter, U, mu, F))
         model_output += '#include "%ssample_%d.h"\n' % (prefix, sample.iter)
 
     gen_file("model.h", model_output)
