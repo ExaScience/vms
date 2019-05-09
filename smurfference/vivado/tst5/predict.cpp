@@ -20,6 +20,7 @@ void predict_compound_block_c(
     //#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
     F_type in_buf[num_features];
+    S_type out_buf[num_proteins];
     //#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
 
 //       ((nc x nf) * (nf * nl)) * (nl * np)
@@ -40,7 +41,7 @@ predict_compound_block_c_loop11:
 
         for (d = 0; d < num_proteins; d++)
         {
-            out[c][d] = .0;
+            out_buf[d] = .0;
         }
 
         for (int s = 0; s < num_samples; s++)
@@ -68,13 +69,14 @@ predict_compound_block_c_loop11:
                     sum = sum + tmp[k] * samples[s].U[k][d];
                 }
 
-                out[c][d] += sum;
+                out_buf[d] += sum;
+
             } // end proteins
         } // end samples
 
         for (d = 0; d < num_proteins; d++)
         {
-            out[c][d] /= num_samples;
+            out[c][d] = out_buf[d] / (S_type)num_samples;
         }
     } // end compounds
 }

@@ -2,7 +2,7 @@
 
 #define DT_OBSERVED_DOUBLE
 
-enum types { U_id, F_id, P_id, B_id, S_id, T_id, ntypes };
+enum types { U_id, mu_id, F_id, P_id, B_id, S_id, T_id, ntypes };
 
 extern std::vector<double> values[ntypes];
 
@@ -28,12 +28,22 @@ struct od {
 
     template<enum types S>
     od operator*(const od<S> &other) const { return v * other.v; }
+    
+    template<enum types S>
+    od operator/(const od<S> &other) const { return v / other.v; }
 
     template<enum types S>
     od operator+(const od<S> &other) const { return v + other.v; }
+
+    template<enum types S>
+    od operator+=(const od<S> &other) { return v += other.v; }
+
+    template<enum types S>
+    od operator/=(const od<S> &other) { return v /= other.v; }
 };
 
 typedef od<U_id> U_type;
+typedef od<U_id> mu_type;
 typedef od<F_id> F_type;
 typedef od<P_id> P_type;
 typedef od<B_id> B_type;
