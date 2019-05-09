@@ -9,7 +9,7 @@
 
 int main()
 {
-    double tb_output[num_compounds][num_proteins];
+    P_type tb_output[num_compounds][num_proteins];
 
     predict_compound_block_c(tb_input, tb_output);
 
@@ -20,7 +20,7 @@ int main()
             // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
             if (std::abs(tb_output[c][p] - tb_ref[c][p]) > 0.0001)
             {
-                printf("error at [%d][%d]: %f != %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
+                printf("error at [%d][%d]: %f != %f\n", c, p, (double)tb_output[c][p], (double)tb_ref[c][p]);
                 nerrors++;
             }
         }

@@ -6,6 +6,7 @@
 
 const int WL = 16;
 typedef sc_fixed<WL,3>    U_type;
+typedef sc_fixed<WL,3>   mu_type;
 typedef sc_fixed<WL,4>    F_type;
 typedef sc_fixed<WL,7>    P_type;
 typedef sc_fixed<WL,4>    B_type;
