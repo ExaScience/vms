@@ -23,78 +23,29 @@ def gen_int(name, value, indent = ""):
     """
 
     return indent + "const int %s = %d;\n" % (name, value)
- 
-
-def gen_mat(M, typename, varname, indent = ""):
-    """Generate C code for matrix M,
-    Something like:
-
-const int sample_1_U0_latents_rows = 4;
-const int sample_1_U0_latents_cols = 3;
-const U_type sample_1_U0_latents[4][3] = {
-    { 0.22, 1.40, 1.15 },
-    { -0.26, 0.74, 2.48 },
-    { -0.62, 0.29, 0.17 },
-    { 1.61, 3.64, 5.08 },
-};
 
 
-    """
-    hdr = gen_int(varname + "_rows", M.shape[0], indent)
-    hdr += gen_int(varname + "_cols", M.shape[1], indent)
-    hdr += indent + "const " + typename + " " + varname + "[%d][%d] = {" % M.shape
-    ftr = "};"
-    fmt = indent + "  { " + "%+.8f, " * (M.shape[1] - 1) + "%+.8f },"
+def gen_body(i, M, indent):
+    output = indent + "{\n"
+    if i > 0:
+        output = ",\n" + output 
 
-    f = io.StringIO() 
+    if (len(M.shape) <= 1):
+        f = io.StringIO() 
+        np.savetxt(f, M, fmt = "%+.8f", newline=", ")
+        output += indent + "  " + f.getvalue()
+    else:
+        for i, subM in enumerate(np.split(M, M.shape[0])):
+            output += gen_body(i, np.squeeze(subM), indent + "  ") 
+            
+    return output + "\n" + indent + "}"
 
-    np.savetxt(f, M,
-            fmt = fmt,
-            header = hdr,
-            footer = ftr,
-            newline = "\n",
-            comments = "")
+def gen_array(M, typename, varname, indent = ""):
+    hdr = indent + "const " + typename + " " + varname + "[%s]" * len(M.shape) + " = \n"
+    hdr = hdr % M.shape
+    ftr = ";"
 
-    return f.getvalue()
-
-def gen_vec(V, typename, varname, indent = ""):
-    """Generate C code for vector V,
-    Something like:
-
-const int gate_1_U0_latents_size = 3;
-const U_type gate_1_U0_latents[3] = {
-    { 0.22, 1.40, 1.15 }
-};
-
-
-    """
-    decl  = gen_int(varname + "_size", V.shape[0], indent)
-    decl += indent + "extern const " + typename + " " + varname + "[%d];\n" % V.shape
-
-    hdr = indent + "const " + typename + " " + varname + "[%d] = {" % V.shape
-    ftr = indent + "};"
-    fmt = indent + " %+.8f,"
-
-    f = io.StringIO() 
-    np.savetxt(f, V,
-            fmt = fmt,
-            header = hdr,
-            footer = ftr,
-            newline = "\n",
-            comments = "")
-
-    return decl + f.getvalue()
-
-
-
-def gen_sample(i, U, mu, B):
-    # (nc x np) = ((nc x nf) * (nf x nl)) * (nl x np)
-
-    return  "namespace sample_%d {\n\n" % i \
-        + gen_mat(U, "U_type", "U", "  ") + "\n" \
-        + gen_vec(mu, "mu_type", "mu", "  ") + "\n" \
-        + gen_mat(B, "B_type", "B", "  ") + "\n" \
-        + "} // end namespace sample_%d\n" % i
+    return hdr + gen_body(0, M, indent) + ftr
 
 def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
     const_output = "#pragma once\n"
@@ -119,41 +70,34 @@ def gen_session(root):
         tb_in_matrix = np.array(tb_in_matrix.todense())
 
     #generate model
-    num_samples = 0
-    predictions = []
-    model_output = ""
+    samples = []
+    P = []
     for sample in session.samples():
         U = sample.latents[1]
         mu = sample.mus[0]
         F = sample.betas[0]
-        P = np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U)
-        predictions.append(P)
+        P.append(np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U))
+        samples.append((U, mu, F))
 
-        gen_file("sample_%d.h" % num_samples, gen_sample(num_samples, U, mu, F))
-        model_output += '#include "%ssample_%d.h"\n' % (prefix, num_samples)
+    U, mu, B = [ np.stack(s) for s in zip(*samples) ]
 
-        num_samples += 1
+    model_out = gen_array(U, "U_type", "U", "  ") + "\n" \
+        + gen_array(mu, "mu_type", "mu", "  ") + "\n" \
+        + gen_array(B, "B_type", "B", "  ") + "\n"
 
-    model_output += "\nconst sample samples[%d] = {\n" % num_samples
-    for i in range(num_samples):
-        model_output += " sample(sample_%d::U, sample_%d::mu, sample_%d::B ),\n" % (i, i, i) 
-    model_output += "};\n\n"
-
-    gen_file("model.h", model_output)
+    gen_file("model.h",  model_out)
 
     #generate testbench
-
     (num_compounds, tb_num_features) = tb_in_matrix.shape
-    print(predictions[-1])
-    predictions  = np.stack(predictions)
-    Pavg = np.mean(predictions, axis=0)
-    tb_output = gen_mat(tb_in_matrix, "F_type", "tb_input")
-    tb_output += gen_mat(Pavg, "P_type", "tb_ref")
+    P  = np.stack(P)
+    Pavg = np.mean(P, axis=0)
+    tb_output = gen_array(tb_in_matrix, "F_type", "tb_input")
+    tb_output += gen_array(Pavg, "P_type", "tb_ref")
     gen_file("tb.h", tb_output)
 
     assert tb_num_features == num_features
 
-    gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples)
+    gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples))
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file')

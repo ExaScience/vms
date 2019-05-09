@@ -53,10 +53,10 @@ predict_compound_block_c_loop11:
             predict_compound_block_c_loop13:
                 for (k = 0; k < num_features; k++)
                 {
-                    sum = sum + in_buf[k] * samples[s].B[d][k];
+                    sum = sum + in_buf[k] * B[s][d][k];
                 }
 
-                tmp[d] = sum + samples[s].mu[d];
+                tmp[d] = sum + mu[s][d];
             }
 
         predict_compound_block_c_loop22:
@@ -66,7 +66,7 @@ predict_compound_block_c_loop11:
             predict_compound_block_c_loop23:
                 for (k = 0; k < num_latent; k++)
                 {
-                    sum = sum + tmp[k] * samples[s].U[k][d];
+                    sum = sum + tmp[k] * U[s][k][d];
                 }
 
                 out_buf[d] += sum;
