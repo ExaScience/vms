@@ -1,12 +1,12 @@
 #include "smurff_const.h"
 #include "smurff_types.h"
+
+#include "predict.h"
 #include "smurff_model.h"
 
-using namespace sample_1;
-
 void predict_compound_block_c(
-   const Fin_type in[tb_num_in][num_features],
-   Pout_type out[tb_num_in][num_out]
+   const F_type in[num_compounds][num_features],
+   P_type out[num_compounds][num_proteins]
 )
 {
 #pragma HLS ARRAY_RESHAPE variable=out complete dim=2
@@ -17,10 +17,10 @@ void predict_compound_block_c(
 #pragma HLS INTERFACE ap_fifo port=in
 
 	int c, d, k;
-    Uin_type tmp[num_latent];
+    U_type tmp[num_latent];
 //#pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
-    Fin_type in_buf[num_features];
+    F_type in_buf[num_features];
 //#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
 
     //       ((nc x nf) * (nf * nl)) * (nl * np)
@@ -31,7 +31,7 @@ void predict_compound_block_c(
 
     // tmp = in * F0
     predict_compound_block_c_loop11:
-	for (c = 0; c < tb_num_in; c++)
+	for (c = 0; c < num_compounds; c++)
     {
 #pragma HLS PIPELINE II=1
 
@@ -42,24 +42,24 @@ void predict_compound_block_c(
         predict_compound_block_c_loop12:
 		for (d = 0; d < num_latent; d++)
         {
-			Uin_type sum = .0;
+			U_type sum = .0;
             predict_compound_block_c_loop13:
 			for (k = 0; k < num_features; k++)
             {
-                sum = sum + in_buf[k] * F0[d][k];
+                sum = sum + in_buf[k] * samples[0].B[d][k];
             }
 
             tmp[d] = sum;
         }
 
     	predict_compound_block_c_loop22:
-        for (d = 0; d < num_out; d++)
+        for (d = 0; d < num_proteins; d++)
         {
-            Pout_type sum = .0;
+            P_type sum = .0;
             predict_compound_block_c_loop23:
             for (k = 0; k < num_latent; k++)
             {
-                sum = sum + tmp[k] * U1[k][d];
+                sum = sum + tmp[k] * samples[0].U[k][d];
             }
 
             out[c][d] = sum;
