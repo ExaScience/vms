@@ -17,7 +17,7 @@ int main()
     for(int c=0; c<num_compounds; c++)
         for(int p=0; p<num_proteins; p++)
         {
-            printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
+            // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
             if (std::abs(tb_output[c][p] - tb_ref[c][p]) > 0.0001)
             {
                 printf("error at [%d][%d]: %f != %f\n", c, p, tb_output[c][p], tb_ref[c][p]);

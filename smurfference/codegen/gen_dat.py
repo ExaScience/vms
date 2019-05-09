@@ -119,65 +119,47 @@ def gen_session(root):
         tb_in_matrix = np.array(tb_in_matrix.todense())
 
     #generate model
-    model_output = ""
     num_samples = 0
     predictions = []
+    model_output = ""
     for sample in session.samples():
-        num_samples += 1
         U = sample.latents[1]
         mu = sample.mus[0]
         F = sample.betas[0]
         P = np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U)
         predictions.append(P)
 
-        gen_file("sample_%d.h" % sample.iter, gen_sample(sample.iter, U, mu, F))
-        model_output += '#include "%ssample_%d.h"\n' % (prefix, sample.iter)
+        gen_file("sample_%d.h" % num_samples, gen_sample(num_samples, U, mu, F))
+        model_output += '#include "%ssample_%d.h"\n' % (prefix, num_samples)
+
+        num_samples += 1
+
+    model_output += "\nsample samples[] {\n"
+    for i in range(num_samples):
+        model_output += " { sample_%d::U, sample_%d::mu, sample_%d::B },\n" % (i, i, i) 
+    model_output += "};\n\n"
 
     gen_file("model.h", model_output)
 
     #generate testbench
 
     (num_compounds, tb_num_features) = tb_in_matrix.shape
-    Pavg = np.mean(np.stack(predictions), axis=0)
+    print(predictions[-1])
+    predictions  = np.stack(predictions)
+    Pavg = np.mean(predictions, axis=0)
     tb_output = gen_mat(tb_in_matrix, "F_type", "tb_input")
-    tb_output += gen_mat(Pavg, "P_type", "tb_output")
+    tb_output += gen_mat(Pavg, "P_type", "tb_ref")
     gen_file("tb.h", tb_output)
 
     assert tb_num_features == num_features
 
     gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples)
 
-def gen_random(num_compounds, num_proteins, num_features, num_latent, num_samples):
-    gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples)
-
-    # tb_input
-    tb_in_matrix = np.random.normal(size=(num_compounds, num_features))
-    gen_file("tb.h", gen_mat(tb_in_matrix, "F_type", "tb_input"))
-
-    model_output = ""
-    for sample in range(num_samples):
-        U = np.random.normal(size=(num_latent, num_proteins))
-        F = np.random.normal(size=(num_latent, num_features))
-        gen_file("sample_%d.h" % sample, gen_sample(sample, U, F, tb_in_matrix))
-        model_output += '#include "%ssample_%d.h"\n' % (prefix, sample)
-
-    gen_file("model.h", model_output)
-    gen_file("tb.h", gen_mat(tb_in_matrix, "F_type", "tb_input"))
-
-    
-
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default=None)
-parser.add_argument('--size', metavar='NC,NP,NF,NL,NS', dest="size", type=str, 
-    help="num_compounds,num_proteins,num_features,num_latent,num_samples", default="10,15,8,4,2")
+parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file')
 args = parser.parse_args()
 
 if args.root_file:
     gen_session(args.root_file)
-elif args.size:
-    from ast import literal_eval
-    gen_random(*literal_eval(args.size))
-else:
-    raise ValueError("Please provide either --size or --root")
 
 

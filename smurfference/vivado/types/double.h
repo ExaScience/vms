@@ -1,4 +1,5 @@
 typedef double  U_type;
+typedef double  mu_type;
 typedef double  F_type;
 typedef double  P_type;
 typedef double  B_type;
