@@ -7,7 +7,7 @@ MAIN=$(MAXNAME).$(MAXNAME)Manager
 DFE_NAME=MAX5C
 MAXNAME=predict
 
-CLASSPATH=$(MAXCOMPILERDIR)/lib/Max$(PLATFORM)Platform.jar:$(MAXCOMPILERDIR)/lib/MaxCompiler.jar:la4j.jar:build
+CLASSPATH=$(MAXCOMPILERDIR)/lib/Max$(PLATFORM)Platform.jar:$(MAXCOMPILERDIR)/lib/MaxCompiler.jar:la4j.jar:build:src
 
 SRCFILES=$(wildcard $(SRCDIR)/*/*.maxj)
 CLSFILES=$(patsubst src/%.maxj,build/%.class,$(SRCFILES))

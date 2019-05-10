@@ -4,3 +4,16 @@ build
 *.o
 *DFE/
 *DFE_SIM/
+.metadata
+.recommenders
+.classpath
+.dfeprojectproperties
+.envvars
+.project
+.cproject
+.cproperties
+.maxbuttons
+.maxproperties
+.max*
+vivado.jou
+vivado.log

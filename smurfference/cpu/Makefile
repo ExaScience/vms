@@ -18,3 +18,6 @@ all: $(BINARY)
  
 $(BINARY): $(FILES) $(HEADERS) Makefile
 	$(CXX) $(CXXFLAGS) $(FILES) -o $(BINARY) $(LDFLAGS)
+
+clean:
+	rm -f *.o *.exe $(BINARY)
