@@ -1,5 +1,0 @@
-phase;iter;phase_len;rmse_avg;rmse_1samp;train_rmse;auc_avg;auc_1samp;elapsed_1samp;elapsed_total
-Burnin;1;1;nan;5.4660;4.4825;nan;:nan;0.0;0.0
-Sample;1;3;0.3611;0.3611;0.4703;nan;:nan;0.0;0.0
-Sample;2;3;0.1874;0.2035;0.2046;nan;:nan;0.0;0.0
-Sample;3;3;0.2039;0.4538;0.3863;nan;:nan;0.0;0.0
