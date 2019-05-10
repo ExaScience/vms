@@ -68,6 +68,11 @@ def gen_session(root):
     tb_in_matrix = mio.read_matrix(tb_file)
     if sp.sparse.issparse(tb_in_matrix):
         tb_in_matrix = np.array(tb_in_matrix.todense())
+    (num_compounds, tb_num_features) = tb_in_matrix.shape
+    if (num_compounds > 10):
+        tb_in_matrix = tb_in_matrix[:10,:]
+    (num_compounds, tb_num_features) = tb_in_matrix.shape
+
 
     #generate model
     samples = []
@@ -88,7 +93,6 @@ def gen_session(root):
     gen_file("model.h",  model_out)
 
     #generate testbench
-    (num_compounds, tb_num_features) = tb_in_matrix.shape
     P  = np.stack(P)
     Pavg = np.mean(P, axis=0)
     tb_output = gen_array(tb_in_matrix, "F_type", "tb_input")
