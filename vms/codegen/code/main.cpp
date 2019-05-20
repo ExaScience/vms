@@ -3,10 +3,9 @@
 #include <iostream>
 
 #include "smurff_const.h"
-#include "smurff_types.h"
+#include "predict.h"
 #include "smurff_tb.h"
 
-#include "predict.h"
 
 #ifdef DT_OBSERVED_DOUBLE
 const char *typenames[] = { "U", "mu", "F", "P", "B", "S", "T" };
@@ -15,6 +14,8 @@ std::vector<double> values[ntypes];
 
 int main()
 {
+    printf("using datatype: %s\n", DT_NAME);
+
     P_type tb_output[num_compounds][num_proteins];
 
     predict_compound_block_c(tb_input, tb_output);

@@ -1,5 +1,4 @@
 #include "smurff_const.h"
-#include "smurff_types.h"
 
 #include "predict.h"
 #include "smurff_model.h"

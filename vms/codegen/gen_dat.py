@@ -6,6 +6,7 @@ import numpy as np
 import scipy as sp
 import sys
 import os.path as pth
+import glob
 import shutil
 import io
 import argparse
@@ -90,14 +91,14 @@ def gen_session(root, outputdir):
         + gen_array(mu, "mu_type", "mu", "  ") + "\n" \
         + gen_array(B, "B_type", "B", "  ") + "\n"
 
-    gen_file(outputdir, "model.cpp",  model_out)
+    gen_file(outputdir, "model.h",  model_out)
 
     #generate testbench
     P  = np.stack(P)
     Pavg = np.mean(P, axis=0)
     tb_output = gen_array(tb_in_matrix, "F_type", "tb_input")
     tb_output += gen_array(Pavg, "P_type", "tb_ref")
-    gen_file(outputdir, "tb.cpp", tb_output)
+    gen_file(outputdir, "tb.h", tb_output)
 
     assert tb_num_features == num_features
 
@@ -105,7 +106,10 @@ def gen_session(root, outputdir):
     gen_file(outputdir, "const.h", const_output)
 
     codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")
-    shutil.copytree(codedir, outputdir)
+    codefiles = glob.glob(pth.join(codedir, '*.cpp')) + glob.glob(pth.join(codedir, '*.h'))
+    for c in codefiles:
+        pass
+        #shutil.copy(c, outputdir)
 
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')

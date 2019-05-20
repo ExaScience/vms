@@ -1,5 +1,7 @@
 #include "smurff_const.h"
 
+#include "types.h"
+
 struct sample
 {
   sample(
