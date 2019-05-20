@@ -6,13 +6,13 @@ import numpy as np
 import scipy as sp
 import sys
 import os.path as pth
+import shutil
 import io
 import argparse
 
-prefix = "smurff_"
 
-def gen_file(suffix, content):
-    with open(prefix + suffix, "w") as os:
+def gen_file(dir, suffix, content):
+    with open(pth.join(dir, "smurff_" + suffix), "w") as os:
         os.write(content)
 
 
@@ -54,9 +54,9 @@ def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
     const_output += gen_int("num_samples",   num_samples)
-    gen_file("const.h", const_output)
+    return const_output
 
-def gen_session(root):
+def gen_session(root, outputdir):
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
@@ -90,24 +90,29 @@ def gen_session(root):
         + gen_array(mu, "mu_type", "mu", "  ") + "\n" \
         + gen_array(B, "B_type", "B", "  ") + "\n"
 
-    gen_file("model.h",  model_out)
+    gen_file(outputdir, "model.cpp",  model_out)
 
     #generate testbench
     P  = np.stack(P)
     Pavg = np.mean(P, axis=0)
     tb_output = gen_array(tb_in_matrix, "F_type", "tb_input")
     tb_output += gen_array(Pavg, "P_type", "tb_ref")
-    gen_file("tb.h", tb_output)
+    gen_file(outputdir, "tb.cpp", tb_output)
 
     assert tb_num_features == num_features
 
-    gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples))
+    const_output = gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples))
+    gen_file(outputdir, "const.h", const_output)
+
+    codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")
+    shutil.copytree(codedir, outputdir)
+
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
-parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file')
+parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
+parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
 args = parser.parse_args()
 
-if args.root_file:
-    gen_session(args.root_file)
+gen_session(args.root_file, args.output)
 
 

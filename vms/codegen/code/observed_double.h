@@ -41,13 +41,3 @@ struct od {
     template<enum types S>
     od operator/=(const od<S> &other) { return v /= other.v; }
 };
-
-typedef od<U_id> U_type;
-typedef od<U_id> mu_type;
-typedef od<F_id> F_type;
-typedef od<P_id> P_type;
-typedef od<B_id> B_type;
-typedef od<S_id> S_type;
-typedef od<T_id> T_type;
-
-const double epsilon = 0.00001;
