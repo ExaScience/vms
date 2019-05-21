@@ -15,6 +15,11 @@ std::vector<double> values[ntypes];
 int main()
 {
     printf("using datatype: %s\n", DT_NAME);
+    printf("  nprot: %d\n", num_proteins);
+    printf("  ncmpd: %d\n", num_compounds);
+    printf("  nfeat: %d\n", num_features);
+    printf("  nlat:  %d\n", num_latent);
+    printf("  nsmpl: %d\n", num_samples);
 
     P_type tb_output[num_compounds][num_proteins];
 
@@ -34,7 +39,7 @@ int main()
             }
         }
 
-    printf("%d errors\n", nerrors);
+    printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
 
 #ifdef DT_OBSERVED_DOUBLE
     for(int i=0; i<ntypes; ++i) {

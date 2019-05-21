@@ -29,8 +29,8 @@ typedef sc_fixed<WL,4>   mu_type;
 typedef sc_fixed<WL,4>    F_type;
 typedef sc_fixed<WL,7>    P_type;
 typedef sc_fixed<WL,4>    B_type;
-typedef sc_fixed<4+WL,7>  S_type;
-typedef sc_fixed<4+WL,7>  T_type;
+typedef sc_fixed<4+WL,9>  S_type;
+typedef sc_fixed<4+WL,9>  T_type;
 
 const double epsilon = 1./(WL-8);
 
