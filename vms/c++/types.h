@@ -23,20 +23,22 @@ const float epsilon = 0.0001;
 
 #define DT_NAME "fixed"
 
-
-// U; size: 1049856; min: -18.8395; max: 14.6594 
-// F; size: 825909; min: -12.1851; max: 10.8723
-// P; size: 2280; min: 0; max: 8.98226
-// B; size: 82544; min: -0.51856; max: 0.469575
-// S; size: 229254; min: -1.31922; max: 98.8048    
-
-typedef sc_fixed<16,6>    U_type;
-typedef sc_fixed<16,4>   mu_type;
-typedef sc_fixed<16,5>    F_type;
-typedef sc_fixed<16,5>    P_type;
-typedef sc_fixed<16,5>    B_type;
+/*
+typedef sc_fixed<16,6>  U_type;
+typedef sc_fixed<16,4>  mu_type;
+typedef sc_fixed<16,5>  F_type;
+typedef sc_fixed<16,5>  P_type;
+typedef sc_fixed<16,5>  B_type;
 typedef sc_fixed<20,9>  S_type;
 typedef sc_fixed<20,9>  T_type;
+*/
+typedef sc_fixed<24,6>  U_type;
+typedef sc_fixed<8,1>  mu_type;
+typedef sc_fixed<20,10>  F_type;
+//typedef float  P_type;
+typedef sc_fixed<20,1>  B_type;
+typedef sc_fixed<20,8>  S_type;
+typedef float  T_type;
 
 const float epsilon = 1./8.;
 

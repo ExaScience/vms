@@ -53,4 +53,5 @@ clean:
 $(BINARIES): \
  	code/smurff_const.h \
 	code/smurff_tb.h \
+	../../c++/types.h \
 	../../c++/predict.h
