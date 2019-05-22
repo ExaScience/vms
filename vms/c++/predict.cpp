@@ -2,8 +2,6 @@
 #include "predict.h"
 #include "types.h"
 
-
-
 void predict_compound_block_c(
     const float features[num_compounds][num_features],
           float predictions[num_compounds][num_proteins],
@@ -95,7 +93,7 @@ predict_compound_block_c_loop11:
         for (d = 0; d < num_proteins; d++)
         {
 #pragma HLS UNROLL
-            predictions[c][d] = out_buf[d] / (S_type)num_samples;
+            predictions[c][d] = (float)(out_buf[d] / (S_type)num_samples);
         }
     } // end compounds
 }

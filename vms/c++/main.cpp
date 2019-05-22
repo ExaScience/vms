@@ -22,7 +22,7 @@ int main()
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    P_type tb_output[num_compounds][num_proteins];
+    float tb_output[num_compounds][num_proteins];
 
     predict_compound_block_c(tb_input, tb_output, U, mu, B);
 

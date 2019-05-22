@@ -46,7 +46,7 @@ const float epsilon = 1./8.;
 #define DT_NAME "observed_float"
 
 typedef ::od<U_id> U_type;
-typedef ::od<U_id> mu_type;
+typedef ::od<mu_id> mu_type;
 typedef ::od<F_id> F_type;
 typedef ::od<P_id> P_type;
 typedef ::od<B_id> B_type;
