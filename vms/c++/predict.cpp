@@ -61,22 +61,23 @@ predict_loop:
 
         for (int s = 0; s < num_samples; s++)
         {
+            for (k = 0; k < num_latent; k++)
+            {
+#pragma HLS UNROLL
+                tmp[k] = mu[s][k];
+            }
+
             for (d = 0; d < num_features; d++)
             {
 #pragma HLS PIPELINE II=1
 #pragma HLS ARRAY_PARTITION variable=B complete dim=2
 #pragma HLS ARRAY_PARTITION variable=mu complete dim=2
 
-                S_type feature;
+                F_type feature;
                 feature = features[c][d];
                 for (k = 0; k < num_latent; k++)
                 {
-
-                    S_type prod = feature * B[s][k][d];
-                    if (d == 0)
-                        tmp[k] = mu[s][k] + prod;
-                    else
-                        tmp[k] = tmp[k] + prod;
+                    tmp[k] = tmp[k] + feature * B[s][k][d];
                 }
             }
 
