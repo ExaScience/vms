@@ -1,6 +1,5 @@
 #include <vector>
-
-#define DT_OBSERVED_DOUBLE
+#include <algorithm>
 
 enum types { U_id, mu_id, F_id, P_id, B_id, S_id, T_id, ntypes };
 

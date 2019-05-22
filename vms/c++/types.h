@@ -23,16 +23,22 @@ const double epsilon = 0.00001;
 
 #define DT_NAME "fixed"
 
-const int WL = 16;
-typedef sc_fixed<WL,4>    U_type;
-typedef sc_fixed<WL,4>   mu_type;
-typedef sc_fixed<WL,4>    F_type;
-typedef sc_fixed<WL,7>    P_type;
-typedef sc_fixed<WL,4>    B_type;
-typedef sc_fixed<4+WL,9>  S_type;
-typedef sc_fixed<4+WL,9>  T_type;
 
-const double epsilon = 1./(WL-8);
+// U; size: 1049856; min: -18.8395; max: 14.6594 
+// F; size: 825909; min: -12.1851; max: 10.8723
+// P; size: 2280; min: 0; max: 8.98226
+// B; size: 82544; min: -0.51856; max: 0.469575
+// S; size: 229254; min: -1.31922; max: 98.8048    
+
+typedef sc_fixed<16,6>    U_type;
+typedef sc_fixed<16,4>   mu_type;
+typedef sc_fixed<16,5>    F_type;
+typedef sc_fixed<16,5>    P_type;
+typedef sc_fixed<16,5>    B_type;
+typedef sc_fixed<20,9>  S_type;
+typedef sc_fixed<20,9>  T_type;
+
+const double epsilon = 1./8.;
 
 #elif defined(DT_OBSERVED_DOUBLE)
 #include "observed_double.h"

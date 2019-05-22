@@ -65,7 +65,7 @@ def gen_session(root, outputdir):
     num_features = session.beta_shape[0]
 
     # read input features
-    tb_file = pth.join(session.root_dir, session.options.get("side_info_0_0", "file"))
+    tb_file = session.options.get("side_info_0_0", "file")
     tb_in_matrix = mio.read_matrix(tb_file)
     if sp.sparse.issparse(tb_in_matrix):
         tb_in_matrix = np.array(tb_in_matrix.todense())
@@ -78,12 +78,15 @@ def gen_session(root, outputdir):
     #generate model
     samples = []
     P = []
+    max_samples = 10
     for sample in session.samples():
         U = sample.latents[1]
         mu = sample.mus[0]
         F = sample.betas[0]
         P.append(np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U))
         samples.append((U, mu, F))
+        if len(samples) > max_samples:
+            break
 
     U, mu, B = [ np.stack(s) for s in zip(*samples) ]
 
