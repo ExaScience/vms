@@ -13,6 +13,17 @@ const char *typenames[] = { "U", "mu", "F", "P", "B", "S", "T" };
 std::vector<float> values[ntypes];
 #endif
 
+
+#define CONVERT2(N) convert(&(N[0][0]), &(N##_fx[0][0]), sizeof(N)/sizeof(N[0][0]))
+#define CONVERT3(N) convert(&(N[0][0][0]), &(N##_fx[0][0][0]), sizeof(N)/sizeof(N[0][0][0]))
+
+template<typename F, typename T>
+void convert(const F* in, T* out, int size)
+{
+    for(int i=0; i<size; ++i) out[i] = in[i];
+}
+
+
 int main()
 {
     printf("using datatype: %s\n", DT_NAME);
@@ -22,9 +33,18 @@ int main()
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    float tb_output[num_compounds][num_proteins];
+    P_type    tb_output[num_compounds][num_proteins];
+    F_type  tb_input_fx[num_compounds][num_features];
+    U_type         U_fx[num_samples][num_proteins][num_latent];
+    mu_type       mu_fx[num_samples][num_latent];
+    B_type         B_fx[num_samples][num_latent][num_features];
+    
+    CONVERT2(tb_input);
+    CONVERT3(U);
+    CONVERT2(mu);
+    CONVERT3(B);
 
-    predict_compound_block_c(tb_input, tb_output, U, mu, B);
+    predict_compound_block_c(tb_input_fx, tb_output, U_fx, mu_fx, B_fx);
 
     int nerrors = 0;
     for(int c=0; c<num_compounds; c++)

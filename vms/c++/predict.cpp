@@ -5,12 +5,11 @@
 #include "types.h"
 
 void predict_compound_block_c(
-    const float features[num_compounds][num_features],
-          float predictions[num_compounds][num_proteins],
-
-    const float U_in [num_samples][num_proteins][num_latent],
-    const float mu_in[num_samples][num_latent],
-    const float B_in [num_samples][num_latent][num_features]
+    const F_type features[num_compounds][num_features],
+          P_type predictions[num_compounds][num_proteins],
+    const U_type U_in [num_samples][num_proteins][num_latent],
+    const mu_type mu_in[num_samples][num_latent],
+    const B_type B_in [num_samples][num_latent][num_features]
     )
 {
 #pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
