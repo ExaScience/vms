@@ -1,18 +1,38 @@
 #include "smurff_const.h"
-
 #include "predict.h"
-#include "smurff_model.h"
+#include "types.h"
+
+
 
 void predict_compound_block_c(
-    const F_type in[num_compounds][num_features],
-    P_type out[num_compounds][num_proteins])
+    const float features[num_compounds][num_features],
+          float predictions[num_compounds][num_proteins],
+
+    const float U_in [num_samples][num_latent][num_proteins],
+    const float mu_in[num_samples][num_latent],
+    const float B_in [num_samples][num_latent][num_features]
+    )
 {
-#pragma HLS ARRAY_RESHAPE variable = out complete dim = 2
-#pragma HLS ARRAY_RESHAPE variable = in complete dim = 2
-//#pragma HLS ARRAY_PARTITION variable=out complete dim=2
-//#pragma HLS ARRAY_PARTITION variable=in complete dim=2
-#pragma HLS INTERFACE ap_fifo port = out
-#pragma HLS INTERFACE ap_fifo port = in
+#pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
+#pragma HLS ARRAY_RESHAPE variable = features complete dim = 2
+//#pragma HLS ARRAY_PARTITION variable=predictions complete dim=2
+//#pragma HLS ARRAY_PARTITION variable=features complete dim=2
+#pragma HLS INTERFACE ap_fifo port = predictions
+#pragma HLS INTERFACE ap_fifo port = features
+
+    U_type   U[num_samples][num_latent][num_proteins];
+    mu_type mu[num_samples][num_latent];
+    B_type   B[num_samples][num_latent][num_features];
+
+    for(int i=0; i<num_samples; i++)
+    {
+        for(int j=0; j<num_latent; j++)
+        {
+            for(int k=0; k<num_proteins; k++) U[i][j][k] = U_in[i][j][k];
+            mu[i][j] = mu_in[i][j];
+            for(int k=0; k<num_features; k++) B[i][j][k] = B_in[i][j][k];
+        }
+    }
 
     int c, d, k;
     U_type tmp[num_latent];
@@ -26,7 +46,7 @@ void predict_compound_block_c(
 //       ((nc x nf) * (nf * nl)) * (nl * np)
 //       (nc        x        nl) * (nl * np)
 //       (nc             x               np)
-// out = ((in * f0.transpose()) + mu) * u1;
+// predictions = ((features * f0.transpose()) + mu) * u1;
 
 predict_compound_block_c_loop11:
     for (c = 0; c < num_compounds; c++)
@@ -34,7 +54,7 @@ predict_compound_block_c_loop11:
         for (k = 0; k < num_features; k++)
         {
 #pragma HLS UNROLL
-            in_buf[k] = in[c][k];
+            in_buf[k] = features[c][k];
         }
 
         for (d = 0; d < num_proteins; d++)
@@ -75,7 +95,7 @@ predict_compound_block_c_loop11:
         for (d = 0; d < num_proteins; d++)
         {
 #pragma HLS UNROLL
-            out[c][d] = out_buf[d] / (S_type)num_samples;
+            predictions[c][d] = out_buf[d] / (S_type)num_samples;
         }
     } // end compounds
 }

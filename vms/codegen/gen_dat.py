@@ -90,17 +90,14 @@ def gen_session(root, outputdir):
 
     U, mu, B = [ np.stack(s) for s in zip(*samples) ]
 
-    model_out = gen_array(U, "U_type", "U", "  ") + "\n" \
-        + gen_array(mu, "mu_type", "mu", "  ") + "\n" \
-        + gen_array(B, "B_type", "B", "  ") + "\n"
-
-    gen_file(outputdir, "model.h",  model_out)
+    tb_output = gen_array(U, "float", "U", "  ") + "\n" \
+        + gen_array(mu, "float", "mu", "  ") + "\n" \
+        + gen_array(B, "float", "B", "  ") + "\n"
 
     #generate testbench
-    P  = np.stack(P)
-    Pavg = np.mean(P, axis=0)
-    tb_output = gen_array(tb_in_matrix, "F_type", "tb_input")
-    tb_output += gen_array(Pavg, "P_type", "tb_ref")
+    Pavg = np.mean(np.stack(P), axis=0)
+    tb_output += gen_array(tb_in_matrix, "float", "tb_input") + "\n"
+    tb_output += gen_array(Pavg, "float", "tb_ref") + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
     assert tb_num_features == num_features

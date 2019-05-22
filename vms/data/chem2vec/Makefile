@@ -3,7 +3,7 @@ TOPDIR=../..
 
 SRCDIR=$(TOPDIR)/c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
-INCLUDES=-I$(SRCDIR) -Imodel
+INCLUDES=-I$(SRCDIR) -Icode
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 
 LDFLAGS=
 
@@ -18,7 +18,7 @@ SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 BINARIES=sim_float sim_observed_float sim_fixed
 ROOTFILE=model/root.ini
 INPUTDATA=test.sdm train.sdm side_c2v.ddm
-MODELFILES=model/smurff_const.h model/smurff_model.h model/smurff_tb.h
+MODELFILES=code/smurff_const.h code/smurff_tb.h
 
 .PHONY: run clean
 
@@ -33,7 +33,8 @@ $(ROOTFILE): $(INPUTDATA)
 	smurff --ini options.ini --save-prefix model
 
 $(MODELFILES): $(ROOTFILE)
-	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output model
+	mkdir -p code
+	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 sim_float: $(MODELFILES) $(CXXFILES)
 	$(CXX) -DDT_FLOAT $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
@@ -45,12 +46,11 @@ sim_fixed: $(MODELFILES) $(CXXFILES)
 	$(CXX) -DDT_FIXED $(SC_CXXFLAGS) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) $(SC_LDFLAGS)
 
 clean:
-	rm -rf model
+	rm -rf model code
 	rm -f $(BINARIES)
 	rm -rf $(addsuffix .dSYM,$(BINARIES))
 
 $(BINARIES): \
- 	model/smurff_const.h \
-	model/smurff_model.h \
-	model/smurff_tb.h \
+ 	code/smurff_const.h \
+	code/smurff_tb.h \
 	../../c++/predict.h

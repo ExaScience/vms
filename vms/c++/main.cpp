@@ -5,6 +5,7 @@
 #include "smurff_const.h"
 #include "predict.h"
 #include "smurff_tb.h"
+#include "types.h"
 
 
 #ifdef DT_OBSERVED_FLOAT
@@ -23,7 +24,7 @@ int main()
 
     P_type tb_output[num_compounds][num_proteins];
 
-    predict_compound_block_c(tb_input, tb_output);
+    predict_compound_block_c(tb_input, tb_output, U, mu, B);
 
     int nerrors = 0;
     for(int c=0; c<num_compounds; c++)
