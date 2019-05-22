@@ -76,16 +76,55 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
     return model;
 }
 
+void af_predict_block(MatrixX8 &ret,
+    const std::vector<Sample> &model,
+    const Eigen::Map<Eigen::MatrixXf> &row_features,
+    size_t block,
+    size_t blocksize,
+    size_t nprot,
+    std::vector<int> devices)
+{
+    size_t ncomp = row_features.rows();
+    size_t nfeat = row_features.cols();
+
+    auto load_block = [&row_features, nfeat, ncomp, blocksize](int block) -> af::array {
+        if (block >= ncomp) return af::constant(0, 0);
+        auto bs = std::min(blocksize, ncomp - block);
+        return as_af(row_features.block(block, 0, bs, nfeat));
+    };
+
+    int dev = omp_get_thread_num();
+    af::setDevice(devices[dev]);
+    // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
+    auto feat = load_block(block);
+    auto pred = af::constant(.0, feat.dims(0), nprot);
+
+    for (const auto &sample : model)
+    {
+        auto U0 = af::matmulNT(sample.af_F0[dev], feat);
+        auto U0m = af::tile(sample.af_M0[dev], 1, feat.dims(0));
+        auto U0c = U0 + U0m;
+        pred += af::matmulTN(U0c, sample.af_U1[dev]);
+    }
+
+    // final result is in 8bit unsigned
+    af::array out = (pred / (float)(model.size())).as(u8);
+
+    // copy data to host
+    out.host(&ret.coeffRef(block, 0));
+    //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
+}
+
 MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices)
 {
-    Eigen::MatrixXd temp_features;
-    read_matrix(ffile, temp_features);
+    Eigen::MatrixXd features;
+    read_matrix(ffile, features);
 
-    Eigen::Map<Eigen::MatrixXf> row_features(af::pinned<float>(temp_features.nonZeros()), temp_features.rows(), temp_features.cols());
+    Eigen::Map<Eigen::MatrixXf> row_features(af::pinned<float>(features.nonZeros()), features.rows(), features.cols());
 
-    row_features = temp_features.cast<float>();
+    row_features = features.cast<float>();
 
-    size_t ncomp = row_features.rows();
+    size_t ncomp = features.rows();
     size_t nlat  = model.at(0).U1.rows();
     size_t nfeat = model.at(0).F0.cols();
     size_t nprot = model.at(0).U1.cols();
@@ -102,40 +141,12 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
     cudaProfilerStart();
 #endif
 
-    auto load_block = [&row_features, nfeat, ncomp, blocksize](int block) -> af::array
-    {
-        if (block >= ncomp)
-            return af::constant(0, 0);
-
-        auto bs = std::min(blocksize, ncomp - block);
-        return as_af(row_features.block(block, 0, bs, nfeat));
-    };
-
     int ndev = devices.size();
     omp_set_num_threads(ndev);
 #pragma omp parallel for 
     for(size_t block=0; block<ncomp; block+=blocksize)
     {
-	int dev = omp_get_thread_num();
-	af::setDevice(devices[dev]);
-        // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
-        auto feat = load_block(block);
-        auto pred = af::constant(.0, feat.dims(0), nprot);
-
-        for(const auto &sample : model)
-        {
-            auto U0 = af::matmulNT(sample.af_F0[dev], feat);
-            auto U0m = af::tile(sample.af_M0[dev], 1, feat.dims(0));
-            auto U0c = U0 + U0m;
-            pred += af::matmulTN(U0c, sample.af_U1[dev]);
-        }
-
-        // final result is in 8bit unsigned
-        af::array out = (pred / (float)(model.size())).as(u8);
-
-        // copy data to host
-        out.host(&ret.coeffRef(block, 0));
-        //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
+        af_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
     }
 
 #ifdef CUDA_PROFILE
