@@ -23,6 +23,7 @@ void predict_compound_block_c(
     mu_type mu[num_samples][num_latent];
     B_type   B[num_samples][num_latent][num_features];
 
+    load_model_loop:
     for(int i=0; i<num_samples; i++)
     {
         for(int j=0; j<num_proteins; j++)
@@ -51,7 +52,7 @@ void predict_compound_block_c(
 //       (nc             x               np)
 // predictions = ((features * f0.transpose()) + mu) * u1;
 
-predict_compound_block_c_loop11:
+predict_loop:
     for (c = 0; c < num_compounds; c++)
     {
         for (k = 0; k < num_features; k++)
