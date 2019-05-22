@@ -3,6 +3,8 @@ TOPDIR=../..
 
 SRCDIR=$(TOPDIR)/c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
+HEADERFILES=$(wildcard $(SRCDIR)/*.h)
+
 INCLUDES=-I$(SRCDIR) -Icode
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 
 LDFLAGS=
@@ -22,7 +24,7 @@ ROOTFILE=model/root.ini
 INPUTDATA=test.sdm train.sdm side_c2v.ddm
 MODELFILES=code/smurff_const.h code/smurff_tb.h
 
-.PHONY: run clean
+.PHONY: hls run clean
 
 run: $(BINARIES)
 	./sim_float && ./sim_fixed
@@ -38,22 +40,20 @@ $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
-sim_float: $(MODELFILES) $(CXXFILES)
+sim_float: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	$(CXX) -DDT_FLOAT $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
 
-sim_observed_float: $(MODELFILES) $(CXXFILES)
+sim_observed_float: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	$(CXX) -DDT_OBSERVED_FLOAT -std=c++11 $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
 
-sim_fixed: $(MODELFILES) $(CXXFILES)
+sim_fixed: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	$(CXX) -DDT_FIXED $(SC_CXXFLAGS) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) $(SC_LDFLAGS)
 
 clean:
-	rm -rf model code
+	rm -rf model code hls
 	rm -f $(BINARIES)
 	rm -rf $(addsuffix .dSYM,$(BINARIES))
 
-$(BINARIES): \
- 	code/smurff_const.h \
-	code/smurff_tb.h \
-	../../c++/types.h \
-	../../c++/predict.h
+hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
+	cp $(HEADERFILES) $(CXXFILES) code/
+	vivado_hls $(TOPDIR)/codegen/run.tcl

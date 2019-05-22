@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "smurff_const.h"
 #include "predict.h"
 #include "types.h"
@@ -80,6 +82,7 @@ predict_compound_block_c_loop11:
             for (d = 0; d < num_proteins; d++)
             {
 #pragma HLS PIPELINE II=1
+#pragma HLS ARRAY_PARTITION variable=U complete dim=3
                 S_type sum = .0;
                 for (k = 0; k < num_latent; k++)
                 {
