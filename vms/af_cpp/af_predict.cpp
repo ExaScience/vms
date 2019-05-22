@@ -36,22 +36,28 @@ struct Sample
 {
     Sample(int s, std::string modeldir, std::vector<int> devices)
     {
+        Eigen::MatrixXd dF0, dM0, dU1;
+
         auto base = modeldir + "sample-" + std::to_string(s) + "-";
-        read_matrix(base + "F0-link.ddm", F0);
-        read_matrix(base + "M0-hypermu.ddm", M0);
-        read_matrix(base + "U1-latents.ddm", U1);
+        read_matrix(base + "F0-link.ddm", dF0);
+        read_matrix(base + "M0-hypermu.ddm", dM0);
+        read_matrix(base + "U1-latents.ddm", dU1);
+
+        F0 = dF0.cast<float>(); 
+        M0 = dM0.cast<float>(); 
+        U1 = dU1.cast<float>();
 
         for(int dev : devices) {
             af::setDevice(dev);
-            af_F0.push_back(as_af(F0.cast<float>())); 
-            af_M0.push_back(as_af(M0.cast<float>())); 
-            af_U1.push_back(as_af(U1.cast<float>())); 
+            af_F0.push_back(as_af(F0)); 
+            af_M0.push_back(as_af(M0)); 
+            af_U1.push_back(as_af(U1)); 
         }
     }
 
     std::vector<af::array> af_F0, af_M0, af_U1;
+    Eigen::MatrixXf F0, M0, U1;
 
-    Eigen::MatrixXd F0, M0, U1;
 };
 
 std::vector<Sample> read_model(int samples_from, int samples_to, std::string modeldir, std::vector<int> devices)
@@ -74,6 +80,34 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
     printf("  nsmpl: %lu\n", model.size());
 
     return model;
+}
+
+void eigen_predict_block(MatrixX8 &ret,
+    const std::vector<Sample> &model,
+    const Eigen::Map<Eigen::MatrixXf> &row_features,
+    size_t block,
+    size_t blocksize,
+    size_t nprot,
+    std::vector<int> devices)
+{
+    size_t ncomp = row_features.rows();
+    size_t nfeat = row_features.cols();
+
+    // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
+    auto feat = row_features.block(block, 0, blocksize, nfeat);
+    Eigen::MatrixXf pred = Eigen::MatrixXf::Zero(feat.rows(), nprot);
+
+    for (const auto &sample : model)
+    {
+        auto U0 = sample.F0 * feat.transpose();
+        auto U0c = U0.colwise() + sample.M0.col(0);
+        pred += U0c.transpose() * sample.U1;
+    }
+
+    // final result is in 8bit unsigned
+    ret.block(block, 0, blocksize, nprot) =  (pred / (float)(model.size())).cast<std::uint8_t>();
+    
+    //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
 void af_predict_block(MatrixX8 &ret,
