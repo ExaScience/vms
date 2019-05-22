@@ -1,18 +1,18 @@
 #pragma once
 
-#ifdef DT_DOUBLE
+#ifdef DT_FLOAT
 
-#define DT_NAME "double"
+#define DT_NAME "float"
 
-typedef double U_type;
-typedef double mu_type;
-typedef double F_type;
-typedef double P_type;
-typedef double B_type;
-typedef double S_type;
-typedef double T_type;
+typedef float U_type;
+typedef float mu_type;
+typedef float F_type;
+typedef float P_type;
+typedef float B_type;
+typedef float S_type;
+typedef float T_type;
 
-const double epsilon = 0.00001;
+const float epsilon = 0.0001;
 
 #elif defined(DT_FIXED)
 #define SC_INCLUDE_FX
@@ -38,12 +38,12 @@ typedef sc_fixed<16,5>    B_type;
 typedef sc_fixed<20,9>  S_type;
 typedef sc_fixed<20,9>  T_type;
 
-const double epsilon = 1./8.;
+const float epsilon = 1./8.;
 
-#elif defined(DT_OBSERVED_DOUBLE)
-#include "observed_double.h"
+#elif defined(DT_OBSERVED_FLOAT)
+#include "observed_float.h"
 
-#define DT_NAME "observed_double"
+#define DT_NAME "observed_float"
 
 typedef ::od<U_id> U_type;
 typedef ::od<U_id> mu_type;
@@ -53,7 +53,7 @@ typedef ::od<B_id> B_type;
 typedef ::od<S_id> S_type;
 typedef ::od<T_id> T_type;
 
-const double epsilon = 0.00001;
+const float epsilon = 0.0001;
 
 #else
 #error Need to define datatype

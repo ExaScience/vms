@@ -7,9 +7,9 @@
 #include "smurff_tb.h"
 
 
-#ifdef DT_OBSERVED_DOUBLE
+#ifdef DT_OBSERVED_FLOAT
 const char *typenames[] = { "U", "mu", "F", "P", "B", "S", "T" };
-std::vector<double> values[ntypes];
+std::vector<float> values[ntypes];
 #endif
 
 int main()
@@ -29,8 +29,8 @@ int main()
     for(int c=0; c<num_compounds; c++)
         for(int p=0; p<num_proteins; p++)
         {
-            double o = (double)tb_output[c][p];
-            double r = (double)tb_ref[c][p];
+            float o = (float)tb_output[c][p];
+            float r = (float)tb_ref[c][p];
             // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output[c][p], tb_ref[c][p]);
             if (std::abs(o - r) > epsilon)
             {
@@ -41,7 +41,7 @@ int main()
 
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
 
-#ifdef DT_OBSERVED_DOUBLE
+#ifdef DT_OBSERVED_FLOAT
     for(int i=0; i<ntypes; ++i) {
         std::cout << typenames[i] << "; size: " << values[i].size();
         if (values[i].size() > 0) {
