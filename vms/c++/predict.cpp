@@ -8,7 +8,7 @@ void predict_compound_block_c(
     const float features[num_compounds][num_features],
           float predictions[num_compounds][num_proteins],
 
-    const float U_in [num_samples][num_latent][num_proteins],
+    const float U_in [num_samples][num_proteins][num_latent],
     const float mu_in[num_samples][num_latent],
     const float B_in [num_samples][num_latent][num_features]
     )
@@ -20,18 +20,22 @@ void predict_compound_block_c(
 #pragma HLS INTERFACE ap_fifo port = predictions
 #pragma HLS INTERFACE ap_fifo port = features
 
-    U_type   U[num_samples][num_latent][num_proteins];
+    U_type   U[num_samples][num_proteins][num_latent];
     mu_type mu[num_samples][num_latent];
     B_type   B[num_samples][num_latent][num_features];
 
     for(int i=0; i<num_samples; i++)
     {
+        for(int j=0; j<num_proteins; j++)
+            for(int k=0; k<num_latent; k++)
+                 U[i][j][k] = U_in[i][j][k];
+
         for(int j=0; j<num_latent; j++)
-        {
-            for(int k=0; k<num_proteins; k++) U[i][j][k] = U_in[i][j][k];
             mu[i][j] = mu_in[i][j];
-            for(int k=0; k<num_features; k++) B[i][j][k] = B_in[i][j][k];
-        }
+
+        for(int j=0; j<num_latent; j++)
+            for(int k=0; k<num_features; k++)
+                B[i][j][k] = B_in[i][j][k];
     }
 
     int c, d, k;
@@ -86,7 +90,7 @@ predict_compound_block_c_loop11:
                 S_type sum = .0;
                 for (k = 0; k < num_latent; k++)
                 {
-                    sum = sum + tmp[k] * U[s][k][d];
+                    sum = sum + tmp[k] * U[s][d][k];
                 }
 
                 out_buf[d] += sum;
