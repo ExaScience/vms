@@ -6,5 +6,5 @@ void predict_compound_block_c(
           P_type  out[num_compounds][num_proteins],
     const U_type  U  [num_samples][num_proteins][num_latent],
     const mu_type mu [num_samples][num_latent],
-    const B_type  B  [num_samples][num_latent][num_features]
+    const B_type  B  [num_samples][num_features][num_latent]
 );

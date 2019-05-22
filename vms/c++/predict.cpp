@@ -9,7 +9,7 @@ void predict_compound_block_c(
           P_type predictions[num_compounds][num_proteins],
     const U_type U_in [num_samples][num_proteins][num_latent],
     const mu_type mu_in[num_samples][num_latent],
-    const B_type B_in [num_samples][num_latent][num_features]
+    const B_type B_in [num_samples][num_features][num_latent]
     )
 {
 #pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
@@ -21,7 +21,7 @@ void predict_compound_block_c(
 
     U_type   U[num_samples][num_proteins][num_latent];
     mu_type mu[num_samples][num_latent];
-    B_type   B[num_samples][num_latent][num_features];
+    B_type   B[num_samples][num_features][num_latent];
 
     load_model_loop:
     for(int i=0; i<num_samples; i++)
@@ -33,8 +33,8 @@ void predict_compound_block_c(
         for(int j=0; j<num_latent; j++)
             mu[i][j] = mu_in[i][j];
 
-        for(int j=0; j<num_latent; j++)
-            for(int k=0; k<num_features; k++)
+        for(int j=0; j<num_features; j++)
+            for(int k=0; k<num_latent; k++)
                 B[i][j][k] = B_in[i][j][k];
     }
 
@@ -77,7 +77,7 @@ predict_loop:
                 feature = features[c][d];
                 for (k = 0; k < num_latent; k++)
                 {
-                    tmp[k] = tmp[k] + feature * B[s][k][d];
+                    tmp[k] = tmp[k] + feature * B[s][d][k];
                 }
             }
 

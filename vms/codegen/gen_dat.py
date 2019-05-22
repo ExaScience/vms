@@ -90,6 +90,7 @@ def gen_session(root, outputdir):
 
     U, mu, B = [ np.stack(s) for s in zip(*samples) ]
     U = np.transpose(U, axes = (0,2,1))
+    B = np.transpose(B, axes = (0,2,1))
 
     tb_output = gen_array(U, "float", "U", "  ") + "\n" \
         + gen_array(mu, "float", "mu", "  ") + "\n" \

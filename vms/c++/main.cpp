@@ -37,7 +37,7 @@ int main()
     static F_type  tb_input_fx[num_compounds][num_features];
     static U_type         U_fx[num_samples][num_proteins][num_latent];
     static mu_type       mu_fx[num_samples][num_latent];
-    static B_type         B_fx[num_samples][num_latent][num_features];
+    static B_type         B_fx[num_samples][num_features][num_latent];
 
     CONVERT2(tb_input);
     CONVERT3(U);
