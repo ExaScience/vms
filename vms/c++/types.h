@@ -34,10 +34,10 @@ typedef sc_fixed<20,9>  T_type;
 */
 typedef sc_fixed<24,6>  U_type;
 typedef sc_fixed<8,1>  mu_type;
+typedef sc_fixed<20,1>  B_type;
 typedef sc_fixed<20,10>  F_type;
 typedef sc_fixed<16,5>  P_type;
-typedef sc_fixed<20,1>  B_type;
-typedef sc_fixed<20,8>  S_type;
+typedef sc_fixed<32,10>  S_type;
 typedef float  T_type;
 
 const float epsilon = 1./8.;

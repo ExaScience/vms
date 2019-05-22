@@ -39,10 +39,9 @@ void predict_compound_block_c(
     }
 
     int c, d, k;
-    U_type tmp[num_latent];
+    S_type tmp[num_latent];
 #pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
-    F_type in_buf[num_features];
 #pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
     S_type out_buf[num_proteins];
 #pragma HLS ARRAY_PARTITION variable=out_buf complete dim=1
@@ -55,12 +54,6 @@ void predict_compound_block_c(
 predict_loop:
     for (c = 0; c < num_compounds; c++)
     {
-        for (k = 0; k < num_features; k++)
-        {
-#pragma HLS UNROLL
-            in_buf[k] = features[c][k];
-        }
-
         for (d = 0; d < num_proteins; d++)
         {
 #pragma HLS UNROLL
@@ -69,18 +62,22 @@ predict_loop:
 
         for (int s = 0; s < num_samples; s++)
         {
-            for (d = 0; d < num_latent; d++)
+            for (d = 0; d < num_features; d++)
             {
 #pragma HLS PIPELINE II=1
 #pragma HLS ARRAY_PARTITION variable=B complete dim=3
 
-                U_type sum = .0;
-                for (k = 0; k < num_features; k++)
+                S_type feature;
+                feature = features[c][d];
+                for (k = 0; k < num_latent; k++)
                 {
-                    sum = sum + in_buf[k] * B[s][d][k];
-                }
 
-                tmp[d] = sum + mu[s][d];
+                    S_type prod = feature * B[s][k][d];
+                    if (d == 0)
+                        tmp[k] = mu[s][k] + prod;
+                    else
+                        tmp[k] = tmp[k] + prod;
+                }
             }
 
             for (d = 0; d < num_proteins; d++)
