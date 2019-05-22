@@ -50,7 +50,7 @@ int main()
     for(int c=0; c<num_compounds; c++)
         for(int p=0; p<num_proteins; p++)
         {
-            float o = (float)tb_output_fx[c][p];
+            float o = (float)tb_output_fx[c][p] / (float)num_samples;
             float r = (float)tb_ref[c][p];
             // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output_fx[c][p], tb_ref[c][p]);
             if (std::abs(o - r) > epsilon)

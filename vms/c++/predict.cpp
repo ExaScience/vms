@@ -12,12 +12,12 @@ void predict_compound_block_c(
     const B_type B_in [num_samples][num_features][num_latent]
     )
 {
-#pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
-#pragma HLS ARRAY_RESHAPE variable = features complete dim = 2
+//#pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
+//#pragma HLS ARRAY_RESHAPE variable = features complete dim = 2
 //#pragma HLS ARRAY_PARTITION variable=predictions complete dim=2
 //#pragma HLS ARRAY_PARTITION variable=features complete dim=2
-#pragma HLS INTERFACE ap_fifo port = predictions
-#pragma HLS INTERFACE ap_fifo port = features
+//#pragma HLS INTERFACE ap_fifo port = predictions
+//#pragma HLS INTERFACE ap_fifo port = features
 
     U_type   U[num_samples][num_proteins][num_latent];
     mu_type mu[num_samples][num_latent];
@@ -70,7 +70,7 @@ predict_loop:
             for (d = 0; d < num_features; d++)
             {
 #pragma HLS PIPELINE II=1
-#pragma HLS ARRAY_PARTITION variable=B complete dim=2
+#pragma HLS ARRAY_PARTITION variable=B complete dim=3
 #pragma HLS ARRAY_PARTITION variable=mu complete dim=2
 
                 F_type feature;
@@ -97,8 +97,7 @@ predict_loop:
 
         for (d = 0; d < num_proteins; d++)
         {
-#pragma HLS UNROLL
-            predictions[c][d] = out_buf[d] / (S_type)num_samples;
+            predictions[c][d] = out_buf[d];
         }
     } // end compounds
 }
