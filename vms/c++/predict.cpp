@@ -42,7 +42,6 @@ void predict_compound_block_c(
     S_type tmp[num_latent];
 #pragma HLS ARRAY_PARTITION variable=tmp complete dim=1
 
-#pragma HLS ARRAY_PARTITION variable=in_buf complete dim=1
     S_type out_buf[num_proteins];
 #pragma HLS ARRAY_PARTITION variable=out_buf complete dim=1
 
@@ -65,7 +64,8 @@ predict_loop:
             for (d = 0; d < num_features; d++)
             {
 #pragma HLS PIPELINE II=1
-#pragma HLS ARRAY_PARTITION variable=B complete dim=3
+#pragma HLS ARRAY_PARTITION variable=B complete dim=2
+#pragma HLS ARRAY_PARTITION variable=mu complete dim=2
 
                 S_type feature;
                 feature = features[c][d];
