@@ -4,3 +4,10 @@ output
 *-state.ini
 *bin
 status.csv
+model
+sim_fixed
+sim_fixed.dSYM
+sim_float
+sim_float.dSYM
+sim_observed_float
+sim_observed_float.dSYM
