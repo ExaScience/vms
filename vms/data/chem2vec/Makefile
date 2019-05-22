@@ -7,16 +7,13 @@ INCLUDES=-I$(SRCDIR) -Imodel
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 
 LDFLAGS=
 
-# CXXFLAGS+=-DDT_OBSERVED_FLOAT -std=c++11
-# BINARY=sim_observed_float
+# Vivado Xilinx sc_fixed<>
+# SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+# Homebrew sc_fixed<>
+SYSTEMCROOT=/usr/local/opt/systemc
 
-CXXFLAGS+=-DDT_FLOAT
-BINARY=sim_float
-
-# CXXFLAGS+=-DDT_FIXED
-# CXXFLAGS+=-I$(XILINX_VIVADO)/lnx64/tools/systemc/include
-# LDFLAGS+=-L$(XILINX_VIVADO)/lnx64/tools/systemc/lib -lsystemc
-# BINARY=sim_fixed
+SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
+SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
 BINARIES=sim_float sim_observed_float sim_fixed
 ROOTFILE=model/root.ini
@@ -25,8 +22,8 @@ MODELFILES=model/smurff_const.h model/smurff_model.h model/smurff_tb.h
 
 .PHONY: run clean
 
-run: $(BINARY)
-	./$(BINARY)
+run: $(BINARIES)
+	./sim_float && ./sim_fixed
 
 $(INPUTDATA):
 	python make.py
@@ -38,16 +35,22 @@ $(ROOTFILE): $(INPUTDATA)
 $(MODELFILES): $(ROOTFILE)
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output model
 
-$(BINARY): $(MODELFILES) $(CXXFILES)
-	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
-	$(CXX) $(CXXFLAGS)  -MM $(CXXFILES) > Makefile.dep
+sim_float: $(MODELFILES) $(CXXFILES)
+	$(CXX) -DDT_FLOAT $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
+
+sim_observed_float: $(MODELFILES) $(CXXFILES)
+	$(CXX) -DDT_OBSERVED_FLOAT -std=c++11 $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
+
+sim_fixed: $(MODELFILES) $(CXXFILES)
+	$(CXX) -DDT_FIXED $(SC_CXXFLAGS) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) $(SC_LDFLAGS)
 
 clean:
 	rm -rf model
-	rm -f Makefile.dep
 	rm -f $(BINARIES)
 	rm -rf $(addsuffix .dSYM,$(BINARIES))
 
-
--include Makefile.dep
-
+$(BINARIES): \
+ 	model/smurff_const.h \
+	model/smurff_model.h \
+	model/smurff_tb.h \
+	../../c++/predict.h
