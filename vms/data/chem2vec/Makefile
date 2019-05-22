@@ -8,9 +8,11 @@ CXXFLAGS=$(INCLUDES) -pthread -g -O0
 LDFLAGS=
 
 # Vivado Xilinx sc_fixed<>
-# SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+CXX=/home/vanderaa/local/software/Xilinx/Vivado/2017.3/lnx64/tools/clang-3.9/bin/clang++
+
 # Homebrew sc_fixed<>
-SYSTEMCROOT=/usr/local/opt/systemc
+#SYSTEMCROOT=/usr/local/opt/systemc
 
 SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
 SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
@@ -25,14 +27,14 @@ MODELFILES=code/smurff_const.h code/smurff_tb.h
 run: $(BINARIES)
 	./sim_float && ./sim_fixed
 
-$(INPUTDATA):
+$(INPUTDATA): make.py
 	python make.py
 
 $(ROOTFILE): $(INPUTDATA)
 	mkdir -p model
 	smurff --ini options.ini --save-prefix model
 
-$(MODELFILES): $(ROOTFILE)
+$(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
