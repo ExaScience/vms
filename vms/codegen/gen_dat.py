@@ -48,9 +48,8 @@ def gen_array(M, typename, varname, indent = ""):
 
     return hdr + gen_body(0, M, indent) + ftr
 
-def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
+def gen_const(num_proteins, num_features, num_latent, num_samples):
     const_output = "#pragma once\n"
-    const_output += gen_int("num_compounds", num_compounds)
     const_output += gen_int("num_proteins",  num_proteins)
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
@@ -89,7 +88,8 @@ def gen_session(root, outputdir):
     U = np.transpose(U, axes = (0,2,1))
     B = np.transpose(B, axes = (0,2,1))
 
-    tb_output = gen_array(U, "float", "U", "  ") + "\n" \
+    tb_output = gen_int("num_compounds", num_compounds)
+    tb_output += gen_array(U, "float", "U", "  ") + "\n" \
         + gen_array(mu, "float", "mu", "  ") + "\n" \
         + gen_array(B, "float", "B", "  ") + "\n"
 
@@ -101,7 +101,7 @@ def gen_session(root, outputdir):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples))
+    const_output = gen_const(num_proteins, num_features, num_latent, len(samples))
     gen_file(outputdir, "const.h", const_output)
 
     codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")
