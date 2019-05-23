@@ -49,12 +49,7 @@ load_model_loop:
 predict_loop:
     for (int c = 0; c < num_compounds; c++)
     {
-        for (int s = 0; s < num_samples; s++)
-#pragma HLS UNROLL
-            for (int k = 0; k < num_latent; k++)
-#pragma HLS UNROLL
-                tmp[s][k] = mu[s][k];
-
+//#pragma HLS DATAFLOW
         for (int d = 0; d < num_features; d++)
         {
 #pragma HLS PIPELINE II = 1
@@ -66,7 +61,11 @@ predict_loop:
             feature = features[c][d];
             for (int s = 0; s < num_samples; s++)
                 for (int k = 0; k < num_latent; k++)
-                    tmp[s][k] = tmp[s][k] + feature * B[s][d][k];
+                {
+                	S_type v;
+                	if (d==0) v = mu[s][k]; else v = tmp[s][k];
+                    tmp[s][k] = v + feature * B[s][d][k];
+                }
         }
 
         for (int d = 0; d < num_proteins; d++)
