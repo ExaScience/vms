@@ -11,7 +11,7 @@ LDFLAGS=
 
 ifeq ($(XILINX_VIVADO),)
 #Homebrew sc_fixed<>
-#SYSTEMCROOT=/usr/local/opt/systemc
+SYSTEMCROOT=/usr/local/opt/systemc
 else
 # Vivado Xilinx sc_fixed<>
 SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
