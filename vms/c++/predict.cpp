@@ -57,6 +57,26 @@ void features_loop(
 	}
 }
 
+void proteins_loop(
+	    P_type predictions[num_compounds][num_proteins],
+		int c,
+		const S_type tmp[num_samples][num_latent])
+{
+
+	for (int d = 0; d < num_proteins; d++)
+	{
+#pragma HLS PIPELINE II = 1
+#pragma HLS ARRAY_PARTITION variable = U complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = U complete dim = 3
+		S_type sum = .0;
+		for (int s = 0; s < num_samples; s++)
+			for (int k = 0; k < num_latent; k++)
+				sum = sum + tmp[s][k] * U[s][d][k];
+
+		predictions[c][d] = sum;
+	} // end proteins
+}
+
 void predict_compound_block_c(
     const F_type features[num_compounds][num_features],
     P_type predictions[num_compounds][num_proteins],
@@ -83,24 +103,9 @@ void predict_compound_block_c(
 predict_loop:
     for (int c = 0; c < num_compounds; c++)
     {
-//#pragma HLS DATAFLOW
-
-
-    S_type tmp[num_samples][num_latent];
-
-    features_loop(features, c, tmp);
-
-        for (int d = 0; d < num_proteins; d++)
-        {
-#pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = U complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = U complete dim = 3
-            S_type sum = .0;
-            for (int s = 0; s < num_samples; s++)
-                for (int k = 0; k < num_latent; k++)
-                    sum = sum + tmp[s][k] * U[s][d][k];
-
-            predictions[c][d] = sum;
-        } // end proteins
-    }     // end compounds
-}
+    	//#pragma HLS DATAFLOW
+    	S_type tmp[num_samples][num_latent];
+    	features_loop(features, c, tmp);
+    	proteins_loop(predictions, c, tmp);
+    } // end compounds
+} // end function
