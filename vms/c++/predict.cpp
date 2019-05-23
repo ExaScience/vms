@@ -29,6 +29,34 @@ void load_model(
     }
 }
 
+void features_loop(
+	    const F_type features[num_compounds][num_features],
+		int c,
+		S_type tmp[num_samples][num_latent])
+{
+	for (int d = 0; d < num_features; d++)
+	{
+#pragma HLS PIPELINE II = 1
+#pragma HLS ARRAY_PARTITION variable = B complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = B complete dim = 1
+
+#pragma HLS ARRAY_PARTITION variable = mu complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = mu complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = tmp complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = tmp complete dim = 2
+
+		F_type feature;
+		feature = features[c][d];
+		for (int s = 0; s < num_samples; s++)
+			for (int k = 0; k < num_latent; k++)
+			{
+				S_type v;
+				if (d==0) v = mu[s][k]; else v = tmp[s][k];
+				tmp[s][k] = v + feature * B[s][d][k];
+			}
+	}
+}
+
 void predict_compound_block_c(
     const F_type features[num_compounds][num_features],
     P_type predictions[num_compounds][num_proteins],
@@ -60,27 +88,7 @@ predict_loop:
 
     S_type tmp[num_samples][num_latent];
 
-        for (int d = 0; d < num_features; d++)
-        {
-#pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = B complete dim = 3
-#pragma HLS ARRAY_PARTITION variable = B complete dim = 1
-
-#pragma HLS ARRAY_PARTITION variable = mu complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = mu complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = tmp complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = tmp complete dim = 2
-
-            F_type feature;
-            feature = features[c][d];
-            for (int s = 0; s < num_samples; s++)
-                for (int k = 0; k < num_latent; k++)
-                {
-                	S_type v;
-                	if (d==0) v = mu[s][k]; else v = tmp[s][k];
-                    tmp[s][k] = v + feature * B[s][d][k];
-                }
-        }
+    features_loop(features, c, tmp);
 
         for (int d = 0; d < num_proteins; d++)
         {
