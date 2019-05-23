@@ -44,7 +44,7 @@ int main()
     CONVERT2(mu);
     CONVERT3(B);
 
-    predict_compound_block_c(tb_input_fx, tb_output_fx, U_fx, mu_fx, B_fx);
+    predict_compound_block_c(tb_input_fx, tb_output_fx, num_compounds, U_fx, mu_fx, B_fx);
 
     int nerrors = 0;
     for(int c=0; c<num_compounds; c++)

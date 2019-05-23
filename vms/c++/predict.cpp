@@ -14,6 +14,11 @@ void load_model(
 	    const mu_type mu_in[num_samples][num_latent],
 	    const B_type B_in[num_samples][num_features][num_latent])
 {
+#define MEMCPY2(N) memcpy(&(N[0][0]), &(N##_in[0][0]), sizeof(N)/sizeof(N[0][0]))
+#define MEMCPY3(N) memcpy(&(N[0][0][0]), &(N##_in[0][0][0]), sizeof(N)/sizeof(N[0][0][0]))
+
+	//MEMCPY2(mu);
+
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
@@ -21,7 +26,7 @@ void load_model(
                 U[i][j][k] = U_in[i][j][k];
 
         for (int j = 0; j < num_latent; j++)
-            mu[i][j] = mu_in[i][j];
+           mu[i][j] = mu_in[i][j];
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
@@ -30,8 +35,7 @@ void load_model(
 }
 
 void features_loop(
-	    const F_type features[num_compounds][num_features],
-		int c,
+	    const F_type features[num_features],
 		S_type tmp[num_samples][num_latent])
 {
 	for (int d = 0; d < num_features; d++)
@@ -46,7 +50,7 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = tmp complete dim = 2
 
 		F_type feature;
-		feature = features[c][d];
+		feature = features[d];
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
@@ -58,8 +62,7 @@ void features_loop(
 }
 
 void proteins_loop(
-	    P_type predictions[num_compounds][num_proteins],
-		int c,
+	    P_type predictions[num_proteins],
 		const S_type tmp[num_samples][num_latent])
 {
 
@@ -73,16 +76,18 @@ void proteins_loop(
 			for (int k = 0; k < num_latent; k++)
 				sum = sum + tmp[s][k] * U[s][d][k];
 
-		predictions[c][d] = sum;
+		predictions[d] = sum;
 	} // end proteins
 }
 
 void predict_compound_block_c(
-    const F_type features[num_compounds][num_features],
-    P_type predictions[num_compounds][num_proteins],
-    const U_type U_in[num_samples][num_proteins][num_latent],
-    const mu_type mu_in[num_samples][num_latent],
-    const B_type B_in[num_samples][num_features][num_latent])
+		const F_type  features[][num_features],
+		P_type  predictions[][num_proteins],
+
+		int num_compounds,
+		const U_type U_in[num_samples][num_proteins][num_latent],
+		const mu_type mu_in[num_samples][num_latent],
+		const B_type B_in[num_samples][num_features][num_latent])
 {
     //#pragma HLS ARRAY_RESHAPE variable = predictions complete dim = 2
     //#pragma HLS ARRAY_RESHAPE variable = features complete dim = 2
@@ -94,18 +99,13 @@ void predict_compound_block_c(
 
 	load_model(U_in, mu_in, B_in);
 
-
-    //       ((nc x nf) * (nf * nl)) * (nl * np)
-    //       (nc        x        nl) * (nl * np)
-    //       (nc             x               np)
-    // predictions = ((features * f0.transpose()) + mu) * u1;
-
 predict_loop:
     for (int c = 0; c < num_compounds; c++)
     {
     	#pragma HLS DATAFLOW
     	S_type tmp[num_samples][num_latent];
-    	features_loop(features, c, tmp);
-    	proteins_loop(predictions, c, tmp);
+    	features_loop(features[c], tmp);
+    	proteins_loop(predictions[c], tmp);
     } // end compounds
+
 } // end function
