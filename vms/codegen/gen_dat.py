@@ -78,15 +78,12 @@ def gen_session(root, outputdir):
     #generate model
     samples = []
     P = []
-    max_samples = 10
     for sample in session.samples():
         U = sample.latents[1]
         mu = sample.mus[0]
         F = sample.betas[0]
         P.append(np.matmul(np.matmul(tb_in_matrix, F.transpose()) + mu, U))
         samples.append((U, mu, F))
-        if len(samples) > max_samples:
-            break
 
     U, mu, B = [ np.stack(s) for s in zip(*samples) ]
     U = np.transpose(U, axes = (0,2,1))
