@@ -1,7 +1,7 @@
 open_project -reset hls
 set_top predict_compound_block_c
-add_files code/predict.cpp
-add_files -tb code/main.cpp
+add_files code/predict.cpp -cflags "-DDT_FIXED"
+add_files -tb code/main.cpp -cflags "-DDT_FIXED"
 open_solution "solution1"
 set_part {xczu9eg-ffvb1156-1l-i} -tool vivado
 create_clock -period 5 -name default

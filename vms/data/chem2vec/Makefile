@@ -57,5 +57,6 @@ clean:
 	rm -rf $(addsuffix .dSYM,$(BINARIES))
 
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
-	cp $(HEADERFILES) $(CXXFILES) code/
+	ln -sf $(addprefix ../,$(HEADERFILES)) code/
+	ln -sf $(addprefix ../,$(CXXFILES)) code/
 	vivado_hls $(TOPDIR)/codegen/run.tcl
