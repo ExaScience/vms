@@ -94,7 +94,8 @@ void eigen_predict_block(MatrixX8 &ret,
     size_t nfeat = row_features.cols();
 
     // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
-    auto feat = row_features.block(block, 0, blocksize, nfeat);
+    auto bs = std::min(blocksize, ncomp - block);
+    auto feat = row_features.block(block, 0, bs, nfeat);
     Eigen::MatrixXf pred = Eigen::MatrixXf::Zero(feat.rows(), nprot);
 
     for (const auto &sample : model)
@@ -105,7 +106,7 @@ void eigen_predict_block(MatrixX8 &ret,
     }
 
     // final result is in 8bit unsigned
-    ret.block(block, 0, blocksize, nprot) =  (pred / (float)(model.size())).cast<std::uint8_t>();
+    ret.block(block, 0, bs, nprot) =  (pred / (float)(model.size())).cast<std::uint8_t>();
     
     //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
@@ -149,7 +150,7 @@ void af_predict_block(MatrixX8 &ret,
     //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
-MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices)
+MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen)
 {
     Eigen::MatrixXd features;
     read_matrix(ffile, features);
@@ -176,11 +177,14 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 #endif
 
     int ndev = devices.size();
-    omp_set_num_threads(ndev);
+    if (ndev > 0) omp_set_num_threads(ndev);
 #pragma omp parallel for 
     for(size_t block=0; block<ncomp; block+=blocksize)
     {
-        af_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
+        if (use_eigen)
+            eigen_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
+        else
+            af_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
     }
 
 #ifdef CUDA_PROFILE
@@ -202,7 +206,7 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 
 int main(int ac, char *av[])
 {
-    std::vector<int> devices = {0};
+    std::vector<int> devices;
     std::string backend;
 
     int repeat = 1;
@@ -212,6 +216,7 @@ int main(int ac, char *av[])
     std::string modeldir = "model/";
     std::string features = "features.ddm";
     std::string out;
+    bool use_eigen = false;
 
     // Declare the supported options.
     po::options_description desc("Options");
@@ -243,10 +248,21 @@ int main(int ac, char *av[])
     else if (backend == "cpu") af::setBackend(AF_BACKEND_CPU);
     else if (backend == "opencl") af::setBackend(AF_BACKEND_OPENCL);
     else if (backend == "cuda") af::setBackend(AF_BACKEND_CUDA);
+    else if (backend == "eigen") use_eigen = true;
     else THROWERROR("Unknown backend: " + backend);
 
-    af::info();
-    std::cout << "Using these devices:";
+    if (use_eigen) 
+    {
+        std::cout << "Using Eigen" << std::endl;
+    } 
+    else
+    {
+        if (devices.empty())  // use first GPU by default
+            devices = {0};
+        af::info();
+    }
+
+    std::cout << "Using these devices (cores/GPUs):";
     for(auto dev : devices) std:: cout << " " << dev;
     std::cout << std::endl;
 
@@ -255,7 +271,7 @@ int main(int ac, char *av[])
     MatrixX8 pred;
     for(int r=0; r<repeat; r++)
     {
-	    pred = predict(model, features, blocksize, devices);
+	    pred = predict(model, features, blocksize, devices, use_eigen);
     }
 
     if (!out.empty())

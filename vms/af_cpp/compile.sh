@@ -3,10 +3,15 @@ set -x
 if [ -n "$CONDA_PREFIX" ]
 then
 
-$CXX -fopenmp -O2 -g -std=c++11 af_predict.cpp io.cpp -o af_predict -I$CONDA_PREFIX/include/eigen3 -I$CONDA_PREFIX/include/ \
+$CXX -fopenmp -march=native -O3 -g -std=c++11 af_predict.cpp io.cpp -o af_predict \
+    -DEIGEN_DONT_PARALLELIZE \
+    -I$CONDA_PREFIX/include/eigen3 -I$CONDA_PREFIX/include/ \
     -Wl,-rpath,$CONDA_PREFIX/lib -L$CONDA_PREFIX/lib \
     -Wl,-rpath,$CONDA_PREFIX/lib64 -L$CONDA_PREFIX/lib64 \
-    -laf -lboost_program_options
+    -laf -lboost_program_options 
+
+#    -DEIGEN_USE_MKL_ALL \
+#    -lmkl_rt
 
 else
 
