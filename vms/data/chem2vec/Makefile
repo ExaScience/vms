@@ -9,12 +9,14 @@ INCLUDES=-I$(SRCDIR) -Icode
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 
 LDFLAGS=
 
+ifdef $(XILINX_VIVADO)
 # Vivado Xilinx sc_fixed<>
 SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
 CXX=/home/vanderaa/local/software/Xilinx/Vivado/2017.3/lnx64/tools/clang-3.9/bin/clang++
-
-# Homebrew sc_fixed<>
+else
+#Homebrew sc_fixed<>
 #SYSTEMCROOT=/usr/local/opt/systemc
+endif
 
 SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
 SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
