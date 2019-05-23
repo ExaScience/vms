@@ -103,7 +103,7 @@ void predict_compound_block_c(
 predict_loop:
     for (int c = 0; c < num_compounds; c++)
     {
-    	//#pragma HLS DATAFLOW
+    	#pragma HLS DATAFLOW
     	S_type tmp[num_samples][num_latent];
     	features_loop(features, c, tmp);
     	proteins_loop(predictions, c, tmp);
