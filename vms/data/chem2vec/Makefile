@@ -10,11 +10,11 @@ CXXFLAGS=$(INCLUDES) -pthread -g -O0
 LDFLAGS=
 
 # Vivado Xilinx sc_fixed<>
-#SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
-#CXX=/home/vanderaa/local/software/Xilinx/Vivado/2017.3/lnx64/tools/clang-3.9/bin/clang++
+SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+CXX=/home/vanderaa/local/software/Xilinx/Vivado/2017.3/lnx64/tools/clang-3.9/bin/clang++
 
 # Homebrew sc_fixed<>
-SYSTEMCROOT=/usr/local/opt/systemc
+#SYSTEMCROOT=/usr/local/opt/systemc
 
 SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
 SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
@@ -32,7 +32,7 @@ run: $(BINARIES)
 $(INPUTDATA): make.py
 	python make.py
 
-$(ROOTFILE): $(INPUTDATA)
+$(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model
 	smurff --ini options.ini --save-prefix model
 
