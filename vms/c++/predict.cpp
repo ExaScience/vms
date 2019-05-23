@@ -83,6 +83,7 @@ void proteins_loop(
 void predict_compound_block_c(
 		const F_type  features[num_compounds][num_features],
 		      P_type  predictions[num_compounds][num_proteins],
+		bool  update_model,
 		const U_type U_in[num_samples][num_proteins][num_latent],
 		const mu_type mu_in[num_samples][num_latent],
 		const B_type B_in[num_samples][num_features][num_latent])
@@ -95,7 +96,7 @@ void predict_compound_block_c(
     //#pragma HLS INTERFACE ap_fifo port = features
 
 
-	load_model(U_in, mu_in, B_in);
+	if (update_model) load_model(U_in, mu_in, B_in);
 
 predict_loop:
     for (int c = 0; c < num_compounds; c++)
