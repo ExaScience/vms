@@ -81,10 +81,8 @@ void proteins_loop(
 }
 
 void predict_compound_block_c(
-		const F_type  features[][num_features],
-		P_type  predictions[][num_proteins],
-
-		int num_compounds,
+		const F_type  features[num_compounds][num_features],
+		      P_type  predictions[num_compounds][num_proteins],
 		const U_type U_in[num_samples][num_proteins][num_latent],
 		const mu_type mu_in[num_samples][num_latent],
 		const B_type B_in[num_samples][num_features][num_latent])
