@@ -98,7 +98,7 @@ void proteins_loop(
 			for (int k = 0; k < num_latent; k++)
 				sum = sum + latents[s][k] * TO_FX16(U[s][d][k], U_iwl);
 
-		predictions[d] = sum / num_samples * (1 << P_shift);
+		predictions[d] = sum >> (log_num_samples - P_shift);
 	} // end proteins
 }
 
