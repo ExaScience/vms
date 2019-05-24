@@ -8,7 +8,7 @@
 #define SC_INCLUDE_FX
 #include <systemc.h>
 
-typedef sc_fixed<32, 10> S_type;
+
 typedef sc_fixed<32, 10> L_type;
 
 template<int wl, int iwl, typename T>
@@ -87,18 +87,19 @@ void proteins_loop(
 	    P_type predictions[num_proteins],
 		const L_type latents[num_samples][num_latent])
 {
+	typedef sc_fixed<32, 10 + 12> S_type;
 
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 3
-		S_type sum = .0;
+		S_type sum = 0;
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
-				sum = sum + latents[s][k] * TO_FX16(U[s][d][k], U_iwl);
+				sum = sum + latents[s][k] * U[s][d][k];
 
-		predictions[d] = sum >> (log_num_samples - P_shift);
+		predictions[d] = sum >> (log_num_samples - P_shift + U_shift);
 	} // end proteins
 }
 
