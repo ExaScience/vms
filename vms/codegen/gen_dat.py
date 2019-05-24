@@ -128,7 +128,6 @@ def gen_session(root, outputdir):
     U, U_shift = map_to_int(U, np.int16)
     B, B_shift = map_to_int(B, np.int16)
 
-
     tb_output = gen_int("num_compounds", num_compounds)
     tb_output += \
           gen_array(U, "std::int16_t", "U", "  ", format = "%d") + "\n" \
@@ -139,9 +138,10 @@ def gen_session(root, outputdir):
     Pavg = np.mean(np.stack(P), axis=0)
 
     tb_in_matrix, F_shift = map_to_int(tb_in_matrix, np.int16)
+    Pavg, P_shift = map_to_int(Pavg, np.int8)
 
-    tb_output += gen_array(tb_in_matrix, "std::int16_t", "tb_input") + "\n"
-    tb_output += gen_array(Pavg, "float", "tb_ref") + "\n"
+    tb_output += gen_array(tb_in_matrix, "std::int16_t", "tb_input", format = "%d") + "\n"
+    tb_output += gen_array(Pavg, "std::int8_t", "tb_ref", format = "%d") + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
     assert tb_num_features == num_features
@@ -160,9 +160,14 @@ def gen_session(root, outputdir):
     const_output += gen_int("B_wl", 16)
     const_output += "const int B_iwl = B_wl - B_shift;\n"
 
+    const_output += "\n"
     const_output += gen_int("F_shift", F_shift)
     const_output += gen_int("F_wl", 16)
     const_output += "const int F_iwl = F_wl - F_shift;\n"
+
+    const_output += gen_int("P_shift", P_shift)
+    const_output += gen_int("P_wl", 8)
+    const_output += "const int P_iwl = P_wl - P_shift;\n"
 
     gen_file(outputdir, "const.h", const_output)
 
