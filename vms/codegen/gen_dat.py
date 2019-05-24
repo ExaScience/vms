@@ -45,7 +45,7 @@ def gen_body(i, M, indent, format):
 def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
     hdr = indent + "const " + typename + " " + varname + "[%s]" * len(M.shape) + " = \n"
     hdr = hdr % M.shape
-    ftr = ";"
+    ftr = ";\n"
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
@@ -125,10 +125,12 @@ def gen_session(root, outputdir):
     B = np.transpose(B, axes = (0,2,1))
 
     mu, mu_shift = map_to_int(mu, np.int8)
+    U, U_shift = map_to_int(U, np.int16)
 
 
     tb_output = gen_int("num_compounds", num_compounds)
-    tb_output += gen_array(U, "float", "U", "  ") + "\n" \
+    tb_output += \
+          gen_array(U, "std::int16_t", "U", "  ", format = "%d") + "\n" \
         + gen_array(mu, "std::int8_t", "mu", indent = "  ",  format = "%d") + "\n" \
         + gen_array(B, "float", "B", "  ") + "\n"
 
@@ -142,6 +144,7 @@ def gen_session(root, outputdir):
 
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples))
     const_output += gen_int("mu_shift", mu_shift)
+    const_output += gen_int("U_shift", U_shift)
     gen_file(outputdir, "const.h", const_output)
 
     codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")

@@ -74,7 +74,7 @@ void proteins_loop(
 		S_type sum = .0;
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
-				sum = sum + latents[s][k] * U[s][d][k];
+				sum = sum + latents[s][k] * ((S_type)U[s][d][k] / (S_type)(1<<U_shift));
 
 		predictions[d] = sum;
 	} // end proteins

@@ -6,7 +6,7 @@
 
 #define DT_NAME "float"
 
-typedef float U_type;
+typedef std::int16_t U_type;
 typedef std::int8_t  mu_type;
 typedef float F_type;
 typedef float P_type;
