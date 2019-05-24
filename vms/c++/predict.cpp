@@ -36,7 +36,7 @@ void load_model(
 
 void features_loop(
 	    const F_type features[num_features],
-		S_type latents[num_samples][num_latent])
+		L_type latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_features; d++)
 	{
@@ -53,20 +53,20 @@ void features_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type v;
+				L_type v;
 				if (d==0)
-					v = (S_type)mu[s][k] / (S_type)(1<<mu_shift);
+					v = (L_type)mu[s][k] / (L_type)(1<<mu_shift);
 				else
 					v = latents[s][k];
 
-				latents[s][k] = v + feature * (S_type)B[s][d][k] / (S_type)(1<<B_shift);
+				latents[s][k] = v + feature * (L_type)B[s][d][k] / (L_type)(1<<B_shift);
 			}
 	}
 }
 
 void proteins_loop(
 	    P_type predictions[num_proteins],
-		const S_type latents[num_samples][num_latent])
+		const L_type latents[num_samples][num_latent])
 {
 
 	for (int d = 0; d < num_proteins; d++)
@@ -90,7 +90,7 @@ void predict(
 )
 {
 #pragma HLS DATAFLOW
-		S_type latents[num_samples][num_latent];
+		L_type latents[num_samples][num_latent];
 		features_loop(features, latents);
 		proteins_loop(predictions, latents);
 }

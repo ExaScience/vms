@@ -143,7 +143,7 @@ def gen_session(root, outputdir):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(num_proteins, num_features, num_latent, len(samples))
+    const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     const_output += gen_int("mu_shift", mu_shift)
     const_output += gen_int("U_shift", U_shift)
