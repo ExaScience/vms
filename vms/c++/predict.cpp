@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 
 #include "smurff_const.h"
 #include "predict.h"
@@ -8,7 +9,7 @@
 #include <systemc.h>
 
 typedef sc_fixed<32,10>  S_type;
-typedef float L_type;
+typedef sc_fixed<32, 10> L_type;
 
 template<int wl, int iwl, typename T>
 sc_fixed<wl, iwl> to_fx(const T v) 
@@ -31,24 +32,9 @@ void load_model(
 	    const mu_type mu_in[num_samples][num_latent],
 	    const B_type B_in[num_samples][num_features][num_latent])
 {
-#define MEMCPY2(N) memcpy(&(N[0][0]), &(N##_in[0][0]), sizeof(N)/sizeof(N[0][0]))
-#define MEMCPY3(N) memcpy(&(N[0][0][0]), &(N##_in[0][0][0]), sizeof(N)/sizeof(N[0][0][0]))
-
-	//MEMCPY2(mu);
-
-    for (int i = 0; i < num_samples; i++)
-    {
-        for (int j = 0; j < num_proteins; j++)
-            for (int k = 0; k < num_latent; k++)
-                U[i][j][k] = U_in[i][j][k];
-
-        for (int j = 0; j < num_latent; j++)
-           mu[i][j] = mu_in[i][j];
-
-        for (int j = 0; j < num_features; j++)
-            for (int k = 0; k < num_latent; k++)
-                B[i][j][k] = B_in[i][j][k];
-    }
+	std::memcpy(mu, mu_in, sizeof(mu));
+	std::memcpy(U, U_in, sizeof(U));
+	std::memcpy(B, B_in, sizeof(B));
 }
 
 void features_loop(
