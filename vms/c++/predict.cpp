@@ -8,7 +8,7 @@
 #define SC_INCLUDE_FX
 #include <systemc.h>
 
-typedef sc_fixed<32,10>  S_type;
+typedef sc_fixed<32, 10> S_type;
 typedef sc_fixed<32, 10> L_type;
 
 template<int wl, int iwl, typename T>
@@ -32,9 +32,25 @@ void load_model(
 	    const mu_type mu_in[num_samples][num_latent],
 	    const B_type B_in[num_samples][num_features][num_latent])
 {
+#ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
 	std::memcpy(U, U_in, sizeof(U));
 	std::memcpy(B, B_in, sizeof(B));
+#else
+    for (int i = 0; i < num_samples; i++)
+    {
+        for (int j = 0; j < num_proteins; j++)
+            for (int k = 0; k < num_latent; k++)
+                U[i][j][k] = U_in[i][j][k];
+
+        for (int j = 0; j < num_latent; j++)
+           mu[i][j] = mu_in[i][j];
+
+        for (int j = 0; j < num_features; j++)
+            for (int k = 0; k < num_latent; k++)
+                B[i][j][k] = B_in[i][j][k];
+    }
+#endif
 }
 
 void features_loop(
