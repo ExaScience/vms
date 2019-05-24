@@ -12,6 +12,7 @@ import io
 import argparse
 
 
+
 def gen_file(dir, suffix, content):
     with open(pth.join(dir, "smurff_" + suffix), "w") as os:
         os.write(content)
@@ -26,27 +27,27 @@ def gen_int(name, value, indent = ""):
     return indent + "const int %s = %d;\n" % (name, value)
 
 
-def gen_body(i, M, indent):
+def gen_body(i, M, indent, format):
     output = indent + "{\n"
     if i > 0:
         output = ",\n" + output 
 
     if (len(M.shape) <= 1):
         f = io.StringIO() 
-        np.savetxt(f, M, fmt = "%+.8f", newline=", ")
+        np.savetxt(f, M, fmt = format, newline=", ")
         output += indent + "  " + f.getvalue()
     else:
         for i, subM in enumerate(np.split(M, M.shape[0])):
-            output += gen_body(i, np.squeeze(subM), indent + "  ") 
+            output += gen_body(i, np.squeeze(subM), indent + "  ", format) 
             
     return output + "\n" + indent + "}"
 
-def gen_array(M, typename, varname, indent = ""):
+def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
     hdr = indent + "const " + typename + " " + varname + "[%s]" * len(M.shape) + " = \n"
     hdr = hdr % M.shape
     ftr = ";"
 
-    return hdr + gen_body(0, M, indent) + ftr
+    return hdr + gen_body(0, M, indent, format) + ftr
 
 def gen_const(num_proteins, num_features, num_latent, num_samples):
     const_output = "#pragma once\n"
@@ -55,6 +56,41 @@ def gen_const(num_proteins, num_features, num_latent, num_samples):
     const_output += gen_int("num_latent",    num_latent)
     const_output += gen_int("num_samples",   num_samples)
     return const_output
+
+def map_to_int(M, dt):
+    dtinfo = np.iinfo(dt)
+
+    min = np.min(M)
+    max = np.max(M)
+    avg = np.mean(M)
+    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
+    print(M.flatten()[:10])
+    assert max > 0
+
+    shift = 0
+    while (2*max < dtinfo.max and 2*min > dtinfo.min):
+        max *= 2
+        min *= 2
+        shift += 1
+    
+    M = M * (2**shift)
+
+    min = np.min(M)
+    max = np.max(M)
+    avg = np.mean(M)
+    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
+    print(M.flatten()[:10])
+
+    M = M.round().astype(dt)
+
+    min = np.min(M)
+    max = np.max(M)
+    avg = np.mean(M)
+    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
+    print(M.flatten()[:10])
+    
+    return M, shift
+
 
 def gen_session(root, outputdir):
     # read model
@@ -88,9 +124,12 @@ def gen_session(root, outputdir):
     U = np.transpose(U, axes = (0,2,1))
     B = np.transpose(B, axes = (0,2,1))
 
+    mu, mu_shift = map_to_int(mu, np.int8)
+
+
     tb_output = gen_int("num_compounds", num_compounds)
     tb_output += gen_array(U, "float", "U", "  ") + "\n" \
-        + gen_array(mu, "float", "mu", "  ") + "\n" \
+        + gen_array(mu, "std::int8_t", "mu", indent = "  ",  format = "%d") + "\n" \
         + gen_array(B, "float", "B", "  ") + "\n"
 
     #generate testbench
@@ -102,6 +141,7 @@ def gen_session(root, outputdir):
     assert tb_num_features == num_features
 
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples))
+    const_output += gen_int("mu_shift", mu_shift)
     gen_file(outputdir, "const.h", const_output)
 
     codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")

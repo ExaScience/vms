@@ -55,7 +55,7 @@ void features_loop(
 			for (int k = 0; k < num_latent; k++)
 			{
 				S_type v;
-				if (d==0) v = mu[s][k]; else v = latents[s][k];
+				if (d==0) v = (S_type)mu[s][k] / (S_type)(1<<mu_shift); else v = latents[s][k];
 				latents[s][k] = v + feature * B[s][d][k];
 			}
 	}
