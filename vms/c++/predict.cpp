@@ -92,13 +92,9 @@ void proteins_loop(
 		S_type sum = .0;
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
-				sum = sum + latents[s][k] * ((S_type)U[s][d][k] / (S_type)(1<<U_shift));
+				sum = sum + latents[s][k] * TO_FX16(U[s][d][k], U_iwl);
 
-		predictions[d] = round(sum / num_samples * (1 << P_shift));
-		printf ("sum = %.4f\n", sum);
-		printf ("sum / num_samples = %.4f\n", sum / num_samples);
-		printf ("Pshift = %d\n", P_shift);
-		printf ("predictions[%d] = %d\n", d, predictions[d]);
+		predictions[d] = sum / num_samples * (1 << P_shift);
 	} // end proteins
 }
 

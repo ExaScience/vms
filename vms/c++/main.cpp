@@ -30,8 +30,8 @@ int check_result(const F out[num_compounds][num_proteins],
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
         {
-            float o = (float)out[c][p];
-            float r = (float)ref[c][p];
+            float o = (float)out[c][p] / (1<<P_shift);
+            float r = (float)ref[c][p] / (1<<P_shift);
             // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output_fx[c][p], tb_ref[c][p]);
             if (std::abs(o - r) > epsilon)
             {
