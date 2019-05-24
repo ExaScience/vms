@@ -149,10 +149,20 @@ def gen_session(root, outputdir):
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     const_output += gen_int("mu_shift", mu_shift)
+    const_output += gen_int("mu_wl", 8)
+    const_output += "const int mu_iwl = mu_wl - mu_shift;\n"
+
     const_output += gen_int("U_shift", U_shift)
+    const_output += gen_int("U_wl", 16)
+    const_output += "const int U_iwl = U_wl - U_shift;\n"
+
     const_output += gen_int("B_shift", B_shift)
+    const_output += gen_int("B_wl", 16)
+    const_output += "const int B_iwl = B_wl - B_shift;\n"
 
     const_output += gen_int("F_shift", F_shift)
+    const_output += gen_int("F_wl", 16)
+    const_output += "const int F_iwl = F_wl - F_shift;\n"
 
     gen_file(outputdir, "const.h", const_output)
 
