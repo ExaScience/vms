@@ -46,7 +46,6 @@ int check_result(const F out[num_compounds][num_proteins],
 
 int main()
 {
-    printf("using datatype: %s\n", DT_NAME);
     printf("  nprot: %d\n", num_proteins);
     printf("  ncmpd: %d\n", num_compounds);
     printf("  nfeat: %d\n", num_features);
