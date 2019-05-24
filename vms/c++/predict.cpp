@@ -49,14 +49,17 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
-		F_type feature;
-		feature = features[d];
+		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
 				S_type v;
-				if (d==0) v = (S_type)mu[s][k] / (S_type)(1<<mu_shift); else v = latents[s][k];
-				latents[s][k] = v + feature * B[s][d][k];
+				if (d==0)
+					v = (S_type)mu[s][k] / (S_type)(1<<mu_shift);
+				else
+					v = latents[s][k];
+
+				latents[s][k] = v + feature * (S_type)B[s][d][k] / (S_type)(1<<B_shift);
 			}
 	}
 }

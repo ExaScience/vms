@@ -126,13 +126,14 @@ def gen_session(root, outputdir):
 
     mu, mu_shift = map_to_int(mu, np.int8)
     U, U_shift = map_to_int(U, np.int16)
+    B, B_shift = map_to_int(B, np.int16)
 
 
     tb_output = gen_int("num_compounds", num_compounds)
     tb_output += \
           gen_array(U, "std::int16_t", "U", "  ", format = "%d") + "\n" \
         + gen_array(mu, "std::int8_t", "mu", indent = "  ",  format = "%d") + "\n" \
-        + gen_array(B, "float", "B", "  ") + "\n"
+        + gen_array(B, "std::int16_t", "B", "  ", format = "%d") + "\n"
 
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
@@ -143,8 +144,11 @@ def gen_session(root, outputdir):
     assert tb_num_features == num_features
 
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples))
+
     const_output += gen_int("mu_shift", mu_shift)
     const_output += gen_int("U_shift", U_shift)
+    const_output += gen_int("B_shift", B_shift)
+
     gen_file(outputdir, "const.h", const_output)
 
     codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")
