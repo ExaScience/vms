@@ -137,7 +137,10 @@ def gen_session(root, outputdir):
 
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
-    tb_output += gen_array(tb_in_matrix, "float", "tb_input") + "\n"
+
+    tb_in_matrix, F_shift = map_to_int(tb_in_matrix, np.int16)
+
+    tb_output += gen_array(tb_in_matrix, "std::int16_t", "tb_input") + "\n"
     tb_output += gen_array(Pavg, "float", "tb_ref") + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
@@ -148,6 +151,8 @@ def gen_session(root, outputdir):
     const_output += gen_int("mu_shift", mu_shift)
     const_output += gen_int("U_shift", U_shift)
     const_output += gen_int("B_shift", B_shift)
+
+    const_output += gen_int("F_shift", F_shift)
 
     gen_file(outputdir, "const.h", const_output)
 
