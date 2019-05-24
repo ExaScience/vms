@@ -7,6 +7,8 @@
 #define SC_INCLUDE_FX
 #include <systemc.h>
 
+typedef sc_fixed<32,10>  S_type;
+typedef float L_type;
 
 template<int wl, int iwl, typename T>
 sc_fixed<wl, iwl> to_fx(const T v) 
