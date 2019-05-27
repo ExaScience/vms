@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cstdio>
 
+
+
 template<typename T>
 struct fxp
 {
@@ -35,7 +37,6 @@ struct fxp
         : iwl(i)
     {
         mul_type temp_val = v.val >> (v.shift() - shift());
-        printf("temp_val = %lld\n", temp_val);
         assert(abs(temp_val) < (1L<<(wl-1)));
         val = temp_val;
     }
@@ -52,6 +53,12 @@ struct fxp
         return ret;
     }
 
+    fxp<T> operator+(const fxp<T> other) const
+    {
+        assert(iwl == other.iwl);
+        return fxp<T>(iwl, (T)(val + other.val));
+    }
+
     void print(const char *name) const
     {
         printf("%s\n val = %.2f\n", name, to_float());
@@ -61,3 +68,9 @@ struct fxp
 };
 
 #define SHOW(F) F.print(#F)
+
+template<typename T>
+fxp<T> make_fxp(int iwl, const T &val)
+{
+    return fxp<T>(iwl, val);
+}

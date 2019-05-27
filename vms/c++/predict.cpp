@@ -5,37 +5,9 @@
 #include "predict.h"
 #include "types.h"
 
-#define SC_INCLUDE_FX
-#include <systemc.h>
+#include "fxp.h"
 
-
-template<int _iwl, typename T>
-struct fxp
-{
-	static const int iwl = _iwl;
-	static const int wl = sizeof(T);
-
-	T _val;
-
-	float to_float() const {
-		return ((float)_val) / (1<<(wl - iwl));
-	}
-}
-
-template<int wl, int iwl, typename T>
-sc_fixed<wl, iwl> to_fx(const T v) 
-{
-    sc_fixed<wl, wl> f_sc_int = v;
-    sc_fixed<wl, iwl> f_sc = f_sc_int >> (wl - iwl);
-	return f_sc;
-}
-
-typedef sc_fixed<32, 10 + B_shift + F_shift> L_type;
-
-
-#define TO_FX8(V, IWL) to_fx<8, IWL, std::int8_t>(V)
-#define TO_FX16(V, IWL) to_fx<16, IWL, std::int16_t>(V)
-#define TO_FX32(V, IWl) to_fx<32, IWL, std::int32_t>(V)
+typedef fxp<int> L_type;
 
 static U_type U[num_samples][num_proteins][num_latent];
 static mu_type mu[num_samples][num_latent];
@@ -83,17 +55,17 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
-		const F_type feature = features[d];
+		const fxp<short> feature = fxp<short>(F_iwl, features[d]);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type v;
 				if (d==0)
-					v = TO_FX8(mu[s][k], mu_iwl);
+					v = L_type(mu_iwl, mu[s][k]);
 				else
 					v = latents[s][k];
 
-				latents[s][k] = v + feature * B[s][d][k];
+				latents[s][k] = v + feature * fxp<short>(B_iwl, B[s][d][k]);
 			}
 	}
 }
