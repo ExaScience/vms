@@ -9,7 +9,18 @@
 #include <systemc.h>
 
 
-typedef sc_fixed<32, 10> L_type;
+template<int _iwl, typename T>
+struct fxp
+{
+	static const int iwl = _iwl;
+	static const int wl = sizeof(T);
+
+	T _val;
+
+	float to_float() const {
+		return ((float)_val) / (1<<(wl - iwl));
+	}
+}
 
 template<int wl, int iwl, typename T>
 sc_fixed<wl, iwl> to_fx(const T v) 
@@ -18,6 +29,9 @@ sc_fixed<wl, iwl> to_fx(const T v)
     sc_fixed<wl, iwl> f_sc = f_sc_int >> (wl - iwl);
 	return f_sc;
 }
+
+typedef sc_fixed<32, 10 + B_shift + F_shift> L_type;
+
 
 #define TO_FX8(V, IWL) to_fx<8, IWL, std::int8_t>(V)
 #define TO_FX16(V, IWL) to_fx<16, IWL, std::int16_t>(V)
@@ -57,6 +71,7 @@ void features_loop(
 	    const F_type features[num_features],
 		L_type latents[num_samples][num_latent])
 {
+
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -68,7 +83,7 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
-		const sc_fixed<F_wl, F_iwl> feature = TO_FX16(features[d], F_iwl);
+		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
@@ -78,7 +93,7 @@ void features_loop(
 				else
 					v = latents[s][k];
 
-				latents[s][k] = v + feature * TO_FX16(B[s][d][k], B_iwl);
+				latents[s][k] = v + feature * B[s][d][k];
 			}
 	}
 }
