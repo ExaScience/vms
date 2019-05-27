@@ -1,4 +1,5 @@
 
+#include <utility>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -10,8 +11,8 @@ struct fxp
 {
 	static const int wl = sizeof(T) * 8;
 
-	T val;
     int iwl;
+	T val;
 
     int shift() const { return wl - iwl; }
 
@@ -19,7 +20,11 @@ struct fxp
 		return ((float)val) / (float)(1L<<shift());
 	}
 
-    fxp(int i, float v = .0)
+    fxp() : iwl(0xdead), val(0xdead) {}
+
+    fxp(int i) : iwl(i), val(0xdead) {}
+
+    fxp(int i, float v)
         : iwl(i)
     {
         val = v*(1L<<shift()); 
@@ -27,11 +32,12 @@ struct fxp
     }
 
     fxp(int i, T v)
-        : val(v), iwl(i)
+        : iwl(i), val(v)
     {
         assert(fabs(v) < (1L<<(wl-1)));
     }
 
+/*
     template<typename otherT>
     fxp(int i, fxp<otherT> v)
         : iwl(i)
@@ -41,16 +47,30 @@ struct fxp
         val = temp_val;
     }
 
-    typedef int mul_type;
-
-    fxp<mul_type> operator*(const fxp<T> other) const
+*/
+    template<typename otherT>
+    fxp(fxp<otherT> v)
     {
-        fxp<mul_type> ret(iwl + other.iwl);
+        iwl = v.iwl + wl - v.wl;
+        int temp_val = v.val >> (v.shift() - shift());
+        assert(abs(temp_val) < (1L<<(wl-1)));
+        val = temp_val;
+    }
 
-        int s = shift() + other.shift() - ret.shift();
-        if (s > 0) ret.val = (mul_type)(val * other.val) >> s;
-        else     ret.val = (mul_type)(val * other.val) << -s;
-        return ret;
+    typedef std::pair<fxp<T>, fxp<T> > mul_expr;
+
+
+    mul_expr operator*(const fxp<T> &other) const
+    {
+        return std::make_pair(*this, other);
+    }
+
+    fxp(int i, const mul_expr &mul)
+        : iwl(i)
+    {
+        int s = mul.first.shift() + mul.second.shift() - i;
+        if (s > 0) val = (mul.first.val * mul.second.val) >> s;
+        else       val = (mul.first.val * mul.second.val) << -s;
     }
 
     fxp<T> operator+(const fxp<T> other) const

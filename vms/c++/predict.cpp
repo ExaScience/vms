@@ -55,17 +55,19 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
-		const fxp<short> feature = fxp<short>(F_iwl, features[d]);
+		const fxp<int> feature = make_fxp(F_iwl, features[d]);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				L_type v;
-				if (d==0)
-					v = L_type(mu_iwl, mu[s][k]);
-				else
-					v = latents[s][k];
-
-				latents[s][k] = v + feature * fxp<short>(B_iwl, B[s][d][k]);
+				L_type  v;
+				if (d==0) v = make_fxp(mu_iwl, mu[s][k]);
+				else      v = latents[s][k];
+				SHOW(v);
+				SHOW(latents[s][k]);
+				SHOW(feature);
+				L_type prod(25, feature * make_fxp(B_iwl, B[s][d][k]));
+				SHOW(prod);
+				latents[s][k] = v + prod;
 			}
 	}
 }
@@ -74,19 +76,22 @@ void proteins_loop(
 	    P_type predictions[num_proteins],
 		const L_type latents[num_samples][num_latent])
 {
-	typedef sc_fixed<32, 10 + 12> S_type;
+	typedef fxp<int> S_type;
 
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 3
-		S_type sum = 0;
+		S_type sum = make_fxp(14, 0);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
-				sum = sum + latents[s][k] * U[s][d][k];
+			{
+				S_type prod(16, latents[s][k] * fxp<int>(make_fxp(U_iwl, U[s][d][k])));
+				sum = sum + prod;
+			}
 
-		predictions[d] = sum >> (log_num_samples - P_shift + U_shift);
+		predictions[d] = sum.val; // >> (log_num_samples - P_shift + U_shift);
 	} // end proteins
 }
 
