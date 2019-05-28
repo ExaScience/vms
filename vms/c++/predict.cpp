@@ -63,11 +63,16 @@ void features_loop(
 				if (d==0) v = make_fxp(mu_iwl, mu[s][k]);
 				else      v = latents[s][k];
 				SHOW(v);
-				SHOW(latents[s][k]);
 				SHOW(feature);
-				L_type prod(25, feature * make_fxp(B_iwl, B[s][d][k]));
+				fxp<short> b = make_fxp(B_iwl, B[s][d][k]);
+				SHOW(b);
+				L_type prod(25, feature * b);
 				SHOW(prod);
 				latents[s][k] = v + prod;
+				SHOW(latents[s][k]);
+				printf("\n\n");
+				printf("latens[%d][%d] = %.4f = %.4f + %.4f * %.4f\n",
+					s, k, latents[s][k].to_float(), v.to_float(), feature.to_float(), b.to_float());
 			}
 	}
 }
@@ -87,11 +92,13 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod(16, latents[s][k] * fxp<int>(make_fxp(U_iwl, U[s][d][k])));
+				S_type prod(14, latents[s][k] * fxp<int>(make_fxp(U_iwl, U[s][d][k])));
 				sum = sum + prod;
 			}
 
+		SHOW(sum);
 		predictions[d] = sum.val; // >> (log_num_samples - P_shift + U_shift);
+		//SHOW(predictions[d]);
 	} // end proteins
 }
 

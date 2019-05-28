@@ -3,82 +3,89 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <iostream>
 
+template<typename T, int IWL>
+struct fxp;
 
+template<typename T1, int IWL1, typename T2, int IWL2>
+struct mul_expr
+{
+    fxp<T1, IWL1> a;
+    fxp<T2, IWL2> b;
+};
 
-template<typename T>
+template<typename T1, int IWL1, typename T2, int IWL2>
+mul_expr<T1, IWL1, T2, IWL2> operator*(const fxp<T1, IWL1> &a, const fxp<T2, IWL2> &b)
+{
+    return mul_expr<T1, IWL1, T2, IWL2>{a,b};
+}
+
+template<typename T1, int IWL1, typename T2, int IWL2>
+struct add_expr
+{
+    fxp<T1, IWL1> a;
+    fxp<T2, IWL2> b;
+};
+
+template<typename T1, int IWL1, typename T2, int IWL2>
+add_expr<T1, IWL1, T2, IWL2> operator+(const fxp<T1, IWL1> &a, const fxp<T2, IWL2> &b)
+{
+    return add_expr<T1, IWL1, T2, IWL2>{a,b};
+}
+
+template<typename T, int IWL>
 struct fxp
 {
 	static const int wl = sizeof(T) * 8;
-
-    int iwl;
+    static const int iwl = IWL;
+    static const int shift = wl - iwl;
 	T val;
 
-    int shift() const { return wl - iwl; }
-
 	float to_float() const {
-		return ((float)val) / (float)(1L<<shift());
+		return ((float)val) / (float)(1L<<shift);
 	}
 
-    fxp() : iwl(0xdead), val(0xdead) {}
+    fxp() : val(0xdead) {}
 
-    fxp(int i) : iwl(i), val(0xdead) {}
-
-    fxp(int i, float v)
-        : iwl(i)
+    void check() const
     {
-        val = v*(1L<<shift()); 
-        assert(fabs(v) < (1L<<(iwl-1)));
+        if(fabs(val >> shift) > (1L<<(iwl-1)))
+        {
+            std::cerr << to_float() << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
+            abort();
+        }
     }
 
-    fxp(int i, T v)
-        : iwl(i), val(v)
+    fxp(float v) : val(v*(1L<<shift)) { check(); } 
+
+    fxp(T v) : val(v) { check(); } 
+
+    template<typename otherT, int otherIWL>
+    fxp(fxp<otherT, otherIWL> v)
     {
-        assert(fabs(v) < (1L<<(wl-1)));
+        val = v.val >> (v.shift - shift);
+        check();
     }
 
-/*
-    template<typename otherT>
-    fxp(int i, fxp<otherT> v)
-        : iwl(i)
+    template<typename T1, int IWL1, typename T2, int IWL2>
+    fxp(const mul_expr<T1, IWL1, T2, IWL2> &mul)
     {
-        mul_type temp_val = v.val >> (v.shift() - shift());
-        assert(abs(temp_val) < (1L<<(wl-1)));
-        val = temp_val;
+        int s = mul.a.shift + mul.b.shift - shift;
+
+        if (s > 0)
+            val = (mul.a.val * mul.b.val) >> s;
+        else
+            val = (mul.a.val * mul.b.val) << -s;
     }
 
-*/
-    template<typename otherT>
-    fxp(fxp<otherT> v)
+    template<typename T1, int IWL1, typename T2, int IWL2>
+    fxp(const add_expr<T1, IWL1, T2, IWL2> &add)
     {
-        iwl = v.iwl + wl - v.wl;
-        int temp_val = v.val >> (v.shift() - shift());
-        assert(abs(temp_val) < (1L<<(wl-1)));
-        val = temp_val;
+        fxp<T, IWL> a =  add.a; // convert to target type
+        fxp<T, IWL> b =  add.b; // idem
+        val = a.val + b.val;
     }
-
-    typedef std::pair<fxp<T>, fxp<T> > mul_expr;
-
-
-    mul_expr operator*(const fxp<T> &other) const
-    {
-        return std::make_pair(*this, other);
-    }
-
-    fxp(int i, const mul_expr &mul)
-        : iwl(i)
-    {
-        int s = mul.first.shift() + mul.second.shift() - i;
-        if (s > 0) val = (mul.first.val * mul.second.val) >> s;
-        else       val = (mul.first.val * mul.second.val) << -s;
-    }
-
-    fxp<T> operator+(const fxp<T> other) const
-    {
-        assert(iwl == other.iwl);
-        return fxp<T>(iwl, (T)(val + other.val));
-    }
-
     void print(const char *name) const
     {
         printf("%s\n val = %.2f\n", name, to_float());
@@ -88,9 +95,3 @@ struct fxp
 };
 
 #define SHOW(F) F.print(#F)
-
-template<typename T>
-fxp<T> make_fxp(int iwl, const T &val)
-{
-    return fxp<T>(iwl, val);
-}
