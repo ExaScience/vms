@@ -1,3 +1,4 @@
+#pragma once
 
 #include <utility>
 #include <cassert>
@@ -18,7 +19,8 @@ struct mul_expr
 template<typename T1, int IWL1, typename T2, int IWL2>
 mul_expr<T1, IWL1, T2, IWL2> operator*(const fxp<T1, IWL1> &a, const fxp<T2, IWL2> &b)
 {
-    return mul_expr<T1, IWL1, T2, IWL2>{a,b};
+    mul_expr<T1, IWL1, T2, IWL2> r = {a,b};
+    return r;
 }
 
 template<typename T1, int IWL1, typename T2, int IWL2>
@@ -31,7 +33,8 @@ struct add_expr
 template<typename T1, int IWL1, typename T2, int IWL2>
 add_expr<T1, IWL1, T2, IWL2> operator+(const fxp<T1, IWL1> &a, const fxp<T2, IWL2> &b)
 {
-    return add_expr<T1, IWL1, T2, IWL2>{a,b};
+    add_expr<T1, IWL1, T2, IWL2> r = {a,b};
+    return r;
 }
 
 template<typename T, int IWL>
@@ -40,13 +43,14 @@ struct fxp
 	static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
+
+    typedef T base_type;
+
 	T val;
 
 	float to_float() const {
 		return ((float)val) / (float)(1L<<shift);
 	}
-
-    fxp() : val(0xdead) {}
 
     void check() const
     {
@@ -58,13 +62,15 @@ struct fxp
     }
 
     fxp(float v) : val(v*(1L<<shift)) { check(); } 
-
-    fxp(T v) : val(v) { check(); } 
+    fxp(T v = (T)0xdead) : val(v) { check(); } 
 
     template<typename otherT, int otherIWL>
     fxp(fxp<otherT, otherIWL> v)
     {
-        val = v.val >> (v.shift - shift);
+        if (v.shift > shift) 
+            val = v.val >> (v.shift - shift);
+        else 
+            val = v.val << (shift - v.shift);
         check();
     }
 

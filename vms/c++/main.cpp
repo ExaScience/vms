@@ -2,10 +2,10 @@
 #include <cmath>
 #include <iostream>
 
+#include "fxp.h"
 #include "smurff_const.h"
 #include "predict.h"
 #include "smurff_tb.h"
-#include "types.h"
 
 #ifdef DT_OBSERVED_FLOAT
 const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
@@ -52,11 +52,11 @@ int main()
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    static P_type tb_output_fx[num_compounds][num_proteins];
-    static F_type tb_input_fx[num_compounds][num_features];
-    static U_type U_fx[num_samples][num_proteins][num_latent];
-    static mu_type mu_fx[num_samples][num_latent];
-    static B_type B_fx[num_samples][num_features][num_latent];
+    static P_base tb_output_fx[num_compounds][num_proteins];
+    static F_base tb_input_fx[num_compounds][num_features];
+    static U_base U_fx[num_samples][num_proteins][num_latent];
+    static mu_base mu_fx[num_samples][num_latent];
+    static B_base B_fx[num_samples][num_features][num_latent];
 
     CONVERT2(tb_input);
     CONVERT3(U);
