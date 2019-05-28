@@ -81,8 +81,14 @@ void proteins_loop(
 				sum = sum + prod;
 			}
 
-		P_type aggr(sum >> log_num_samples);
-		predictions[d] = aggr.val;
+		P_type aggr(
+#ifdef DT_FLOAT
+			sum / num_samples
+#else
+			sum >> log_num_samples
+#endif
+			);
+		predictions[d] = aggr;
 	} // end proteins
 }
 

@@ -57,6 +57,12 @@ struct fxp
 		return ((float)val) / (float)(1L<<shift);
 	}
 
+    operator T() const
+    {
+        return val;
+    }
+
+
     void check() const
     {
         if(val > std::numeric_limits<T>::max() || val < std::numeric_limits<T>::min())
