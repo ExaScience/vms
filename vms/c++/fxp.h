@@ -4,7 +4,11 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+
 #include <iostream>
+#include <limits>
+
+#define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 template<typename T, int IWL>
 struct fxp;
@@ -37,6 +41,8 @@ add_expr<T1, IWL1, T2, IWL2> operator+(const fxp<T1, IWL1> &a, const fxp<T2, IWL
     return r;
 }
 
+#define SHOW(F) (F).print(#F)
+
 template<typename T, int IWL>
 struct fxp
 {
@@ -48,15 +54,15 @@ struct fxp
 
 	T val;
 
-	float to_float() const {
+	operator float() const {
 		return ((float)val) / (float)(1L<<shift);
 	}
 
     void check() const
     {
-        if(fabs(val >> shift) > (1L<<(iwl-1)))
+        if(val > std::numeric_limits<T>::max() || val < std::numeric_limits<T>::min())
         {
-            std::cerr << to_float() << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
+            std::cerr << (float)(*this) << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
             abort();
         }
     }
@@ -77,27 +83,62 @@ struct fxp
     template<typename T1, int IWL1, typename T2, int IWL2>
     fxp(const mul_expr<T1, IWL1, T2, IWL2> &mul)
     {
-        int s = mul.a.shift + mul.b.shift - shift;
+        int diff = mul.a.shift + mul.b.shift - shift;
+        int max = mul.a.shift > mul.b.shift ? mul.a.shift : mul.b.shift;
 
-        if (s > 0)
-            val = (mul.a.val * mul.b.val) >> s;
+        if (diff > 0)
+            if (mul.a.shift > mul.b.shift)
+                val = (mul.a.val >> diff) * mul.b.val;
+            else 
+                val = mul.a.val  * (mul.b.val >> diff);
         else
-            val = (mul.a.val * mul.b.val) << -s;
+            val = (mul.a.val * mul.b.val) << -diff;
+
+        SHOWFLOAT(diff);
+        SHOWFLOAT(max);
+        SHOW(mul.a);
+        SHOW(mul.b);
+        SHOW(*this);
+        float f = (float)(mul.a) * (float)(mul.b);
+        SHOWFLOAT(f);
+        assert(((float)(*this) - ((float)mul.a * (float)mul.b)) < 0.01);
     }
+
 
     template<typename T1, int IWL1, typename T2, int IWL2>
     fxp(const add_expr<T1, IWL1, T2, IWL2> &add)
     {
-        fxp<T, IWL> a =  add.a; // convert to target type
-        fxp<T, IWL> b =  add.b; // idem
-        val = a.val + b.val;
+        int diff = add.a.shift - add.b.shift;
+        int max = add.a.shift > add.b.shift ? add.a.shift : add.b.shift;
+        if (diff > 0)
+            val = add.a.val + (add.b.val << diff);
+        else
+            val = (add.a.val << -diff) + add.b.val;
+
+        int s = max - shift;
+        if (s > 0) val = val << s;
+        else       val = val >> -s;
+
+        SHOWFLOAT(diff);
+        SHOWFLOAT(max);
+        SHOWFLOAT(s);
+        SHOWFLOAT(add.a);
+        SHOWFLOAT(add.b);
+        SHOWFLOAT(*this);
+        SHOWFLOAT(((float)(add.a) + (float)(add.b)));
+
+        float af = (float)(add.a);
+        float bf = (float)(add.b);
+        float tf = (float)(*this);
+        float f = tf - (af + bf);
+        SHOWFLOAT(f);
+        assert(fabs(f)< 0.01);
     }
     void print(const char *name) const
     {
-        printf("%s\n val = %.2f\n", name, to_float());
+        printf("%s\n val = %.8f (%d)\n", name, (float)*this, val);
         printf(" wl = %d\n", wl);
         printf(" iwl = %d\n", iwl);
     }
 };
 
-#define SHOW(F) F.print(#F)

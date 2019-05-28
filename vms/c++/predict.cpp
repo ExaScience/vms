@@ -76,11 +76,13 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
+				SHOW(latents[s][k]);
+				SHOW(U_type(U[s][d][k]));
 				S_type prod = latents[s][k] * U_type(U[s][d][k]);
+				SHOW(prod);
 				sum = sum + prod;
 			}
 
-printf("sum[%d]: ", d );
 		//SHOW(sum);
 		predictions[d] = sum / num_samples; // >> (log_num_samples - P_shift + U_shift);
 		//SHOW(predictions[d]);

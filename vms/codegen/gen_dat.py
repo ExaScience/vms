@@ -142,7 +142,8 @@ def gen_session(root, outputdir, fixed_type):
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     if fixed_type:
-        types_output = '#include "fxp.h"\n\n'
+        types_output = "#define DT_FLOAT\n"
+        types_output += '#include "fxp.h"\n\n'
         types = {
             8 : "signed char",
             16 : "signed short",
@@ -163,7 +164,7 @@ def gen_session(root, outputdir, fixed_type):
         types_output += "typedef fxp<int, 10> S_type;\n"
         types_output += "const float epsilon = 0.5;\n"
     else:
-        types_output = ""
+        types_output = "#define DT_FIXED\n"
         for name in [ "U", "mu", "B", "F", "P" ]:
             types_output += "typedef float %s_base ;\n" % name
             types_output += "typedef float %s_type;\n\n" % name
