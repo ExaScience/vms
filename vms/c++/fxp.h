@@ -8,7 +8,6 @@
 #include <iostream>
 #include <limits>
 
-#define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 template<typename T, int IWL>
 struct fxp;
@@ -84,8 +83,6 @@ struct fxp
     fxp(const mul_expr<T1, IWL1, T2, IWL2> &mul)
     {
         int diff = mul.a.shift + mul.b.shift - shift;
-        int max = mul.a.shift > mul.b.shift ? mul.a.shift : mul.b.shift;
-
         if (diff > 0)
             if (mul.a.shift > mul.b.shift)
                 val = (mul.a.val >> diff) * mul.b.val;
@@ -94,13 +91,6 @@ struct fxp
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
-        SHOWFLOAT(diff);
-        SHOWFLOAT(max);
-        SHOW(mul.a);
-        SHOW(mul.b);
-        SHOW(*this);
-        float f = (float)(mul.a) * (float)(mul.b);
-        SHOWFLOAT(f);
         assert(((float)(*this) - ((float)mul.a * (float)mul.b)) < 0.01);
     }
 
@@ -119,21 +109,18 @@ struct fxp
         if (s > 0) val = val << s;
         else       val = val >> -s;
 
-        SHOWFLOAT(diff);
-        SHOWFLOAT(max);
-        SHOWFLOAT(s);
-        SHOWFLOAT(add.a);
-        SHOWFLOAT(add.b);
-        SHOWFLOAT(*this);
-        SHOWFLOAT(((float)(add.a) + (float)(add.b)));
-
         float af = (float)(add.a);
         float bf = (float)(add.b);
         float tf = (float)(*this);
         float f = tf - (af + bf);
-        SHOWFLOAT(f);
         assert(fabs(f)< 0.01);
     }
+
+    fxp<T, IWL> operator>>(const int s)
+    {
+        return fxp<T, IWL>(val >> s);
+    }
+
     void print(const char *name) const
     {
         printf("%s\n val = %.8f (%d)\n", name, (float)*this, val);

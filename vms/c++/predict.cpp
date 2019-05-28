@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstring>
 
+#define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 #include "predict.h"
 
@@ -76,16 +77,12 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				SHOW(latents[s][k]);
-				SHOW(U_type(U[s][d][k]));
 				S_type prod = latents[s][k] * U_type(U[s][d][k]);
-				SHOW(prod);
 				sum = sum + prod;
 			}
 
-		//SHOW(sum);
-		predictions[d] = sum / num_samples; // >> (log_num_samples - P_shift + U_shift);
-		//SHOW(predictions[d]);
+		P_type aggr(sum >> log_num_samples);
+		predictions[d] = aggr.val;
 	} // end proteins
 }
 
