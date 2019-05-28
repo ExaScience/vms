@@ -1,5 +1,6 @@
-#include "fxp.h"
 #include "smurff_const.h"
+
+#include "smurff_types.h"
 
 void predict_or_update_model(
     const F_base  in[num_features],

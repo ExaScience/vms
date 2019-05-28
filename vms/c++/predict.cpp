@@ -1,11 +1,8 @@
 #include <cstdio>
 #include <cstring>
 
-#include "fxp.h"
-#include "smurff_const.h"
-#include "predict.h"
 
-typedef fxp<int, 10> L_type;
+#include "predict.h"
 
 static U_base U[num_samples][num_proteins][num_latent];
 static mu_base mu[num_samples][num_latent];
@@ -60,15 +57,8 @@ void features_loop(
 				L_type  v(0xdead);
 				if (d==0) v = mu_type(mu[s][k]);
 				else      v = latents[s][k];
-				SHOW(v);
-				SHOW(feature);
 				L_type prod = feature * B_type(B[s][d][k]);
-				SHOW(prod);
 				latents[s][k] = v + prod;
-				SHOW(latents[s][k]);
-				printf("\n\n");
-				printf("latens[%d][%d] = %.4f = %.4f + %.4f * %.4f\n",
-					s, k, latents[s][k].to_float(), v.to_float(), feature.to_float(), B_type(B[s][d][k]).to_float());
 			}
 	}
 }
@@ -77,8 +67,6 @@ void proteins_loop(
 	    P_base predictions[num_proteins],
 		const L_type latents[num_samples][num_latent])
 {
-	typedef fxp<int, 10> S_type;
-
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -92,8 +80,9 @@ void proteins_loop(
 				sum = sum + prod;
 			}
 
-		SHOW(sum);
-		predictions[d] = sum.val; // >> (log_num_samples - P_shift + U_shift);
+printf("sum[%d]: ", d );
+		//SHOW(sum);
+		predictions[d] = sum / num_samples; // >> (log_num_samples - P_shift + U_shift);
 		//SHOW(predictions[d]);
 	} // end proteins
 }
