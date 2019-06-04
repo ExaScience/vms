@@ -9,18 +9,6 @@ INCLUDES=-I$(SRCDIR) -Icode
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
 LDFLAGS=
 
-ifeq ($(XILINX_VIVADO),)
-#Homebrew sc_fixed<>
-SYSTEMCROOT=/usr/local/opt/systemc
-else
-# Vivado Xilinx sc_fixed<>
-SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
-CXX=$(XILINX_VIVADO)/lnx64/tools/clang-3.9/bin/clang++
-endif
-
-SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
-SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
-
 ROOTFILE=model/root.ini
 INPUTDATA=test.sdm train.sdm side_c2v.ddm
 MODELFILES=code/smurff_const.h code/smurff_tb.h
@@ -38,11 +26,11 @@ $(ROOTFILE): $(INPUTDATA) options.ini
 	smurff --ini options.ini --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
-	mkdir -p code
+	mkdir -p code 
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 sim: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) -DDT_FIXED $(SC_CXXFLAGS) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) $(SC_LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
 
 clean:
 	rm -rf model code hls

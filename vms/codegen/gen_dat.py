@@ -67,9 +67,6 @@ def map_to_int(M, dt):
 
     min = np.min(M)
     max = np.max(M)
-    avg = np.mean(M)
-    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
-    print(M.flatten()[:10])
     assert max > 0
 
     shift = 0
@@ -79,25 +76,11 @@ def map_to_int(M, dt):
         shift += 1
     
     M = M * (2**shift)
-
-    min = np.min(M)
-    max = np.max(M)
-    avg = np.mean(M)
-    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
-    print(M.flatten()[:10])
-
     M = M.round().astype(dt)
-
-    min = np.min(M)
-    max = np.max(M)
-    avg = np.mean(M)
-    print("min: %4f, max %.4f, avg: %.4f" % (min, max, avg))
-    print(M.flatten()[:10])
-    
-    return M, shift
+    return M, dtinfo.bits, dtinfo.bits - shift
 
 
-def gen_session(root, outputdir):
+def gen_session(root, outputdir, fixed_type):
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
@@ -129,65 +112,77 @@ def gen_session(root, outputdir):
     U = np.transpose(U, axes = (0,2,1))
     B = np.transpose(B, axes = (0,2,1))
 
-    mu, mu_shift = map_to_int(mu, np.int8)
-    U, U_shift = map_to_int(U, np.int16)
-    B, B_shift = map_to_int(B, np.int16)
-
-    tb_output = gen_int("num_compounds", num_compounds)
-    tb_output += \
-          gen_array(U, "std::int16_t", "U", "  ", format = "%d") + "\n" \
-        + gen_array(mu, "std::int8_t", "mu", indent = "  ",  format = "%d") + "\n" \
-        + gen_array(B, "std::int16_t", "B", "  ", format = "%d") + "\n"
-
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
 
-    tb_in_matrix, F_shift = map_to_int(tb_in_matrix, np.int16)
-    Pavg, P_shift = map_to_int(Pavg, np.int8)
+    if fixed_type:
+        mu, mu_wl, mu_iwl = map_to_int(mu, np.int8)
+        U, U_wl, U_iwl = map_to_int(U, np.int16)
+        B, B_wl, B_iwl = map_to_int(B, np.int16)
 
-    tb_output += gen_array(tb_in_matrix, "std::int16_t", "tb_input", format = "%d") + "\n"
-    tb_output += gen_array(Pavg, "std::int8_t", "tb_ref", format = "%d") + "\n"
+        tb_in_matrix, F_wl, F_iwl  = map_to_int(tb_in_matrix, np.int16)
+        Pavg, P_wl, P_iwl = map_to_int(Pavg, np.int8)
+
+        format = "%d"
+    else:
+        format = "%.4f"
+
+    tb_output = gen_int("num_compounds", num_compounds)
+    tb_output += \
+        gen_array(U,  "U_base", "U", "  ", format = format) + "\n" \
+        + gen_array(mu, "mu_base", "mu", indent = "  ",  format = format) + "\n" \
+        + gen_array(B,  "B_base", "B", "  ", format = format) + "\n"
+
+    tb_output += gen_array(tb_in_matrix, "F_base", "tb_input", format = format) + "\n"
+    tb_output += gen_array(Pavg, "P_base", "tb_ref", format = format) + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
     assert tb_num_features == num_features
 
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
-    const_output += gen_int("mu_shift", mu_shift)
-    const_output += gen_int("mu_wl", 8)
-    const_output += "const int mu_iwl = mu_wl - mu_shift;\n"
+    if fixed_type:
+        types_output = "#define DT_FIXED\n"
+        types_output += '#include "fxp.h"\n\n'
+        types = {
+            8 : "signed char",
+            16 : "signed short",
+            32 : "signed int",
+        }
+        for name, wl, iwl in zip(
+            [ "U", "mu", "B", "F", "P" ],
+            [ U_wl, mu_wl, B_wl, F_wl, P_wl ],
+            [ U_iwl, mu_iwl, B_iwl, F_iwl, P_iwl ],
+        ):
+            types_output += gen_int(name + "_wl", wl)
+            types_output += gen_int(name + "_iwl", iwl)
+            types_output += gen_int(name + "_shift", wl - iwl)
+            types_output += "typedef %s %s_base ;\n" % (types[wl], name)
+            types_output += "typedef fxp<%s, %d> %s_type;\n\n" % (types[wl], iwl, name)
 
-    const_output += gen_int("U_shift", U_shift)
-    const_output += gen_int("U_wl", 16)
-    const_output += "const int U_iwl = U_wl - U_shift;\n"
+        types_output += "typedef fxp<int, 10> L_type;\n"
+        types_output += "typedef fxp<int, 10> S_type;\n"
+        types_output += "const float epsilon = 0.5;\n"
+    else:
+        types_output = "#define DT_FLOAT\n"
+        for name in [ "U", "mu", "B", "F", "P" ]:
+            types_output += "typedef float %s_base ;\n" % name
+            types_output += "typedef float %s_type;\n\n" % name
 
-    const_output += gen_int("B_shift", B_shift)
-    const_output += gen_int("B_wl", 16)
-    const_output += "const int B_iwl = B_wl - B_shift;\n"
-
-    const_output += "\n"
-    const_output += gen_int("F_shift", F_shift)
-    const_output += gen_int("F_wl", 16)
-    const_output += "const int F_iwl = F_wl - F_shift;\n"
-
-    const_output += gen_int("P_shift", P_shift)
-    const_output += gen_int("P_wl", 8)
-    const_output += "const int P_iwl = P_wl - P_shift;\n"
+        types_output += "typedef float L_type;\n"
+        types_output += "typedef float S_type;\n"
+        types_output += "const float epsilon = 0.5;\n"
 
     gen_file(outputdir, "const.h", const_output)
-
-    codedir = pth.join(pth.dirname(pth.realpath(__file__)), "code")
-    codefiles = glob.glob(pth.join(codedir, '*.cpp')) + glob.glob(pth.join(codedir, '*.h'))
-    for c in codefiles:
-        pass
-        #shutil.copy(c, outputdir)
+    gen_file(outputdir, "types.h", types_output)
 
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
 parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
+parser.add_argument('--fxp', action='store_true', help='use fixed point')
 args = parser.parse_args()
 
-gen_session(args.root_file, args.output)
+gen_session(args.root_file, args.output, args.fxp)
 
 
