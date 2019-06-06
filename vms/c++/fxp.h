@@ -91,9 +91,9 @@ struct fxp
         int diff = mul.a.shift + mul.b.shift - shift;
         if (diff > 0)
             if (mul.a.shift > mul.b.shift)
-                val = (mul.a.val >> diff) * mul.b.val;
+                val = (T1)(mul.a.val >> diff) * mul.b.val;
             else 
-                val = mul.a.val  * (mul.b.val >> diff);
+                val = mul.a.val  * (T2)(mul.b.val >> diff);
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
@@ -124,7 +124,7 @@ struct fxp
 
     fxp<T, IWL> operator>>(const int s)
     {
-        return fxp<T, IWL>(val >> s);
+        return fxp<T, IWL>((T)(val >> s));
     }
 
     void print(const char *name) const
