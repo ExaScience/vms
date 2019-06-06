@@ -1,4 +1,6 @@
-CFLAGS_      = $(CFLAGS) -O1 -std=c++11
+#!/usr/bin/make -f
+
+CFLAGS_      = $(CFLAGS) -O1 -std=c++11 --verbose
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 -k
 MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
@@ -32,8 +34,9 @@ bitstream: $(SRCFILES)
 	--Wf,"--name=$(PROGRAM_),--dir=${PWD}/$(BOARD),--board=$(BOARD),--task_manager,--clock=200" \
 	$^ -o $(PROGRAM_)-i $(LDFLAGS_)
 
+export PETALINUX_BUILD = $(PWD)/zcu102/petalinux
 boot:
-	export PETALINUX_BUILD=$$PWD/zcu102/petalinux; \
+	mkdir -p $(PETALINUX_BUILD)
 	autoVivado --verbose --name=$(PROGRAM_) --dir=${PWD}/$(BOARD) --board=$(BOARD) --task_manager --clock=200 --from_step=boot --to_step=boot
 
 clean:
