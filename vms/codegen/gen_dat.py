@@ -160,8 +160,8 @@ def gen_session(root, outputdir, fixed_type):
             types_output += "typedef %s %s_base ;\n" % (types[wl], name)
             types_output += "typedef fxp<%s, %d> %s_type;\n\n" % (types[wl], iwl, name)
 
-        types_output += "typedef fxp<int, 10> L_type;\n"
-        types_output += "typedef fxp<int, 10> S_type;\n"
+        types_output += "typedef fxp<signed int, 10> L_type;\n"
+        types_output += "typedef fxp<signed int, 10> S_type;\n"
         types_output += "const float epsilon = 0.5;\n"
     else:
         types_output = "#define DT_FLOAT\n"
@@ -180,9 +180,9 @@ def gen_session(root, outputdir, fixed_type):
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
 parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
-parser.add_argument('--fxp', action='store_true', help='use fixed point')
+parser.add_argument('--float', action='store_true', help='use floating point')
 args = parser.parse_args()
 
-gen_session(args.root_file, args.output, args.fxp)
+gen_session(args.root_file, args.output, not args.float)
 
 
