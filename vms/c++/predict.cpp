@@ -55,7 +55,7 @@ void features_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				L_type  v(0xdead);
+				L_type  v;
 				if (d==0) v = mu_type(mu[s][k]);
 				else      v = latents[s][k];
 				L_type prod = feature * B_type(B[s][d][k]);
@@ -73,7 +73,7 @@ void proteins_loop(
 #pragma HLS PIPELINE II = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U complete dim = 3
-		S_type sum(0);
+		S_type sum(.0F);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
@@ -108,18 +108,38 @@ void predict(
 void predict_or_update_model(
 		const F_base  features[num_features],
 		      P_base  predictions[num_proteins],
-		bool  update_model,
 		const U_base U_in[num_samples][num_proteins][num_latent],
 		const mu_base mu_in[num_samples][num_latent],
 		const B_base B_in[num_samples][num_features][num_latent])
 {
-	if (update_model)
+	if (U_in && mu_in && B_in)
 	{
 		load_model(U_in, mu_in, B_in);
 	} 
-	else 
+
+	if (features && predictions)
 	{
 		predict(features, predictions);
 	}
 
 } // end function
+
+
+
+void update_model(
+    const U_base  U  [num_samples][num_proteins][num_latent],
+    const mu_base mu [num_samples][num_latent],
+    const B_base  B  [num_samples][num_features][num_latent]
+)
+{
+    predict_or_update_model(0, 0, U, mu, B);
+}
+
+void predict_compound(
+    const F_base  in[num_features],
+          P_base  out[num_proteins]
+)
+{
+    predict_or_update_model(in, out, 0, 0, 0);
+}
+
