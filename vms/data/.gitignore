@@ -5,3 +5,5 @@ output
 model
 sim
 sim.dSYM
+hls
+*log
