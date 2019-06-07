@@ -1,8 +1,7 @@
-SRCDIR=.
-CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
+CXXFILES=main.cpp predict.cpp
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
-CXXFLAGS=-pthread -g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
+CXXFLAGS=-g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
 LDFLAGS=
 
 .PHONY: run clean
@@ -10,8 +9,8 @@ LDFLAGS=
 run: sim
 	./sim
 
-sim: $(MODELFILES $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) -DDT_FIXED $(SC_CXXFLAGS) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) $(SC_LDFLAGS)
+sim: $(CXXFILES) $(HEADERFILES) Makefile
+	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
 
 clean:
 	rm -f sim
