@@ -101,44 +101,30 @@ void predict(
 }
 
 
-#pragma omp target device(fpga) copy_deps localmem(features) localmem(predictions)
-#pragma omp task in([num_features]features, [num_samples][num_proteins][num_latent]U_in, [num_samples][num_latent]mu_in, [num_samples][num_features][num_latent]B_in) inout([num_proteins]predictions)
-void predict_or_update_model(
+#pragma omp target device(fpga) copy_deps localmem()
+#pragma omp task \
+    in([num_features]features, [num_samples][num_proteins][num_latent]U_in,\
+       [num_samples][num_latent]mu_in,\
+       [num_samples][num_features][num_latent]B_in) \
+    out([num_proteins]predictions)
+void predict_with_model_task(
 		F_base  features[num_features],
 		P_base  predictions[num_proteins],
-		bool  update_model,
 		U_base U_in[num_samples][num_proteins][num_latent],
 		mu_base mu_in[num_samples][num_latent],
 		B_base B_in[num_samples][num_features][num_latent])
 {
-	if (update_model)
-	{
-		load_model(U_in, mu_in, B_in);
-	} 
-	else 
-	{
-		predict(features, predictions);
-	}
-
+        load_model(U_in, mu_in, B_in);
+        predict(features, predictions);
 } // end function
 
-void update_model(
-    U_base  U  [num_samples][num_proteins][num_latent],
-    mu_base mu [num_samples][num_latent],
-    B_base  B  [num_samples][num_features][num_latent]
-)
-{
-    do {
-        predict_or_update_model(0, 0, true, U, mu, B);
-    } while(0);
-}
 
-void predict_compound(
-    F_base  in[num_features],
-    P_base  out[num_proteins]
-)
+void predict_with_model(
+        F_base  features[num_features],
+        P_base  predictions[num_proteins],
+        U_base U_in[num_samples][num_proteins][num_latent],
+        mu_base mu_in[num_samples][num_latent],
+        B_base B_in[num_samples][num_features][num_latent])
 {
-    do {
-        predict_or_update_model(in, out, false, 0, 0, 0);
-    } while(0);
+    predict_with_model_task(features, predictions, U_in, mu_in, B_in);
 }

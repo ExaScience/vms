@@ -63,13 +63,10 @@ int main()
 
     int nerrors = 0;
 
-    printf("Updating model\n");
-    update_model(U_fx, mu_fx, B_fx);
-
     printf("Predicting\n");
     for(int c=0; c<num_compounds; c++)
     {
-        predict_compound(tb_input_fx[c], tb_output_fx[c]);
+        predict_with_model(tb_input_fx[c], tb_output_fx[c], U_fx, mu_fx, B_fx);
     }
     nerrors += check_result(tb_output_fx, tb_ref);
 
