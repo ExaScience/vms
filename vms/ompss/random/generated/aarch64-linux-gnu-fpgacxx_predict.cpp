@@ -5426,8 +5426,7 @@ typedef float P_type;
 typedef float L_type;
 typedef float S_type;
 const float epsilon(5.00000000000000000000000000000000000000000000000000000e-01);
-void update_model(::U_base U[4L][4L][8L], ::mu_base mu[4L][8L], ::B_base B[4L][2L][8L]);
-void predict_compound(::F_base in[2L], ::P_base out[4L]);
+void predict_with_model(::F_base features[2L], ::P_base predictions[4L], ::U_base U_in[4L][4L][8L], ::mu_base mu_in[4L][8L], ::B_base B_in[4L][2L][8L]);
 static ::U_base U[4L][4L][8L];
 static ::mu_base mu[4L][8L];
 static ::B_base B[4L][2L][8L];
@@ -5517,13 +5516,12 @@ struct  nanos_args_0_t
 {
     ::F_base *features;
     ::P_base *predictions;
-    bool update_model;
     ::U_base (*U_in)[4L][8L];
     ::mu_base (*mu_in)[8L];
     ::B_base (*B_in)[2L][8L];
 };
-void fpga_ol_predict_or_update_model_1_unpacked(::F_base *features, ::P_base *predictions, bool update_model, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw();
-static void fpga_ol_predict_or_update_model_1(::nanos_args_0_t &args) throw();
+void fpga_ol_predict_with_model_task_1_unpacked(::F_base *features, ::P_base *predictions, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw();
+static void fpga_ol_predict_with_model_task_1(::nanos_args_0_t &args) throw();
 static void nanos_xlate_fun_predictcpp_0(::nanos_args_0_t &arg, ::nanos_wd_t wd) throw()
 {
   {
@@ -5582,738 +5580,331 @@ static void nanos_xlate_fun_predictcpp_0(::nanos_args_0_t &arg, ::nanos_wd_t wd)
     arg.B_in = (::B_base (*)[2L][8L])device_base_address;
   }
 }
-void update_model(::U_base (*U)[4L][8L], ::mu_base (*mu)[8L], ::B_base (*B)[2L][8L])
+void predict_with_model(::F_base *features, ::P_base *predictions, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L])
 {
-  do
+  {
+    ::F_base *mcc_arg_0(features);
+    ::P_base *mcc_arg_1(predictions);
+    ::U_base (*mcc_arg_2)[4L][8L](U_in);
+    ::mu_base (*mcc_arg_3)[8L](mu_in);
+    ::B_base (*mcc_arg_4)[2L][8L](B_in);
     {
-      {
-        ::F_base *mcc_arg_0(0);
-        ::P_base *mcc_arg_1(0);
-        bool mcc_arg_2(true);
-        ::U_base (*mcc_arg_3)[4L][8L](U);
-        ::mu_base (*mcc_arg_4)[8L](mu);
-        ::B_base (*mcc_arg_5)[2L][8L](B);
+       /* device argument type */ 
+      static ::nanos_fpga_args_t fpga_ol_predict_with_model_task_1_args /* () */ ;
+      fpga_ol_predict_with_model_task_1_args.outline = (void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_with_model_task_1;
+      fpga_ol_predict_with_model_task_1_args.type = 1414868932;
+      static ::nanos_const_wd_definition_1 nanos_wd_const_data = { /* .::nanos_const_wd_definition_1::base =  */ { /* .::nanos_const_wd_definition_tag::props =  */ { /* .::nanos_wd_props_t::mandatory_creation =  */ 0,  /* .::nanos_wd_props_t::tied =  */ 0,  /* .::nanos_wd_props_t::clear_chunk =  */ 0,  /* .::nanos_wd_props_t::reserved0 =  */ 0,  /* .::nanos_wd_props_t::reserved1 =  */ 0,  /* .::nanos_wd_props_t::reserved2 =  */ 0,  /* .::nanos_wd_props_t::reserved3 =  */ 0,  /* .::nanos_wd_props_t::reserved4 =  */ 0},  /* .::nanos_const_wd_definition_tag::data_alignment =  */ alignof(::nanos_args_0_t),  /* .::nanos_const_wd_definition_tag::num_copies =  */ 5,  /* .::nanos_const_wd_definition_tag::num_devices =  */ 1,  /* .::nanos_const_wd_definition_tag::num_dimensions =  */ 15,  /* .::nanos_const_wd_definition_tag::description =  */ "predict_with_model_task"},  /* .::nanos_const_wd_definition_1::devices =  */ { /* [0] =  */ { /* .::nanos_device_t::factory =  */ ::nanos_fpga_factory,  /* .::nanos_device_t::arg =  */ &fpga_ol_predict_with_model_task_1_args}}};
+      ::nanos_wd_dyn_props_t nanos_wd_dyn_props /* () */ ;
+      nanos_wd_dyn_props.tie_to = 0;
+      nanos_wd_dyn_props.priority = 0;
+      nanos_wd_dyn_props.flags.is_final = 0;
+      nanos_wd_dyn_props.flags.is_implicit = 0;
+      nanos_wd_dyn_props.flags.is_recover = 0;
+      ::nanos_args_0_t *ol_args;
+      ol_args = (::nanos_args_0_t *)0;
+      ::nanos_args_0_t imm_args /* () */ ;
+      ::nanos_wd_t nanos_wd_((::nanos_wd_t)0);
+      ::nanos_copy_data_t *ol_copy_data((::nanos_copy_data_t *)0);
+      ::nanos_region_dimension_internal_t *ol_copy_dimensions((::nanos_region_dimension_internal_t *)0);
+      ::nanos_err_t nanos_err;
+      nanos_err = ::nanos_create_wd_compact(&nanos_wd_, &nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_0_t &), (void **)&ol_args, ::nanos_current_wd(), &ol_copy_data, &ol_copy_dimensions);
+      if (nanos_err != ::NANOS_OK)
         {
-           /* device argument type */ 
-          static ::nanos_fpga_args_t fpga_ol_predict_or_update_model_1_args /* () */ ;
-          fpga_ol_predict_or_update_model_1_args.outline = (void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_or_update_model_1;
-          fpga_ol_predict_or_update_model_1_args.type = 1195774825;
-          static ::nanos_const_wd_definition_1 nanos_wd_const_data = { /* .::nanos_const_wd_definition_1::base =  */ { /* .::nanos_const_wd_definition_tag::props =  */ { /* .::nanos_wd_props_t::mandatory_creation =  */ 0,  /* .::nanos_wd_props_t::tied =  */ 0,  /* .::nanos_wd_props_t::clear_chunk =  */ 0,  /* .::nanos_wd_props_t::reserved0 =  */ 0,  /* .::nanos_wd_props_t::reserved1 =  */ 0,  /* .::nanos_wd_props_t::reserved2 =  */ 0,  /* .::nanos_wd_props_t::reserved3 =  */ 0,  /* .::nanos_wd_props_t::reserved4 =  */ 0},  /* .::nanos_const_wd_definition_tag::data_alignment =  */ alignof(::nanos_args_0_t),  /* .::nanos_const_wd_definition_tag::num_copies =  */ 5,  /* .::nanos_const_wd_definition_tag::num_devices =  */ 1,  /* .::nanos_const_wd_definition_tag::num_dimensions =  */ 15,  /* .::nanos_const_wd_definition_tag::description =  */ "predict_or_update_model"},  /* .::nanos_const_wd_definition_1::devices =  */ { /* [0] =  */ { /* .::nanos_device_t::factory =  */ ::nanos_fpga_factory,  /* .::nanos_device_t::arg =  */ &fpga_ol_predict_or_update_model_1_args}}};
-          ::nanos_wd_dyn_props_t nanos_wd_dyn_props /* () */ ;
-          nanos_wd_dyn_props.tie_to = 0;
-          nanos_wd_dyn_props.priority = 0;
-          nanos_wd_dyn_props.flags.is_final = 0;
-          nanos_wd_dyn_props.flags.is_implicit = 0;
-          nanos_wd_dyn_props.flags.is_recover = 0;
-          ::nanos_args_0_t *ol_args;
-          ol_args = (::nanos_args_0_t *)0;
-          ::nanos_args_0_t imm_args /* () */ ;
-          ::nanos_wd_t nanos_wd_((::nanos_wd_t)0);
-          ::nanos_copy_data_t *ol_copy_data((::nanos_copy_data_t *)0);
-          ::nanos_region_dimension_internal_t *ol_copy_dimensions((::nanos_region_dimension_internal_t *)0);
-          ::nanos_err_t nanos_err;
-          nanos_err = ::nanos_create_wd_compact(&nanos_wd_, &nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_0_t &), (void **)&ol_args, ::nanos_current_wd(), &ol_copy_data, &ol_copy_dimensions);
+          ::nanos_handle_error(nanos_err);
+        }
+      ::nanos_region_dimension_t dimensions_0[1L];
+      ::nanos_region_dimension_t dimensions_1[1L];
+      ::nanos_region_dimension_t dimensions_2[5L];
+      ::nanos_region_dimension_t dimensions_3[3L];
+      ::nanos_region_dimension_t dimensions_4[5L];
+      ::nanos_data_access_t dependences[5L];
+      dimensions_0[0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
+      dimensions_0[0].lower_bound = (0L - 0L) * sizeof(::F_base);
+      dimensions_0[0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
+      dependences[0].address = (void *)mcc_arg_0;
+      dependences[0].offset = 0L;
+      dependences[0].dimensions = dimensions_0;
+      dependences[0].flags.input = 1;
+      dependences[0].flags.output = 0;
+      dependences[0].flags.can_rename = 0;
+      dependences[0].flags.concurrent = 0;
+      dependences[0].flags.commutative = 0;
+      dependences[0].dimension_count = 1;
+      dimensions_1[0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
+      dimensions_1[0].lower_bound = (0L - 0L) * sizeof(::P_base);
+      dimensions_1[0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
+      dependences[1].address = (void *)mcc_arg_1;
+      dependences[1].offset = 0L;
+      dependences[1].dimensions = dimensions_1;
+      dependences[1].flags.input = 0;
+      dependences[1].flags.output = 1;
+      dependences[1].flags.can_rename = 0;
+      dependences[1].flags.concurrent = 0;
+      dependences[1].flags.commutative = 0;
+      dependences[1].dimension_count = 1;
+      dimensions_2[0].size = 8L * sizeof(::U_base);
+      dimensions_2[0].lower_bound = (0L - 0L) * sizeof(::U_base);
+      dimensions_2[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
+      dimensions_2[1].size = 4L;
+      dimensions_2[1].lower_bound = 0L - 0L;
+      dimensions_2[1].accessed_length = 3L - 0L - (0L - 0L) + 1;
+      dimensions_2[2].size = ((::num_latent) - 1L - 0L) + 1L;
+      dimensions_2[2].lower_bound = 0L - 0L;
+      dimensions_2[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+      dimensions_2[3].size = ((::num_proteins) - 1L - 0L) + 1L;
+      dimensions_2[3].lower_bound = 0L - 0L;
+      dimensions_2[3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
+      dimensions_2[4].size = ((::num_samples) - 1L - 0L) + 1L;
+      dimensions_2[4].lower_bound = 0L - 0L;
+      dimensions_2[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+      dependences[2].address = (void *)mcc_arg_2;
+      dependences[2].offset = 0L;
+      dependences[2].dimensions = dimensions_2;
+      dependences[2].flags.input = 1;
+      dependences[2].flags.output = 0;
+      dependences[2].flags.can_rename = 0;
+      dependences[2].flags.concurrent = 0;
+      dependences[2].flags.commutative = 0;
+      dependences[2].dimension_count = 5;
+      dimensions_3[0].size = 8L * sizeof(::mu_base);
+      dimensions_3[0].lower_bound = (0L - 0L) * sizeof(::mu_base);
+      dimensions_3[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
+      dimensions_3[1].size = ((::num_latent) - 1L - 0L) + 1L;
+      dimensions_3[1].lower_bound = 0L - 0L;
+      dimensions_3[1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+      dimensions_3[2].size = ((::num_samples) - 1L - 0L) + 1L;
+      dimensions_3[2].lower_bound = 0L - 0L;
+      dimensions_3[2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+      dependences[3].address = (void *)mcc_arg_3;
+      dependences[3].offset = 0L;
+      dependences[3].dimensions = dimensions_3;
+      dependences[3].flags.input = 1;
+      dependences[3].flags.output = 0;
+      dependences[3].flags.can_rename = 0;
+      dependences[3].flags.concurrent = 0;
+      dependences[3].flags.commutative = 0;
+      dependences[3].dimension_count = 3;
+      dimensions_4[0].size = 8L * sizeof(::B_base);
+      dimensions_4[0].lower_bound = (0L - 0L) * sizeof(::B_base);
+      dimensions_4[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
+      dimensions_4[1].size = 2L;
+      dimensions_4[1].lower_bound = 0L - 0L;
+      dimensions_4[1].accessed_length = 1L - 0L - (0L - 0L) + 1;
+      dimensions_4[2].size = ((::num_latent) - 1L - 0L) + 1L;
+      dimensions_4[2].lower_bound = 0L - 0L;
+      dimensions_4[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+      dimensions_4[3].size = ((::num_features) - 1L - 0L) + 1L;
+      dimensions_4[3].lower_bound = 0L - 0L;
+      dimensions_4[3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
+      dimensions_4[4].size = ((::num_samples) - 1L - 0L) + 1L;
+      dimensions_4[4].lower_bound = 0L - 0L;
+      dimensions_4[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+      dependences[4].address = (void *)mcc_arg_4;
+      dependences[4].offset = 0L;
+      dependences[4].dimensions = dimensions_4;
+      dependences[4].flags.input = 1;
+      dependences[4].flags.output = 0;
+      dependences[4].flags.can_rename = 0;
+      dependences[4].flags.concurrent = 0;
+      dependences[4].flags.commutative = 0;
+      dependences[4].dimension_count = 5;
+      if (nanos_wd_ != (::nanos_wd_t)0)
+        {
+          (*ol_args).features = mcc_arg_0;
+          (*ol_args).predictions = mcc_arg_1;
+          (*ol_args).U_in = mcc_arg_2;
+          (*ol_args).mu_in = mcc_arg_3;
+          (*ol_args).B_in = mcc_arg_4;
+          ol_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
+          ol_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
+          ol_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
+          ol_copy_data[0].sharing = ::NANOS_SHARED;
+          ol_copy_data[0].address = (void *)mcc_arg_0;
+          ol_copy_data[0].flags.input = 1;
+          ol_copy_data[0].flags.output = 0;
+          ol_copy_data[0].dimension_count = (short int)1;
+          ol_copy_data[0].dimensions = &ol_copy_dimensions[0];
+          ol_copy_data[0].offset = 0L;
+          ol_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
+          ol_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
+          ol_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
+          ol_copy_data[1].sharing = ::NANOS_SHARED;
+          ol_copy_data[1].address = (void *)mcc_arg_1;
+          ol_copy_data[1].flags.input = 0;
+          ol_copy_data[1].flags.output = 1;
+          ol_copy_data[1].dimension_count = (short int)1;
+          ol_copy_data[1].dimensions = &ol_copy_dimensions[1];
+          ol_copy_data[1].offset = 0L;
+          ol_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
+          ol_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
+          ol_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
+          ol_copy_dimensions[2 + 1].size = 4L;
+          ol_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
+          ol_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
+          ol_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
+          ol_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
+          ol_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
+          ol_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
+          ol_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
+          ol_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_data[2].sharing = ::NANOS_SHARED;
+          ol_copy_data[2].address = (void *)mcc_arg_2;
+          ol_copy_data[2].flags.input = 1;
+          ol_copy_data[2].flags.output = 0;
+          ol_copy_data[2].dimension_count = (short int)5;
+          ol_copy_data[2].dimensions = &ol_copy_dimensions[2];
+          ol_copy_data[2].offset = 0L;
+          ol_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
+          ol_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
+          ol_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
+          ol_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
+          ol_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
+          ol_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
+          ol_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
+          ol_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_data[3].sharing = ::NANOS_SHARED;
+          ol_copy_data[3].address = (void *)mcc_arg_3;
+          ol_copy_data[3].flags.input = 1;
+          ol_copy_data[3].flags.output = 0;
+          ol_copy_data[3].dimension_count = (short int)3;
+          ol_copy_data[3].dimensions = &ol_copy_dimensions[7];
+          ol_copy_data[3].offset = 0L;
+          ol_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
+          ol_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
+          ol_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
+          ol_copy_dimensions[10 + 1].size = 2L;
+          ol_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
+          ol_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
+          ol_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
+          ol_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
+          ol_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
+          ol_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
+          ol_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
+          ol_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          ol_copy_data[4].sharing = ::NANOS_SHARED;
+          ol_copy_data[4].address = (void *)mcc_arg_4;
+          ol_copy_data[4].flags.input = 1;
+          ol_copy_data[4].flags.output = 0;
+          ol_copy_data[4].dimension_count = (short int)5;
+          ol_copy_data[4].dimensions = &ol_copy_dimensions[10];
+          ol_copy_data[4].offset = 0L;
+          nanos_err = ::nanos_set_translate_function(nanos_wd_, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_0);
           if (nanos_err != ::NANOS_OK)
             {
               ::nanos_handle_error(nanos_err);
             }
-          ::nanos_region_dimension_t dimensions_0[1L];
-          ::nanos_region_dimension_t dimensions_1[1L];
-          ::nanos_region_dimension_t dimensions_2[5L];
-          ::nanos_region_dimension_t dimensions_3[3L];
-          ::nanos_region_dimension_t dimensions_4[5L];
-          ::nanos_data_access_t dependences[5L];
-          dimensions_0[0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-          dimensions_0[0].lower_bound = (0L - 0L) * sizeof(::F_base);
-          dimensions_0[0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-          dependences[0].address = (void *)mcc_arg_0;
-          dependences[0].offset = 0L;
-          dependences[0].dimensions = dimensions_0;
-          dependences[0].flags.input = 1;
-          dependences[0].flags.output = 0;
-          dependences[0].flags.can_rename = 0;
-          dependences[0].flags.concurrent = 0;
-          dependences[0].flags.commutative = 0;
-          dependences[0].dimension_count = 1;
-          dimensions_1[0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-          dimensions_1[0].lower_bound = (0L - 0L) * sizeof(::P_base);
-          dimensions_1[0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-          dependences[1].address = (void *)mcc_arg_1;
-          dependences[1].offset = 0L;
-          dependences[1].dimensions = dimensions_1;
-          dependences[1].flags.input = 1;
-          dependences[1].flags.output = 1;
-          dependences[1].flags.can_rename = 0;
-          dependences[1].flags.concurrent = 0;
-          dependences[1].flags.commutative = 0;
-          dependences[1].dimension_count = 1;
-          dimensions_2[0].size = 8L * sizeof(::U_base);
-          dimensions_2[0].lower_bound = (0L - 0L) * sizeof(::U_base);
-          dimensions_2[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-          dimensions_2[1].size = 4L;
-          dimensions_2[1].lower_bound = 0L - 0L;
-          dimensions_2[1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-          dimensions_2[2].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_2[2].lower_bound = 0L - 0L;
-          dimensions_2[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_2[3].size = ((::num_proteins) - 1L - 0L) + 1L;
-          dimensions_2[3].lower_bound = 0L - 0L;
-          dimensions_2[3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_2[4].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_2[4].lower_bound = 0L - 0L;
-          dimensions_2[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[2].address = (void *)mcc_arg_3;
-          dependences[2].offset = 0L;
-          dependences[2].dimensions = dimensions_2;
-          dependences[2].flags.input = 1;
-          dependences[2].flags.output = 0;
-          dependences[2].flags.can_rename = 0;
-          dependences[2].flags.concurrent = 0;
-          dependences[2].flags.commutative = 0;
-          dependences[2].dimension_count = 5;
-          dimensions_3[0].size = 8L * sizeof(::mu_base);
-          dimensions_3[0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-          dimensions_3[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-          dimensions_3[1].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_3[1].lower_bound = 0L - 0L;
-          dimensions_3[1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_3[2].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_3[2].lower_bound = 0L - 0L;
-          dimensions_3[2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[3].address = (void *)mcc_arg_4;
-          dependences[3].offset = 0L;
-          dependences[3].dimensions = dimensions_3;
-          dependences[3].flags.input = 1;
-          dependences[3].flags.output = 0;
-          dependences[3].flags.can_rename = 0;
-          dependences[3].flags.concurrent = 0;
-          dependences[3].flags.commutative = 0;
-          dependences[3].dimension_count = 3;
-          dimensions_4[0].size = 8L * sizeof(::B_base);
-          dimensions_4[0].lower_bound = (0L - 0L) * sizeof(::B_base);
-          dimensions_4[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-          dimensions_4[1].size = 2L;
-          dimensions_4[1].lower_bound = 0L - 0L;
-          dimensions_4[1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-          dimensions_4[2].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_4[2].lower_bound = 0L - 0L;
-          dimensions_4[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_4[3].size = ((::num_features) - 1L - 0L) + 1L;
-          dimensions_4[3].lower_bound = 0L - 0L;
-          dimensions_4[3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_4[4].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_4[4].lower_bound = 0L - 0L;
-          dimensions_4[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[4].address = (void *)mcc_arg_5;
-          dependences[4].offset = 0L;
-          dependences[4].dimensions = dimensions_4;
-          dependences[4].flags.input = 1;
-          dependences[4].flags.output = 0;
-          dependences[4].flags.can_rename = 0;
-          dependences[4].flags.concurrent = 0;
-          dependences[4].flags.commutative = 0;
-          dependences[4].dimension_count = 5;
-          if (nanos_wd_ != (::nanos_wd_t)0)
-            {
-              (*ol_args).features = mcc_arg_0;
-              (*ol_args).predictions = mcc_arg_1;
-              (*ol_args).update_model = mcc_arg_2;
-              (*ol_args).U_in = mcc_arg_3;
-              (*ol_args).mu_in = mcc_arg_4;
-              (*ol_args).B_in = mcc_arg_5;
-              ol_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-              ol_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
-              ol_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-              ol_copy_data[0].sharing = ::NANOS_SHARED;
-              ol_copy_data[0].address = (void *)mcc_arg_0;
-              ol_copy_data[0].flags.input = 1;
-              ol_copy_data[0].flags.output = 0;
-              ol_copy_data[0].dimension_count = (short int)1;
-              ol_copy_data[0].dimensions = &ol_copy_dimensions[0];
-              ol_copy_data[0].offset = 0L;
-              ol_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-              ol_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
-              ol_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-              ol_copy_data[1].sharing = ::NANOS_SHARED;
-              ol_copy_data[1].address = (void *)mcc_arg_1;
-              ol_copy_data[1].flags.input = 1;
-              ol_copy_data[1].flags.output = 1;
-              ol_copy_data[1].dimension_count = (short int)1;
-              ol_copy_data[1].dimensions = &ol_copy_dimensions[1];
-              ol_copy_data[1].offset = 0L;
-              ol_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
-              ol_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
-              ol_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-              ol_copy_dimensions[2 + 1].size = 4L;
-              ol_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[2].sharing = ::NANOS_SHARED;
-              ol_copy_data[2].address = (void *)mcc_arg_3;
-              ol_copy_data[2].flags.input = 1;
-              ol_copy_data[2].flags.output = 0;
-              ol_copy_data[2].dimension_count = (short int)5;
-              ol_copy_data[2].dimensions = &ol_copy_dimensions[2];
-              ol_copy_data[2].offset = 0L;
-              ol_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[3].sharing = ::NANOS_SHARED;
-              ol_copy_data[3].address = (void *)mcc_arg_4;
-              ol_copy_data[3].flags.input = 1;
-              ol_copy_data[3].flags.output = 0;
-              ol_copy_data[3].dimension_count = (short int)3;
-              ol_copy_data[3].dimensions = &ol_copy_dimensions[7];
-              ol_copy_data[3].offset = 0L;
-              ol_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
-              ol_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
-              ol_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-              ol_copy_dimensions[10 + 1].size = 2L;
-              ol_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[4].sharing = ::NANOS_SHARED;
-              ol_copy_data[4].address = (void *)mcc_arg_5;
-              ol_copy_data[4].flags.input = 1;
-              ol_copy_data[4].flags.output = 0;
-              ol_copy_data[4].dimension_count = (short int)5;
-              ol_copy_data[4].dimensions = &ol_copy_dimensions[10];
-              ol_copy_data[4].offset = 0L;
-              nanos_err = ::nanos_set_translate_function(nanos_wd_, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_0);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
-              nanos_err = ::nanos_submit(nanos_wd_, 5, &dependences[0], (::nanos_team_t)0);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
-            }
-          else
-            {
-              imm_args.features = mcc_arg_0;
-              imm_args.predictions = mcc_arg_1;
-              imm_args.update_model = mcc_arg_2;
-              imm_args.U_in = mcc_arg_3;
-              imm_args.mu_in = mcc_arg_4;
-              imm_args.B_in = mcc_arg_5;
-              ::nanos_copy_data_t imm_copy_data[5L];
-              ::nanos_region_dimension_internal_t imm_copy_dimensions[15L];
-              imm_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-              imm_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
-              imm_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-              imm_copy_data[0].sharing = ::NANOS_SHARED;
-              imm_copy_data[0].address = (void *)mcc_arg_0;
-              imm_copy_data[0].flags.input = 1;
-              imm_copy_data[0].flags.output = 0;
-              imm_copy_data[0].dimension_count = (short int)1;
-              imm_copy_data[0].dimensions = &imm_copy_dimensions[0];
-              imm_copy_data[0].offset = 0L;
-              imm_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-              imm_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
-              imm_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-              imm_copy_data[1].sharing = ::NANOS_SHARED;
-              imm_copy_data[1].address = (void *)mcc_arg_1;
-              imm_copy_data[1].flags.input = 1;
-              imm_copy_data[1].flags.output = 1;
-              imm_copy_data[1].dimension_count = (short int)1;
-              imm_copy_data[1].dimensions = &imm_copy_dimensions[1];
-              imm_copy_data[1].offset = 0L;
-              imm_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
-              imm_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
-              imm_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-              imm_copy_dimensions[2 + 1].size = 4L;
-              imm_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[2].sharing = ::NANOS_SHARED;
-              imm_copy_data[2].address = (void *)mcc_arg_3;
-              imm_copy_data[2].flags.input = 1;
-              imm_copy_data[2].flags.output = 0;
-              imm_copy_data[2].dimension_count = (short int)5;
-              imm_copy_data[2].dimensions = &imm_copy_dimensions[2];
-              imm_copy_data[2].offset = 0L;
-              imm_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[3].sharing = ::NANOS_SHARED;
-              imm_copy_data[3].address = (void *)mcc_arg_4;
-              imm_copy_data[3].flags.input = 1;
-              imm_copy_data[3].flags.output = 0;
-              imm_copy_data[3].dimension_count = (short int)3;
-              imm_copy_data[3].dimensions = &imm_copy_dimensions[7];
-              imm_copy_data[3].offset = 0L;
-              imm_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
-              imm_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
-              imm_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-              imm_copy_dimensions[10 + 1].size = 2L;
-              imm_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[4].sharing = ::NANOS_SHARED;
-              imm_copy_data[4].address = (void *)mcc_arg_5;
-              imm_copy_data[4].flags.input = 1;
-              imm_copy_data[4].flags.output = 0;
-              imm_copy_data[4].dimension_count = (short int)5;
-              imm_copy_data[4].dimensions = &imm_copy_dimensions[10];
-              imm_copy_data[4].offset = 0L;
-              nanos_err = ::nanos_create_wd_and_run_compact(&nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_0_t &), &imm_args, 5, &dependences[0], imm_copy_data, imm_copy_dimensions, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_0);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
-            }
-        }
-      }
-    }
-  while (0);
-}
-struct  nanos_args_1_t
-{
-    ::F_base *features;
-    ::P_base *predictions;
-    bool update_model;
-    ::U_base (*U_in)[4L][8L];
-    ::mu_base (*mu_in)[8L];
-    ::B_base (*B_in)[2L][8L];
-};
-void fpga_ol_predict_or_update_model_3_unpacked(::F_base *features, ::P_base *predictions, bool update_model, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw();
-static void fpga_ol_predict_or_update_model_3(::nanos_args_1_t &args) throw();
-static void nanos_xlate_fun_predictcpp_1(::nanos_args_1_t &arg, ::nanos_wd_t wd) throw()
-{
-  {
-    void *device_base_address;
-    ::nanos_err_t nanos_err;
-    device_base_address = 0;
-    nanos_err = ::nanos_get_addr(0, &device_base_address, wd);
-    if (nanos_err != ::NANOS_OK)
-      {
-        ::nanos_handle_error(nanos_err);
-      }
-    arg.features = (::F_base *)device_base_address;
-  }
-  {
-    void *device_base_address;
-    ::nanos_err_t nanos_err;
-    device_base_address = 0;
-    nanos_err = ::nanos_get_addr(1, &device_base_address, wd);
-    if (nanos_err != ::NANOS_OK)
-      {
-        ::nanos_handle_error(nanos_err);
-      }
-    arg.predictions = (::P_base *)device_base_address;
-  }
-  {
-    void *device_base_address;
-    ::nanos_err_t nanos_err;
-    device_base_address = 0;
-    nanos_err = ::nanos_get_addr(2, &device_base_address, wd);
-    if (nanos_err != ::NANOS_OK)
-      {
-        ::nanos_handle_error(nanos_err);
-      }
-    arg.U_in = (::U_base (*)[4L][8L])device_base_address;
-  }
-  {
-    void *device_base_address;
-    ::nanos_err_t nanos_err;
-    device_base_address = 0;
-    nanos_err = ::nanos_get_addr(3, &device_base_address, wd);
-    if (nanos_err != ::NANOS_OK)
-      {
-        ::nanos_handle_error(nanos_err);
-      }
-    arg.mu_in = (::mu_base (*)[8L])device_base_address;
-  }
-  {
-    void *device_base_address;
-    ::nanos_err_t nanos_err;
-    device_base_address = 0;
-    nanos_err = ::nanos_get_addr(4, &device_base_address, wd);
-    if (nanos_err != ::NANOS_OK)
-      {
-        ::nanos_handle_error(nanos_err);
-      }
-    arg.B_in = (::B_base (*)[2L][8L])device_base_address;
-  }
-}
-void predict_compound(::F_base *in, ::P_base *out)
-{
-  do
-    {
-      {
-        ::F_base *mcc_arg_8(in);
-        ::P_base *mcc_arg_9(out);
-        bool mcc_arg_10(false);
-        ::U_base (*mcc_arg_11)[4L][8L](0);
-        ::mu_base (*mcc_arg_12)[8L](0);
-        ::B_base (*mcc_arg_13)[2L][8L](0);
-        {
-           /* device argument type */ 
-          static ::nanos_fpga_args_t fpga_ol_predict_or_update_model_3_args /* () */ ;
-          fpga_ol_predict_or_update_model_3_args.outline = (void (*)(void *))(void (*)(::nanos_args_1_t &))::fpga_ol_predict_or_update_model_3;
-          fpga_ol_predict_or_update_model_3_args.type = 1195774825;
-          static ::nanos_const_wd_definition_1 nanos_wd_const_data = { /* .::nanos_const_wd_definition_1::base =  */ { /* .::nanos_const_wd_definition_tag::props =  */ { /* .::nanos_wd_props_t::mandatory_creation =  */ 0,  /* .::nanos_wd_props_t::tied =  */ 0,  /* .::nanos_wd_props_t::clear_chunk =  */ 0,  /* .::nanos_wd_props_t::reserved0 =  */ 0,  /* .::nanos_wd_props_t::reserved1 =  */ 0,  /* .::nanos_wd_props_t::reserved2 =  */ 0,  /* .::nanos_wd_props_t::reserved3 =  */ 0,  /* .::nanos_wd_props_t::reserved4 =  */ 0},  /* .::nanos_const_wd_definition_tag::data_alignment =  */ alignof(::nanos_args_1_t),  /* .::nanos_const_wd_definition_tag::num_copies =  */ 5,  /* .::nanos_const_wd_definition_tag::num_devices =  */ 1,  /* .::nanos_const_wd_definition_tag::num_dimensions =  */ 15,  /* .::nanos_const_wd_definition_tag::description =  */ "predict_or_update_model"},  /* .::nanos_const_wd_definition_1::devices =  */ { /* [0] =  */ { /* .::nanos_device_t::factory =  */ ::nanos_fpga_factory,  /* .::nanos_device_t::arg =  */ &fpga_ol_predict_or_update_model_3_args}}};
-          ::nanos_wd_dyn_props_t nanos_wd_dyn_props /* () */ ;
-          nanos_wd_dyn_props.tie_to = 0;
-          nanos_wd_dyn_props.priority = 0;
-          nanos_wd_dyn_props.flags.is_final = 0;
-          nanos_wd_dyn_props.flags.is_implicit = 0;
-          nanos_wd_dyn_props.flags.is_recover = 0;
-          ::nanos_args_1_t *ol_args;
-          ol_args = (::nanos_args_1_t *)0;
-          ::nanos_args_1_t imm_args /* () */ ;
-          ::nanos_wd_t nanos_wd_((::nanos_wd_t)0);
-          ::nanos_copy_data_t *ol_copy_data((::nanos_copy_data_t *)0);
-          ::nanos_region_dimension_internal_t *ol_copy_dimensions((::nanos_region_dimension_internal_t *)0);
-          ::nanos_err_t nanos_err;
-          nanos_err = ::nanos_create_wd_compact(&nanos_wd_, &nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_1_t &), (void **)&ol_args, ::nanos_current_wd(), &ol_copy_data, &ol_copy_dimensions);
+          nanos_err = ::nanos_submit(nanos_wd_, 5, &dependences[0], (::nanos_team_t)0);
           if (nanos_err != ::NANOS_OK)
             {
               ::nanos_handle_error(nanos_err);
             }
-          ::nanos_region_dimension_t dimensions_5[1L];
-          ::nanos_region_dimension_t dimensions_6[1L];
-          ::nanos_region_dimension_t dimensions_7[5L];
-          ::nanos_region_dimension_t dimensions_8[3L];
-          ::nanos_region_dimension_t dimensions_9[5L];
-          ::nanos_data_access_t dependences[5L];
-          dimensions_5[0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-          dimensions_5[0].lower_bound = (0L - 0L) * sizeof(::F_base);
-          dimensions_5[0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-          dependences[0].address = (void *)mcc_arg_8;
-          dependences[0].offset = 0L;
-          dependences[0].dimensions = dimensions_5;
-          dependences[0].flags.input = 1;
-          dependences[0].flags.output = 0;
-          dependences[0].flags.can_rename = 0;
-          dependences[0].flags.concurrent = 0;
-          dependences[0].flags.commutative = 0;
-          dependences[0].dimension_count = 1;
-          dimensions_6[0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-          dimensions_6[0].lower_bound = (0L - 0L) * sizeof(::P_base);
-          dimensions_6[0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-          dependences[1].address = (void *)mcc_arg_9;
-          dependences[1].offset = 0L;
-          dependences[1].dimensions = dimensions_6;
-          dependences[1].flags.input = 1;
-          dependences[1].flags.output = 1;
-          dependences[1].flags.can_rename = 0;
-          dependences[1].flags.concurrent = 0;
-          dependences[1].flags.commutative = 0;
-          dependences[1].dimension_count = 1;
-          dimensions_7[0].size = 8L * sizeof(::U_base);
-          dimensions_7[0].lower_bound = (0L - 0L) * sizeof(::U_base);
-          dimensions_7[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-          dimensions_7[1].size = 4L;
-          dimensions_7[1].lower_bound = 0L - 0L;
-          dimensions_7[1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-          dimensions_7[2].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_7[2].lower_bound = 0L - 0L;
-          dimensions_7[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_7[3].size = ((::num_proteins) - 1L - 0L) + 1L;
-          dimensions_7[3].lower_bound = 0L - 0L;
-          dimensions_7[3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_7[4].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_7[4].lower_bound = 0L - 0L;
-          dimensions_7[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[2].address = (void *)mcc_arg_11;
-          dependences[2].offset = 0L;
-          dependences[2].dimensions = dimensions_7;
-          dependences[2].flags.input = 1;
-          dependences[2].flags.output = 0;
-          dependences[2].flags.can_rename = 0;
-          dependences[2].flags.concurrent = 0;
-          dependences[2].flags.commutative = 0;
-          dependences[2].dimension_count = 5;
-          dimensions_8[0].size = 8L * sizeof(::mu_base);
-          dimensions_8[0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-          dimensions_8[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-          dimensions_8[1].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_8[1].lower_bound = 0L - 0L;
-          dimensions_8[1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_8[2].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_8[2].lower_bound = 0L - 0L;
-          dimensions_8[2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[3].address = (void *)mcc_arg_12;
-          dependences[3].offset = 0L;
-          dependences[3].dimensions = dimensions_8;
-          dependences[3].flags.input = 1;
-          dependences[3].flags.output = 0;
-          dependences[3].flags.can_rename = 0;
-          dependences[3].flags.concurrent = 0;
-          dependences[3].flags.commutative = 0;
-          dependences[3].dimension_count = 3;
-          dimensions_9[0].size = 8L * sizeof(::B_base);
-          dimensions_9[0].lower_bound = (0L - 0L) * sizeof(::B_base);
-          dimensions_9[0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-          dimensions_9[1].size = 2L;
-          dimensions_9[1].lower_bound = 0L - 0L;
-          dimensions_9[1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-          dimensions_9[2].size = ((::num_latent) - 1L - 0L) + 1L;
-          dimensions_9[2].lower_bound = 0L - 0L;
-          dimensions_9[2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_9[3].size = ((::num_features) - 1L - 0L) + 1L;
-          dimensions_9[3].lower_bound = 0L - 0L;
-          dimensions_9[3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-          dimensions_9[4].size = ((::num_samples) - 1L - 0L) + 1L;
-          dimensions_9[4].lower_bound = 0L - 0L;
-          dimensions_9[4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-          dependences[4].address = (void *)mcc_arg_13;
-          dependences[4].offset = 0L;
-          dependences[4].dimensions = dimensions_9;
-          dependences[4].flags.input = 1;
-          dependences[4].flags.output = 0;
-          dependences[4].flags.can_rename = 0;
-          dependences[4].flags.concurrent = 0;
-          dependences[4].flags.commutative = 0;
-          dependences[4].dimension_count = 5;
-          if (nanos_wd_ != (::nanos_wd_t)0)
+        }
+      else
+        {
+          imm_args.features = mcc_arg_0;
+          imm_args.predictions = mcc_arg_1;
+          imm_args.U_in = mcc_arg_2;
+          imm_args.mu_in = mcc_arg_3;
+          imm_args.B_in = mcc_arg_4;
+          ::nanos_copy_data_t imm_copy_data[5L];
+          ::nanos_region_dimension_internal_t imm_copy_dimensions[15L];
+          imm_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
+          imm_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
+          imm_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
+          imm_copy_data[0].sharing = ::NANOS_SHARED;
+          imm_copy_data[0].address = (void *)mcc_arg_0;
+          imm_copy_data[0].flags.input = 1;
+          imm_copy_data[0].flags.output = 0;
+          imm_copy_data[0].dimension_count = (short int)1;
+          imm_copy_data[0].dimensions = &imm_copy_dimensions[0];
+          imm_copy_data[0].offset = 0L;
+          imm_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
+          imm_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
+          imm_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
+          imm_copy_data[1].sharing = ::NANOS_SHARED;
+          imm_copy_data[1].address = (void *)mcc_arg_1;
+          imm_copy_data[1].flags.input = 0;
+          imm_copy_data[1].flags.output = 1;
+          imm_copy_data[1].dimension_count = (short int)1;
+          imm_copy_data[1].dimensions = &imm_copy_dimensions[1];
+          imm_copy_data[1].offset = 0L;
+          imm_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
+          imm_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
+          imm_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
+          imm_copy_dimensions[2 + 1].size = 4L;
+          imm_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
+          imm_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
+          imm_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
+          imm_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
+          imm_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
+          imm_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
+          imm_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
+          imm_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_data[2].sharing = ::NANOS_SHARED;
+          imm_copy_data[2].address = (void *)mcc_arg_2;
+          imm_copy_data[2].flags.input = 1;
+          imm_copy_data[2].flags.output = 0;
+          imm_copy_data[2].dimension_count = (short int)5;
+          imm_copy_data[2].dimensions = &imm_copy_dimensions[2];
+          imm_copy_data[2].offset = 0L;
+          imm_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
+          imm_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
+          imm_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
+          imm_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
+          imm_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
+          imm_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
+          imm_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
+          imm_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_data[3].sharing = ::NANOS_SHARED;
+          imm_copy_data[3].address = (void *)mcc_arg_3;
+          imm_copy_data[3].flags.input = 1;
+          imm_copy_data[3].flags.output = 0;
+          imm_copy_data[3].dimension_count = (short int)3;
+          imm_copy_data[3].dimensions = &imm_copy_dimensions[7];
+          imm_copy_data[3].offset = 0L;
+          imm_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
+          imm_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
+          imm_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
+          imm_copy_dimensions[10 + 1].size = 2L;
+          imm_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
+          imm_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
+          imm_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
+          imm_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
+          imm_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
+          imm_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
+          imm_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
+          imm_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
+          imm_copy_data[4].sharing = ::NANOS_SHARED;
+          imm_copy_data[4].address = (void *)mcc_arg_4;
+          imm_copy_data[4].flags.input = 1;
+          imm_copy_data[4].flags.output = 0;
+          imm_copy_data[4].dimension_count = (short int)5;
+          imm_copy_data[4].dimensions = &imm_copy_dimensions[10];
+          imm_copy_data[4].offset = 0L;
+          nanos_err = ::nanos_create_wd_and_run_compact(&nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_0_t &), &imm_args, 5, &dependences[0], imm_copy_data, imm_copy_dimensions, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_0);
+          if (nanos_err != ::NANOS_OK)
             {
-              (*ol_args).features = mcc_arg_8;
-              (*ol_args).predictions = mcc_arg_9;
-              (*ol_args).update_model = mcc_arg_10;
-              (*ol_args).U_in = mcc_arg_11;
-              (*ol_args).mu_in = mcc_arg_12;
-              (*ol_args).B_in = mcc_arg_13;
-              ol_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-              ol_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
-              ol_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-              ol_copy_data[0].sharing = ::NANOS_SHARED;
-              ol_copy_data[0].address = (void *)mcc_arg_8;
-              ol_copy_data[0].flags.input = 1;
-              ol_copy_data[0].flags.output = 0;
-              ol_copy_data[0].dimension_count = (short int)1;
-              ol_copy_data[0].dimensions = &ol_copy_dimensions[0];
-              ol_copy_data[0].offset = 0L;
-              ol_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-              ol_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
-              ol_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-              ol_copy_data[1].sharing = ::NANOS_SHARED;
-              ol_copy_data[1].address = (void *)mcc_arg_9;
-              ol_copy_data[1].flags.input = 1;
-              ol_copy_data[1].flags.output = 1;
-              ol_copy_data[1].dimension_count = (short int)1;
-              ol_copy_data[1].dimensions = &ol_copy_dimensions[1];
-              ol_copy_data[1].offset = 0L;
-              ol_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
-              ol_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
-              ol_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-              ol_copy_dimensions[2 + 1].size = 4L;
-              ol_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
-              ol_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[2].sharing = ::NANOS_SHARED;
-              ol_copy_data[2].address = (void *)mcc_arg_11;
-              ol_copy_data[2].flags.input = 1;
-              ol_copy_data[2].flags.output = 0;
-              ol_copy_data[2].dimension_count = (short int)5;
-              ol_copy_data[2].dimensions = &ol_copy_dimensions[2];
-              ol_copy_data[2].offset = 0L;
-              ol_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-              ol_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[3].sharing = ::NANOS_SHARED;
-              ol_copy_data[3].address = (void *)mcc_arg_12;
-              ol_copy_data[3].flags.input = 1;
-              ol_copy_data[3].flags.output = 0;
-              ol_copy_data[3].dimension_count = (short int)3;
-              ol_copy_data[3].dimensions = &ol_copy_dimensions[7];
-              ol_copy_data[3].offset = 0L;
-              ol_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
-              ol_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
-              ol_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-              ol_copy_dimensions[10 + 1].size = 2L;
-              ol_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              ol_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
-              ol_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              ol_copy_data[4].sharing = ::NANOS_SHARED;
-              ol_copy_data[4].address = (void *)mcc_arg_13;
-              ol_copy_data[4].flags.input = 1;
-              ol_copy_data[4].flags.output = 0;
-              ol_copy_data[4].dimension_count = (short int)5;
-              ol_copy_data[4].dimensions = &ol_copy_dimensions[10];
-              ol_copy_data[4].offset = 0L;
-              nanos_err = ::nanos_set_translate_function(nanos_wd_, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_1);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
-              nanos_err = ::nanos_submit(nanos_wd_, 5, &dependences[0], (::nanos_team_t)0);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
-            }
-          else
-            {
-              imm_args.features = mcc_arg_8;
-              imm_args.predictions = mcc_arg_9;
-              imm_args.update_model = mcc_arg_10;
-              imm_args.U_in = mcc_arg_11;
-              imm_args.mu_in = mcc_arg_12;
-              imm_args.B_in = mcc_arg_13;
-              ::nanos_copy_data_t imm_copy_data[5L];
-              ::nanos_region_dimension_internal_t imm_copy_dimensions[15L];
-              imm_copy_dimensions[0 + 0].size = (((::num_features) - 1L - 0L) + 1L) * sizeof(::F_base);
-              imm_copy_dimensions[0 + 0].lower_bound = (0L - 0L) * sizeof(::F_base);
-              imm_copy_dimensions[0 + 0].accessed_length = ((::num_features) - 1L - 0L - (0L - 0L) + 1) * sizeof(::F_base);
-              imm_copy_data[0].sharing = ::NANOS_SHARED;
-              imm_copy_data[0].address = (void *)mcc_arg_8;
-              imm_copy_data[0].flags.input = 1;
-              imm_copy_data[0].flags.output = 0;
-              imm_copy_data[0].dimension_count = (short int)1;
-              imm_copy_data[0].dimensions = &imm_copy_dimensions[0];
-              imm_copy_data[0].offset = 0L;
-              imm_copy_dimensions[1 + 0].size = (((::num_proteins) - 1L - 0L) + 1L) * sizeof(::P_base);
-              imm_copy_dimensions[1 + 0].lower_bound = (0L - 0L) * sizeof(::P_base);
-              imm_copy_dimensions[1 + 0].accessed_length = ((::num_proteins) - 1L - 0L - (0L - 0L) + 1) * sizeof(::P_base);
-              imm_copy_data[1].sharing = ::NANOS_SHARED;
-              imm_copy_data[1].address = (void *)mcc_arg_9;
-              imm_copy_data[1].flags.input = 1;
-              imm_copy_data[1].flags.output = 1;
-              imm_copy_data[1].dimension_count = (short int)1;
-              imm_copy_data[1].dimensions = &imm_copy_dimensions[1];
-              imm_copy_data[1].offset = 0L;
-              imm_copy_dimensions[2 + 0].size = 8L * sizeof(::U_base);
-              imm_copy_dimensions[2 + 0].lower_bound = (0L - 0L) * sizeof(::U_base);
-              imm_copy_dimensions[2 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::U_base);
-              imm_copy_dimensions[2 + 1].size = 4L;
-              imm_copy_dimensions[2 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 1].accessed_length = 3L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 3].size = ((::num_proteins) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 3].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 3].accessed_length = (::num_proteins) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[2 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[2 + 4].lower_bound = 0L - 0L;
-              imm_copy_dimensions[2 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[2].sharing = ::NANOS_SHARED;
-              imm_copy_data[2].address = (void *)mcc_arg_11;
-              imm_copy_data[2].flags.input = 1;
-              imm_copy_data[2].flags.output = 0;
-              imm_copy_data[2].dimension_count = (short int)5;
-              imm_copy_data[2].dimensions = &imm_copy_dimensions[2];
-              imm_copy_data[2].offset = 0L;
-              imm_copy_dimensions[7 + 0].size = 8L * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 0].lower_bound = (0L - 0L) * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::mu_base);
-              imm_copy_dimensions[7 + 1].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[7 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[7 + 1].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[7 + 2].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[7 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[7 + 2].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[3].sharing = ::NANOS_SHARED;
-              imm_copy_data[3].address = (void *)mcc_arg_12;
-              imm_copy_data[3].flags.input = 1;
-              imm_copy_data[3].flags.output = 0;
-              imm_copy_data[3].dimension_count = (short int)3;
-              imm_copy_data[3].dimensions = &imm_copy_dimensions[7];
-              imm_copy_data[3].offset = 0L;
-              imm_copy_dimensions[10 + 0].size = 8L * sizeof(::B_base);
-              imm_copy_dimensions[10 + 0].lower_bound = (0L - 0L) * sizeof(::B_base);
-              imm_copy_dimensions[10 + 0].accessed_length = (7L - 0L - (0L - 0L) + 1) * sizeof(::B_base);
-              imm_copy_dimensions[10 + 1].size = 2L;
-              imm_copy_dimensions[10 + 1].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 1].accessed_length = 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 2].size = ((::num_latent) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 2].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 2].accessed_length = (::num_latent) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 3].size = ((::num_features) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 3].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 3].accessed_length = (::num_features) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_dimensions[10 + 4].size = ((::num_samples) - 1L - 0L) + 1L;
-              imm_copy_dimensions[10 + 4].lower_bound = 0L - 0L;
-              imm_copy_dimensions[10 + 4].accessed_length = (::num_samples) - 1L - 0L - (0L - 0L) + 1;
-              imm_copy_data[4].sharing = ::NANOS_SHARED;
-              imm_copy_data[4].address = (void *)mcc_arg_13;
-              imm_copy_data[4].flags.input = 1;
-              imm_copy_data[4].flags.output = 0;
-              imm_copy_data[4].dimension_count = (short int)5;
-              imm_copy_data[4].dimensions = &imm_copy_dimensions[10];
-              imm_copy_data[4].offset = 0L;
-              nanos_err = ::nanos_create_wd_and_run_compact(&nanos_wd_const_data.base, &nanos_wd_dyn_props, sizeof(::nanos_args_1_t &), &imm_args, 5, &dependences[0], imm_copy_data, imm_copy_dimensions, (::nanos_translate_args_t)::nanos_xlate_fun_predictcpp_1);
-              if (nanos_err != ::NANOS_OK)
-                {
-                  ::nanos_handle_error(nanos_err);
-                }
+              ::nanos_handle_error(nanos_err);
             }
         }
-      }
     }
-  while (0);
+  }
 }
-void fpga_ol_predict_or_update_model_1_unpacked(::F_base *features, ::P_base *predictions, bool update_model, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw()
+void fpga_ol_predict_with_model_task_1_unpacked(::F_base *features, ::P_base *predictions, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw()
 {
   union  mcc_union_anon_28
   {
@@ -6333,39 +5924,31 @@ void fpga_ol_predict_or_update_model_1_unpacked(::F_base *features, ::P_base *pr
   ::nanos_fpga_set_task_arg(::nanos_current_wd(), 1, 1, 1, mcc_arg_1.predictions_task_arg);
   union  mcc_union_anon_30
   {
-      bool update_model;
-      ::uint64_t update_model_task_arg;
+      ::U_base (*U_in)[4L][8L];
+      ::uint64_t U_in_task_arg;
   };
   mcc_union_anon_30 mcc_arg_2 /* () */ ;
-  mcc_arg_2.update_model = update_model;
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 2, 1, 1, mcc_arg_2.update_model_task_arg);
+  mcc_arg_2.U_in = (::U_base (*)[4L][8L])::nanos_fpga_get_phy_address((void *)U_in);
+  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 2, 1, 1, mcc_arg_2.U_in_task_arg);
   union  mcc_union_anon_31
   {
-      ::U_base (*U_in)[4L][8L];
-      ::uint64_t U_in_task_arg;
+      ::mu_base (*mu_in)[8L];
+      ::uint64_t mu_in_task_arg;
   };
   mcc_union_anon_31 mcc_arg_3 /* () */ ;
-  mcc_arg_3.U_in = (::U_base (*)[4L][8L])::nanos_fpga_get_phy_address((void *)U_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 3, 1, 1, mcc_arg_3.U_in_task_arg);
+  mcc_arg_3.mu_in = (::mu_base (*)[8L])::nanos_fpga_get_phy_address((void *)mu_in);
+  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 3, 1, 1, mcc_arg_3.mu_in_task_arg);
   union  mcc_union_anon_32
   {
-      ::mu_base (*mu_in)[8L];
-      ::uint64_t mu_in_task_arg;
+      ::B_base (*B_in)[2L][8L];
+      ::uint64_t B_in_task_arg;
   };
   mcc_union_anon_32 mcc_arg_4 /* () */ ;
-  mcc_arg_4.mu_in = (::mu_base (*)[8L])::nanos_fpga_get_phy_address((void *)mu_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 4, 1, 1, mcc_arg_4.mu_in_task_arg);
-  union  mcc_union_anon_33
-  {
-      ::B_base (*B_in)[2L][8L];
-      ::uint64_t B_in_task_arg;
-  };
-  mcc_union_anon_33 mcc_arg_5 /* () */ ;
-  mcc_arg_5.B_in = (::B_base (*)[2L][8L])::nanos_fpga_get_phy_address((void *)B_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 5, 1, 1, mcc_arg_5.B_in_task_arg);
+  mcc_arg_4.B_in = (::B_base (*)[2L][8L])::nanos_fpga_get_phy_address((void *)B_in);
+  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 4, 1, 1, mcc_arg_4.B_in_task_arg);
   ;
 }
-static void fpga_ol_predict_or_update_model_1(::nanos_args_0_t &args) throw()
+static void fpga_ol_predict_with_model_task_1(::nanos_args_0_t &args) throw()
 {
   {
     static int nanos_funct_id_init(0);
@@ -6378,7 +5961,7 @@ static void fpga_ol_predict_or_update_model_1(::nanos_args_0_t &args) throw()
           {
             ::nanos_handle_error(nanos_err);
           }
-        nanos_err = ::nanos_instrument_register_value_with_val((::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_or_update_model_1, "user-funct-location", "fpga_ol_predict_or_update_model_1@predict.cpp@132@FUNCTION", "void ::predict_or_update_model(::F_base [2L], ::P_base [4L], bool, ::U_base [4L][4L][8L], ::mu_base [4L][8L], ::B_base [4L][2L][8L])@predict.cpp@132@FUNCTION", 0);
+        nanos_err = ::nanos_instrument_register_value_with_val((::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_with_model_task_1, "user-funct-location", "fpga_ol_predict_with_model_task_1@predict.cpp@129@FUNCTION", "void ::predict_with_model_task(::F_base [2L], ::P_base [4L], ::U_base [4L][4L][8L], ::mu_base [4L][8L], ::B_base [4L][2L][8L])@predict.cpp@129@FUNCTION", 0);
         if (nanos_err != ::NANOS_OK)
           {
             ::nanos_handle_error(nanos_err);
@@ -6388,96 +5971,12 @@ static void fpga_ol_predict_or_update_model_1(::nanos_args_0_t &args) throw()
     ::nanos_event_t event /* () */ ;
     event.type = ::NANOS_BURST_START;
     event.key = nanos_instr_uf_location_key;
-    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_or_update_model_1;
+    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_with_model_task_1;
     nanos_err = ::nanos_instrument_events(1, &event);
-    ::fpga_ol_predict_or_update_model_1_unpacked(args.features, args.predictions, args.update_model, args.U_in, args.mu_in, args.B_in);
+    ::fpga_ol_predict_with_model_task_1_unpacked(args.features, args.predictions, args.U_in, args.mu_in, args.B_in);
     event.type = ::NANOS_BURST_END;
     event.key = nanos_instr_uf_location_key;
-    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_or_update_model_1;
-    nanos_err = ::nanos_instrument_events(1, &event);
-  }
-}
-void fpga_ol_predict_or_update_model_3_unpacked(::F_base *features, ::P_base *predictions, bool update_model, ::U_base (*U_in)[4L][8L], ::mu_base (*mu_in)[8L], ::B_base (*B_in)[2L][8L]) throw()
-{
-  union  mcc_union_anon_34
-  {
-      ::F_base *features;
-      ::uint64_t features_task_arg;
-  };
-  mcc_union_anon_34 mcc_arg_8 /* () */ ;
-  mcc_arg_8.features = (::F_base *)::nanos_fpga_get_phy_address((void *)features);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 0, 1, 1, mcc_arg_8.features_task_arg);
-  union  mcc_union_anon_35
-  {
-      ::P_base *predictions;
-      ::uint64_t predictions_task_arg;
-  };
-  mcc_union_anon_35 mcc_arg_9 /* () */ ;
-  mcc_arg_9.predictions = (::P_base *)::nanos_fpga_get_phy_address((void *)predictions);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 1, 1, 1, mcc_arg_9.predictions_task_arg);
-  union  mcc_union_anon_36
-  {
-      bool update_model;
-      ::uint64_t update_model_task_arg;
-  };
-  mcc_union_anon_36 mcc_arg_10 /* () */ ;
-  mcc_arg_10.update_model = update_model;
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 2, 1, 1, mcc_arg_10.update_model_task_arg);
-  union  mcc_union_anon_37
-  {
-      ::U_base (*U_in)[4L][8L];
-      ::uint64_t U_in_task_arg;
-  };
-  mcc_union_anon_37 mcc_arg_11 /* () */ ;
-  mcc_arg_11.U_in = (::U_base (*)[4L][8L])::nanos_fpga_get_phy_address((void *)U_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 3, 1, 1, mcc_arg_11.U_in_task_arg);
-  union  mcc_union_anon_38
-  {
-      ::mu_base (*mu_in)[8L];
-      ::uint64_t mu_in_task_arg;
-  };
-  mcc_union_anon_38 mcc_arg_12 /* () */ ;
-  mcc_arg_12.mu_in = (::mu_base (*)[8L])::nanos_fpga_get_phy_address((void *)mu_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 4, 1, 1, mcc_arg_12.mu_in_task_arg);
-  union  mcc_union_anon_39
-  {
-      ::B_base (*B_in)[2L][8L];
-      ::uint64_t B_in_task_arg;
-  };
-  mcc_union_anon_39 mcc_arg_13 /* () */ ;
-  mcc_arg_13.B_in = (::B_base (*)[2L][8L])::nanos_fpga_get_phy_address((void *)B_in);
-  ::nanos_fpga_set_task_arg(::nanos_current_wd(), 5, 1, 1, mcc_arg_13.B_in_task_arg);
-  ;
-}
-static void fpga_ol_predict_or_update_model_3(::nanos_args_1_t &args) throw()
-{
-  {
-    static int nanos_funct_id_init(0);
-    static ::nanos_event_key_t nanos_instr_uf_location_key(0);
-    ::nanos_err_t nanos_err;
-    if (nanos_funct_id_init == 0)
-      {
-        nanos_err = ::nanos_instrument_get_key("user-funct-location", &nanos_instr_uf_location_key);
-        if (nanos_err != ::NANOS_OK)
-          {
-            ::nanos_handle_error(nanos_err);
-          }
-        nanos_err = ::nanos_instrument_register_value_with_val((::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_1_t &))::fpga_ol_predict_or_update_model_3, "user-funct-location", "fpga_ol_predict_or_update_model_3@predict.cpp@142@FUNCTION", "void ::predict_or_update_model(::F_base [2L], ::P_base [4L], bool, ::U_base [4L][4L][8L], ::mu_base [4L][8L], ::B_base [4L][2L][8L])@predict.cpp@142@FUNCTION", 0);
-        if (nanos_err != ::NANOS_OK)
-          {
-            ::nanos_handle_error(nanos_err);
-          }
-        nanos_funct_id_init = 1;
-      }
-    ::nanos_event_t event /* () */ ;
-    event.type = ::NANOS_BURST_START;
-    event.key = nanos_instr_uf_location_key;
-    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_1_t &))::fpga_ol_predict_or_update_model_3;
-    nanos_err = ::nanos_instrument_events(1, &event);
-    ::fpga_ol_predict_or_update_model_3_unpacked(args.features, args.predictions, args.update_model, args.U_in, args.mu_in, args.B_in);
-    event.type = ::NANOS_BURST_END;
-    event.key = nanos_instr_uf_location_key;
-    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_1_t &))::fpga_ol_predict_or_update_model_3;
+    event.value = (::nanos_event_value_t)(void (*)(void *))(void (*)(::nanos_args_0_t &))::fpga_ol_predict_with_model_task_1;
     nanos_err = ::nanos_instrument_events(1, &event);
   }
 }
