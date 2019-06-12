@@ -101,11 +101,18 @@ void predict(
 }
 
 
+#ifdef OMPSS_FPGA
 #pragma omp target device(fpga) copy_deps localmem()
+#elif defined(OMPSS_SMP)
+#pragma omp target device(smp) copy_deps localmem()
+#else
+#error Neithet OMPSS_FPGA nor OMPSS_SMP defined
+#endif
 #pragma omp task \
-    in([num_features]features, [num_samples][num_proteins][num_latent]U_in,\
-       [num_samples][num_latent]mu_in,\
-       [num_samples][num_features][num_latent]B_in) \
+    in([num_features]features, \
+       [num_samples]U_in,\
+       [num_samples]mu_in,\
+       [num_samples]B_in) \
     out([num_proteins]predictions)
 void predict_with_model_task(
 		F_base  features[num_features],
@@ -127,4 +134,5 @@ void predict_with_model(
         B_base B_in[num_samples][num_features][num_latent])
 {
     predict_with_model_task(features, predictions, U_in, mu_in, B_in);
+#pragma omp taskwait
 }

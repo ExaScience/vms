@@ -11,10 +11,21 @@ PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
 BOARD=zcu102
+DEVICE ?= smp
 
-MCXX  ?= fpgacxx
+ifeq ($(DEVICE),fpga)
+	MCXX   = fpgacxx
+	CFLAGS_ += -DOMPSS_FPGA
+else ifeq ($(DEVICE),smp)
+	MCXX   = mcxx
+	CFLAGS_ += -DOMPSS_SMP
+else 
+	$(error DEVICE should be either smp or fpga (DEVICE=$(DEVICE)))
+endif
+
 MCXX_  = $(CROSS_COMPILE)$(MCXX)
 GCXX_  = $(CROSS_COMPILE)gxx
+
 
 .PHONY: all bitstream boot clean
 all: $(PROGS_)
