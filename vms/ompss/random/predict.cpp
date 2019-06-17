@@ -101,7 +101,13 @@ void predict(
 }
 
 
+#ifdef OMPSS_FPGA
 #pragma omp target device(fpga) copy_deps localmem()
+#elif defined(OMPSS_SMP)
+#pragma omp target device(smp) copy_deps localmem()
+#else
+#error Neithet OMPSS_FPGA nor OMPSS_SMP defined
+#endif
 #pragma omp task \
     in([num_features]features, \
        [num_samples]U_in,\

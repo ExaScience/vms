@@ -1,18 +1,55 @@
-CXXFILES=main.cpp predict.cpp
-HEADERFILES=$(wildcard $(SRCDIR)/*.h)
+#!/usr/bin/make -f
 
-CXXFLAGS=-g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
-LDFLAGS=
+CFLAGS_      = $(CFLAGS) -O1 -std=c++11 --verbose
+MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 -k
+MCXX_FLAGS_I_ = --instrument
+MCXX_FLAGS_D_ = --debug -g
+LDFLAGS_     = $(LDFLAGS)
 
-.PHONY: run clean
+SRCFILES = $(TOPDIR)/predict.cpp $(TOPDIR)/main.cpp
+PROGRAM_ = predict
+PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
-run: sim
-	./sim
+BOARD=zcu102
 
-sim: $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
+MCXX_  = $(CROSS_COMPILE)$(MCXX)
+GCXX_  = $(CROSS_COMPILE)gxx
+
+.PHONY: smp run bitstream boot clean
+
+smp:
+	$(MAKE) -C smp
+
+fpga:
+	$(MAKE) -C fpga
+
+run: $(PROGS_)
+	./$(PROGRAM_)-p
+	./$(PROGRAM_)-d
+	./$(PROGRAM_)-i
+
+$(PROGRAM): $(SRCFILES)
+	$(CXX) $(CFLAGS_) $^ -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-p: $(SRCFILES)
+	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-i: $(SRCFILES)
+	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-d: $(SRCFILES)
+	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
+
+bitstream: $(SRCFILES)
+	mkdir -p ${PWD}/$(BOARD)
+	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) --bitstream-generation \
+	--Wf,"--name=$(PROGRAM_),--dir=${PWD}/$(BOARD),--board=$(BOARD),--task_manager,--clock=200" \
+	$^ -o $(PROGRAM_)-i $(LDFLAGS_)
+
+export PETALINUX_BUILD = $(PWD)/zcu102/petalinux
+boot:
+	mkdir -p $(PETALINUX_BUILD)
+	autoVivado --verbose --name=$(PROGRAM_) --dir=${PWD}/$(BOARD) --board=$(BOARD) --task_manager --clock=200 --from_step=boot --to_step=boot
 
 clean:
-	rm -f sim
-	rm -rf sim.dSYM
-
+	rm -f *.o $(PROGS_)
