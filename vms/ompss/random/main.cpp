@@ -68,6 +68,7 @@ int main()
     {
         predict_with_model(tb_input_fx[c], tb_output_fx[c], U_fx, mu_fx, B_fx);
     }
+#pragma omp taskwait
     nerrors += check_result(tb_output_fx, tb_ref);
 
 #ifdef DT_OBSERVED_FLOAT

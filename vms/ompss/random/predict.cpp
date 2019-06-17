@@ -134,5 +134,4 @@ void predict_with_model(
         B_base B_in[num_samples][num_features][num_latent])
 {
     predict_with_model_task(features, predictions, U_in, mu_in, B_in);
-#pragma omp taskwait
 }
