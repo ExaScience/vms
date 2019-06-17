@@ -106,18 +106,18 @@ void predict(
 
 
 void predict_or_update_model(
+                bool update_model,
 		const F_base  features[num_features],
 		      P_base  predictions[num_proteins],
 		const U_base U_in[num_samples][num_proteins][num_latent],
 		const mu_base mu_in[num_samples][num_latent],
 		const B_base B_in[num_samples][num_features][num_latent])
 {
-	if (U_in && mu_in && B_in)
+	if (update_model)
 	{
 		load_model(U_in, mu_in, B_in);
 	} 
-
-	if (features && predictions)
+        else
 	{
 		predict(features, predictions);
 	}
@@ -132,7 +132,7 @@ void update_model(
     const B_base  B  [num_samples][num_features][num_latent]
 )
 {
-    predict_or_update_model(0, 0, U, mu, B);
+    predict_or_update_model(true, 0, 0, U, mu, B);
 }
 
 void predict_compound(
@@ -140,6 +140,6 @@ void predict_compound(
           P_base  out[num_proteins]
 )
 {
-    predict_or_update_model(in, out, 0, 0, 0);
+    predict_or_update_model(false, in, out, 0, 0, 0);
 }
 

@@ -103,9 +103,10 @@ void predict(
 
 #pragma omp target device(fpga) copy_deps localmem()
 #pragma omp task \
-    in([num_features]features, [num_samples][num_proteins][num_latent]U_in,\
-       [num_samples][num_latent]mu_in,\
-       [num_samples][num_features][num_latent]B_in) \
+    in([num_features]features, \
+       [num_samples]U_in,\
+       [num_samples]mu_in,\
+       [num_samples]B_in) \
     out([num_proteins]predictions)
 void predict_with_model_task(
 		F_base  features[num_features],

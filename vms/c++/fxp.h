@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 #include <iostream>
 #include <limits>
@@ -65,11 +66,13 @@ struct fxp
 
     void check() const
     {
+#ifndef __SYNTHESIS__
         if(val > std::numeric_limits<T>::max() || val < std::numeric_limits<T>::min())
         {
             std::cerr << (float)(*this) << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
             abort();
         }
+#endif
     }
 
     fxp(float v) : val(v*(1L<<shift)) { check(); } 
