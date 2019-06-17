@@ -1,7 +1,7 @@
-#!/usr/bin/make -f
 
-CFLAGS_      = $(CFLAGS) -O1 -std=c++11 --verbose
-MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 -k
+CFLAGS_      = $(CFLAGS) -O1 -std=c++11 
+MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
+MCXX_FLAGS_   += -k --verbose
 MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
@@ -9,8 +9,6 @@ LDFLAGS_     = $(LDFLAGS)
 SRCFILES = $(TOPDIR)/predict.cpp $(TOPDIR)/main.cpp
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
-
-BOARD=zcu102
 
 MCXX_  = $(CROSS_COMPILE)$(MCXX)
 GCXX_  = $(CROSS_COMPILE)gxx
@@ -39,17 +37,6 @@ $(PROGRAM_)-i: $(SRCFILES)
 
 $(PROGRAM_)-d: $(SRCFILES)
 	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
-
-bitstream: $(SRCFILES)
-	mkdir -p ${PWD}/$(BOARD)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) --bitstream-generation \
-	--Wf,"--name=$(PROGRAM_),--dir=${PWD}/$(BOARD),--board=$(BOARD),--task_manager,--clock=200" \
-	$^ -o $(PROGRAM_)-i $(LDFLAGS_)
-
-export PETALINUX_BUILD = $(PWD)/zcu102/petalinux
-boot:
-	mkdir -p $(PETALINUX_BUILD)
-	autoVivado --verbose --name=$(PROGRAM_) --dir=${PWD}/$(BOARD) --board=$(BOARD) --task_manager --clock=200 --from_step=boot --to_step=boot
 
 clean:
 	rm -f *.o $(PROGS_)

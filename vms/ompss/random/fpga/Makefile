@@ -1,43 +1,13 @@
-#!/usr/bin/make -f
+TOPDIR=..
 
-CFLAGS_      = $(CFLAGS) -O1 -std=c++11 --verbose
-MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 -k
-MCXX_FLAGS_I_ = --instrument
-MCXX_FLAGS_D_ = --debug -g
-LDFLAGS_     = $(LDFLAGS)
+default: bitstream
 
-SRCFILES=predict.cpp main.cpp
-PROGRAM_ = predict
-PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
+include ../Makefile
+
+MCXX   = fpgacxx
+CFLAGS_ += -DOMPSS_FPGA
 
 BOARD=zcu102
-DEVICE ?= smp
-
-ifeq ($(DEVICE),fpga)
-	MCXX   = fpgacxx
-	CFLAGS_ += -DOMPSS_FPGA
-else ifeq ($(DEVICE),smp)
-	MCXX   = mcxx
-	CFLAGS_ += -DOMPSS_SMP
-else 
-	$(error DEVICE should be either smp or fpga (DEVICE=$(DEVICE)))
-endif
-
-MCXX_  = $(CROSS_COMPILE)$(MCXX)
-GCXX_  = $(CROSS_COMPILE)gxx
-
-
-.PHONY: all bitstream boot clean
-all: $(PROGS_)
-
-$(PROGRAM_)-p: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
-
-$(PROGRAM_)-i: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
-
-$(PROGRAM_)-d: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
 
 bitstream: $(SRCFILES)
 	mkdir -p ${PWD}/$(BOARD)

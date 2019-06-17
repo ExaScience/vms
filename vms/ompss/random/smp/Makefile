@@ -1,4 +1,4 @@
-TOPDIR=../
+TOPDIR=..
 
 default: run
 
