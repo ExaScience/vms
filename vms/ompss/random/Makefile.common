@@ -6,7 +6,9 @@ MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
 
-SRCFILES = $(TOPDIR)/predict.cpp $(TOPDIR)/main.cpp
+SRCFILES = predict.cpp main.cpp
+HDRFILES = predict.fpga.h predict.h smurff_const.h smurff_tb.h smurff_types.h
+TOPDIRFILES = $(addprefix $(TOPDIR)/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
@@ -26,7 +28,10 @@ run: $(PROGS_)
 	./$(PROGRAM_)-d
 	./$(PROGRAM_)-i
 
-$(PROGRAM): $(SRCFILES)
+$(SRCFILES) $(HDRFILES): $(TOPDIRFILES)
+	ln -s $(TOPDIRFILES) ./
+
+$(PROGRAM): $(SRCFILES) $(HDRFILES)
 	$(CXX) $(CFLAGS_) $^ -o $@ $(LDFLAGS_)
 
 $(PROGRAM_)-p: $(SRCFILES)
@@ -40,3 +45,5 @@ $(PROGRAM_)-d: $(SRCFILES)
 
 clean:
 	rm -f *.o $(PROGS_)
+	rm -f *.cpp *.h
+
