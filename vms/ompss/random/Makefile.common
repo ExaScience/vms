@@ -29,7 +29,7 @@ run: $(PROGS_)
 	./$(PROGRAM_)-i
 
 $(SRCFILES) $(HDRFILES): $(TOPDIRFILES)
-	ln -s $(TOPDIRFILES) ./
+	ln -sf $(TOPDIRFILES) ./
 
 $(PROGRAM): $(SRCFILES) $(HDRFILES)
 	$(CXX) $(CFLAGS_) $^ -o $@ $(LDFLAGS_)
@@ -46,4 +46,5 @@ $(PROGRAM_)-d: $(SRCFILES)
 clean:
 	rm -f *.o $(PROGS_)
 	rm -f *.cpp *.h
+	rm -rf zcu102
 

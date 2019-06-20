@@ -1,4 +1,4 @@
---- ./subsystems/linux/config.backup	2019-06-18 13:37:30.016302473 +0200
+--- ./subsystems/linux/config	2019-06-18 13:37:30.016302473 +0200
 +++ ./subsystems/linux/config	2019-06-18 13:51:20.988696497 +0200
 @@ -170,7 +170,7 @@
  #
@@ -35,7 +35,7 @@
  
  #
  # Firmware Version Configuration
---- ./subsystems/linux/configs/rootfs/config.backup	2019-06-18 13:37:30.020302436 +0200
+--- ./subsystems/linux/configs/rootfs/config	2019-06-18 13:37:30.020302436 +0200
 +++ ./subsystems/linux/configs/rootfs/config	2019-06-18 13:51:30.820606499 +0200
 @@ -6702,69 +6702,32 @@
  #
@@ -124,7 +124,7 @@
  
  #
  # PetaLinux RootFS Settings
---- ./subsystems/linux/configs/kernel/config.backup	2019-06-18 13:37:30.040302253 +0200
+--- ./subsystems/linux/configs/kernel/config	2019-06-18 13:37:30.040302253 +0200
 +++ ./subsystems/linux/configs/kernel/config	2019-06-18 13:51:24.068668304 +0200
 @@ -135,16 +135,7 @@
  # CONFIG_SCHED_AUTOGROUP is not set
