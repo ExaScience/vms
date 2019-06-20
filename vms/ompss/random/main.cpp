@@ -70,7 +70,8 @@ int main()
     printf("Predicting\n");
     for(int c=0; c<num_compounds; c++)
     {
-        predict_with_model(tb_input_fx[c], tb_output_fx[c], U_fx, mu_fx, B_fx);
+        predict_with_model(tb_input_fx[c], tb_output_fx[c],
+                &U_fx[0][0][0], &mu_fx[0][0], &B_fx[0][0][0]);
     }
 #pragma omp taskwait
     nerrors += check_result(tb_output_fx, tb_ref);

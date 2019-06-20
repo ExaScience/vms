@@ -2,7 +2,7 @@ TOPDIR=..
 
 default: run
 
-include ../Makefile
+include ../Makefile.common
 
 MCXX   = mcxx
 CFLAGS_ += -DOMPSS_SMP

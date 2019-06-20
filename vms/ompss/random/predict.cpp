@@ -6,9 +6,9 @@
 #include "predict.fpga.h"
 
 void load_model(
-	U_base U_in[num_samples][num_proteins][num_latent],
-	mu_base mu_in[num_samples][num_latent],
-	B_base B_in[num_samples][num_features][num_latent])
+	U_base  *U_in,  // [num_samples][num_proteins][num_latent]
+	mu_base *mu_in, // [num_samples][num_latent]
+	B_base  *B_in)  // [num_samples][num_features][num_latent]
 {
 #ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
@@ -19,14 +19,14 @@ void load_model(
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U[i][j][k] = U_in[i][j][k];
+                U[i][j][k] = *(U_in++);
 
         for (int j = 0; j < num_latent; j++)
-           mu[i][j] = mu_in[i][j];
+           mu[i][j] = *(mu_in++);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B[i][j][k] = B_in[i][j][k];
+                B[i][j][k] = *(B_in++);
     }
 #endif
 }
@@ -62,7 +62,7 @@ void features_loop(
 
 void proteins_loop(
 	    P_base predictions[num_proteins],
-		const L_type latents[num_samples][num_latent])
+            const L_type latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -106,20 +106,20 @@ void predict(
 #elif defined(OMPSS_SMP)
 #pragma omp target device(smp) copy_deps localmem()
 #else
-#error Neithet OMPSS_FPGA nor OMPSS_SMP defined
+#error Neither OMPSS_FPGA nor OMPSS_SMP defined
 #endif
 #pragma omp task \
     in([num_features]features, \
-       [num_samples]U_in,\
-       [num_samples]mu_in,\
-       [num_samples]B_in) \
+       [num_samples*num_proteins*num_latent]U_in,\
+       [num_samples*num_latent             ]mu_in,\
+       [num_samples*num_features*num_latent]B_in) \
     out([num_proteins]predictions)
 void predict_with_model_task(
 		F_base  features[num_features],
 		P_base  predictions[num_proteins],
-		U_base U_in[num_samples][num_proteins][num_latent],
-		mu_base mu_in[num_samples][num_latent],
-		B_base B_in[num_samples][num_features][num_latent])
+		U_base  *U_in,  //[num_samples][num_proteins][num_latent]
+		mu_base *mu_in, //[num_samples][num_latent]
+		B_base  *B_in)  //[num_samples][num_features][num_latent]
 {
         load_model(U_in, mu_in, B_in);
         predict(features, predictions);
@@ -129,9 +129,9 @@ void predict_with_model_task(
 void predict_with_model(
         F_base  features[num_features],
         P_base  predictions[num_proteins],
-        U_base U_in[num_samples][num_proteins][num_latent],
-        mu_base mu_in[num_samples][num_latent],
-        B_base B_in[num_samples][num_features][num_latent])
+        U_base  *U_in,  //[num_samples][num_proteins][num_latent]
+        mu_base *mu_in, //[num_samples][num_latent]
+        B_base  *B_in)  //[num_samples][num_features][num_latent]
 {
     predict_with_model_task(features, predictions, U_in, mu_in, B_in);
 }
