@@ -30,8 +30,12 @@ int check_result(const F out[num_compounds][num_proteins],
         {
             float o = P_type(out[c][p]);
             float r = P_type(ref[c][p]);
-            // printf("[%d][%d]: out is %f -- ref is %f\n", c, p, tb_output_fx[c][p], tb_ref[c][p]);
-            if (std::abs(o - r) > epsilon)
+            printf("[%d][%d]: out is %f -- ref is %f\n", c, p, o, r);
+            if (std::abs(o - r) < epsilon)
+            {
+                printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+            }
+            else
             {
                 printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
                 nerrors++;
