@@ -7,14 +7,15 @@ bitstream: $(BITSTREAM)
 
 include $(TOPDIR)/Makefile.common
 
-MCXX   = fpgacxx
+MCXX   = aarch64-linux-gnu-fpgacxx
 CFLAGS_ += -DOMPSS_FPGA
 
 $(BITSTREAM): $(SRCFILES)
-	mkdir -p ${PWD}/$(BOARD)
+	mkdir -p $(BOARD)
 	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) --bitstream-generation \
 	--Wf,"--name=$(PROGRAM_),--dir=${PWD}/$(BOARD),--board=$(BOARD),--task_manager,--clock=200" \
 	$^ -o $(PROGRAM_)-i $(LDFLAGS_)
+	cp $(BOARD)/$(PROGRAM_)_autoVivado/$(PROGRAM_).xtasks.config $(BOARD)/$(PROGRAM_).xtasks.config
 
 export PETALINUX_BUILD = $(PWD)/zcu102/petalinux
 BSP = /home/vanderaa/local/software/Xilinx/Downloads/Xilinx-ZCU102-v2016.3-final.bsp

@@ -12,16 +12,7 @@ TOPDIRFILES = $(addprefix $(TOPDIR)/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
-MCXX_  = $(CROSS_COMPILE)$(MCXX)
-GCXX_  = $(CROSS_COMPILE)gxx
-
 .PHONY: smp run bitstream boot clean
-
-smp:
-	$(MAKE) -C smp
-
-fpga:
-	$(MAKE) -C fpga
 
 run: $(PROGS_)
 	./$(PROGRAM_)-p
@@ -35,13 +26,13 @@ $(PROGRAM): $(SRCFILES) $(HDRFILES)
 	$(CXX) $(CFLAGS_) $^ -o $@ $(LDFLAGS_)
 
 $(PROGRAM_)-p: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
 
 $(PROGRAM_)-i: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
 
 $(PROGRAM_)-d: $(SRCFILES)
-	$(MCXX_) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
 
 clean:
 	rm -f *.o $(PROGS_)
