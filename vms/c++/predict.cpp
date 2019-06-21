@@ -10,27 +10,27 @@ static mu_base mu[num_samples][num_latent];
 static B_base B[num_samples][num_features][num_latent];
 
 void load_model(
-		const U_base U_in[num_samples][num_proteins][num_latent],
-	    const mu_base mu_in[num_samples][num_latent],
-	    const B_base B_in[num_samples][num_features][num_latent])
+		const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
+	    const mu_base *mu_in, //[num_samples][num_latent],
+	    const B_base  *B_in)  //[num_samples][num_features][num_latent])
 {
 #ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
-	std::memcpy(U, U_in, sizeof(U));
-	std::memcpy(B, B_in, sizeof(B));
+	std::memcpy(U,  U_in, sizeof(U));
+	std::memcpy(B,  B_in, sizeof(B));
 #else
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U[i][j][k] = U_in[i][j][k];
+                U[i][j][k] = *(U_in++);
 
         for (int j = 0; j < num_latent; j++)
-           mu[i][j] = mu_in[i][j];
+           mu[i][j] = *(mu_in++);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B[i][j][k] = B_in[i][j][k];
+                B[i][j][k] = *(B_in++);
     }
 #endif
 }
@@ -109,9 +109,9 @@ void predict_or_update_model(
                 bool update_model,
 		const F_base  features[num_features],
 		      P_base  predictions[num_proteins],
-		const U_base U_in[num_samples][num_proteins][num_latent],
-		const mu_base mu_in[num_samples][num_latent],
-		const B_base B_in[num_samples][num_features][num_latent])
+		const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
+		const mu_base *mu_in, //[num_samples][num_latent],
+		const B_base  *B_in)  //[num_samples][num_features][num_latent])
 {
 	if (update_model)
 	{
@@ -132,7 +132,7 @@ void update_model(
     const B_base  B  [num_samples][num_features][num_latent]
 )
 {
-    predict_or_update_model(true, 0, 0, U, mu, B);
+    predict_or_update_model(true, 0, 0, &U[0][0][0], &mu[0][0], &B[0][0][0]);
 }
 
 void predict_compound(
