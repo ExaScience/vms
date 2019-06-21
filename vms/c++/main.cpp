@@ -71,6 +71,7 @@ int main()
     {
         predict_compound(tb_input_fx[c], tb_output_fx[c]);
     }
+#pragma omp taskwait
     nerrors += check_result(tb_output_fx, tb_ref);
 
 #ifdef DT_OBSERVED_FLOAT
