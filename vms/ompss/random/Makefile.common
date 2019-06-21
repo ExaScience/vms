@@ -12,7 +12,7 @@ TOPDIRFILES = $(addprefix $(TOPDIR)/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
-.PHONY: smp run bitstream boot clean
+.PHONY: smp run boot clean
 
 run: $(PROGS_)
 	./$(PROGRAM_)-p
