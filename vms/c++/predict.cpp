@@ -3,11 +3,7 @@
 
 #define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
-#include "predict.h"
-
-static U_base U[num_samples][num_proteins][num_latent];
-static mu_base mu[num_samples][num_latent];
-static B_base B[num_samples][num_features][num_latent];
+#include "predict.fpga.h"
 
 void load_model(
 		const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
