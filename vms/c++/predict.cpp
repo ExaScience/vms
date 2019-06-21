@@ -101,6 +101,19 @@ void predict(
 }
 
 
+#ifdef OMPSS_FPGA
+#pragma omp target device(fpga) copy_deps localmem()
+#elif defined(OMPSS_SMP)
+#pragma omp target device(smp) copy_deps
+#else
+#warning Neither OMPSS_FPGA nor OMPSS_SMP defined
+#endif
+#pragma omp task \
+    in([num_features]features, \
+       [num_samples*num_proteins*num_latent]U_in,\
+       [num_samples*num_latent             ]mu_in,\
+       [num_samples*num_features*num_latent]B_in) \
+    out([num_proteins]predictions)
 void predict_or_update_model(
                 bool update_model,
 		const F_base  features[num_features],
