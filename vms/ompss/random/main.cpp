@@ -30,10 +30,9 @@ int check_result(const F out[num_compounds][num_proteins],
         {
             float o = P_type(out[c][p]);
             float r = P_type(ref[c][p]);
-            printf("[%d][%d]: out is %f -- ref is %f\n", c, p, o, r);
             if (std::abs(o - r) < epsilon)
             {
-                printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+                //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
             }
             else
             {
@@ -67,11 +66,13 @@ int main()
 
     int nerrors = 0;
 
+    printf("Updating model\n");
+    update_model(U_fx, mu_fx, B_fx);
+
     printf("Predicting\n");
     for(int c=0; c<num_compounds; c++)
     {
-        predict_with_model(tb_input_fx[c], tb_output_fx[c],
-                &U_fx[0][0][0], &mu_fx[0][0], &B_fx[0][0][0]);
+        predict_compound(tb_input_fx[c], tb_output_fx[c]);
     }
 #pragma omp taskwait
     nerrors += check_result(tb_output_fx, tb_ref);
