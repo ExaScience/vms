@@ -1,4 +1,3 @@
-const int num_compounds = 3;
   const U_base U[4][4][8] = 
   {
     {

@@ -8,6 +8,6 @@ void update_model(
 );
 
 void predict_compound(
-    const F_base  in[num_features],
-          P_base  out[num_proteins]
+    const F_base  in [num_compounds][num_features],
+          P_base  out[num_compounds][num_proteins]
 );

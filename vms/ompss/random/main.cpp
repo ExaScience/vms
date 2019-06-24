@@ -81,10 +81,7 @@ int main()
     double start = tick();
     for(int r=0;r<num_repeat; r++)
     {
-        for(int c=0; c<num_compounds; c++)
-        {
-            predict_compound(tb_input_fx[c], tb_output_fx[c]);
-        }
+        predict_compound(tb_input_fx, tb_output_fx);
     }
 #pragma omp taskwait
     double stop = tick();
