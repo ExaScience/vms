@@ -1,4 +1,5 @@
 #pragma once
+const int num_repeat = 3000;
 const int num_compounds = 3;
 const int num_proteins = 4;
 const int num_features = 2;

@@ -94,12 +94,15 @@ void predict(
 		      P_base  *predictions //[num_compounds][num_proteins]
 )
 {
-    L_type latents[num_compounds][num_samples][num_latent];
-    for (int i=0; i<num_compounds; ++i)
+    for(int r=0;r<num_repeat; r++)
     {
+        L_type latents[num_compounds][num_samples][num_latent];
+        for (int i=0; i<num_compounds; ++i)
+        {
 #pragma HLS DATAFLOW
-        features_loop(features + (i*num_features), latents[i]);
-        proteins_loop(predictions + (i*num_proteins), latents[i]);
+            features_loop(features + (i*num_features), latents[i]);
+            proteins_loop(predictions + (i*num_proteins), latents[i]);
+        }
     }
 }
 

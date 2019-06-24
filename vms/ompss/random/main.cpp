@@ -72,17 +72,13 @@ int main()
     CONVERT3(B);
 
     int nerrors = 0;
-    int num_repeat = 10000;
 
     printf("Updating model\n");
     update_model(U_fx, mu_fx, B_fx);
 
     printf("Predicting\n");
     double start = tick();
-    for(int r=0;r<num_repeat; r++)
-    {
-        predict_compound(tb_input_fx, tb_output_fx);
-    }
+    predict_compound(tb_input_fx, tb_output_fx);
 #pragma omp taskwait
     double stop = tick();
     nerrors += check_result(tb_output_fx, tb_ref);
