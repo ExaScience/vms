@@ -90,16 +90,16 @@ void proteins_loop(
 
 
 void predict(
-		const F_base  features[num_compounds][num_features],
-		      P_base  predictions[num_compounds][num_proteins]
+		const F_base  *features,   //[num_compounds][num_features],
+		      P_base  *predictions //[num_compounds][num_proteins]
 )
 {
+    L_type latents[num_compounds][num_samples][num_latent];
     for (int i=0; i<num_compounds; ++i)
     {
 #pragma HLS DATAFLOW
-        L_type latents[num_samples][num_latent];
-        features_loop(features[i], latents);
-        proteins_loop(predictions[i], latents);
+        features_loop(features + (i*num_features), latents[i]);
+        proteins_loop(predictions + (i*num_proteins), latents[i]);
     }
 }
 
@@ -131,8 +131,7 @@ void predict_or_update_model(
 	} 
         else
 	{
-		predict((F_base (*)[num_features])features,
-                        (P_base (*)[num_proteins])predictions);
+		predict(features, predictions);
 	}
 
 } // end function
