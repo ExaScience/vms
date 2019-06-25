@@ -94,6 +94,9 @@ def gen_session(root, outputdir, block_size, fixed_type):
     if sp.sparse.issparse(tb_in_matrix):
         tb_in_matrix = np.array(tb_in_matrix.todense())
     (tb_num_compounds, tb_num_features) = tb_in_matrix.shape
+    if (tb_num_compounds > 100):
+        tb_in_matrix = tb_in_matrix[:100,:]
+    (tb_num_compounds, tb_num_features) = tb_in_matrix.shape
 
 
     #generate model
