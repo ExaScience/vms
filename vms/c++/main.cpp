@@ -28,15 +28,26 @@ void convert(const F *in, T *out, int size)
 }
 
 template <typename F, typename T>
+int convert_input_features(const F in[tb_num_compounds][num_features],
+                                 T out[num_compounds][num_features])
+{
+    for (int c = 0; c < num_compounds; c++)
+        for (int p = 0; p < num_features; p++)
+        {
+            out[c][p] = in [c%tb_num_compounds][p];
+        }
+}
+
+template <typename F, typename T>
 int check_result(const F out[num_compounds][num_proteins],
-             const T ref[num_compounds][num_proteins])
+                 const T ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
         {
             float o = P_type(out[c][p]);
-            float r = P_type(ref[c][p]);
+            float r = P_type(ref[c % tb_num_compounds][p]);
             if (std::abs(o - r) < epsilon)
             {
                 //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
@@ -66,7 +77,8 @@ int main()
     static mu_base mu_fx[num_samples][num_latent];
     static B_base B_fx[num_samples][num_features][num_latent];
 
-    CONVERT2(tb_input);
+    convert_input_features(tb_input, tb_input_fx);
+
     CONVERT3(U);
     CONVERT2(mu);
     CONVERT3(B);

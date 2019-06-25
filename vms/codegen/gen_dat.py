@@ -81,11 +81,11 @@ def map_to_int(M, dt):
     return M, dtinfo.bits, dtinfo.bits - shift
 
 
-def gen_session(root, outputdir, fixed_type):
+def gen_session(root, outputdir, block_size, fixed_type):
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
-    num_compounds, num_proteins = session.data_shape
+    _, num_proteins = session.data_shape
     num_features = session.beta_shape[0]
 
     # read input features
@@ -93,10 +93,7 @@ def gen_session(root, outputdir, fixed_type):
     tb_in_matrix = mio.read_matrix(tb_file)
     if sp.sparse.issparse(tb_in_matrix):
         tb_in_matrix = np.array(tb_in_matrix.todense())
-    (num_compounds, tb_num_features) = tb_in_matrix.shape
-    if (num_compounds > 10):
-        tb_in_matrix = tb_in_matrix[:10,:]
-    (num_compounds, tb_num_features) = tb_in_matrix.shape
+    (tb_num_compounds, tb_num_features) = tb_in_matrix.shape
 
 
     #generate model
@@ -129,7 +126,8 @@ def gen_session(root, outputdir, fixed_type):
         format = "%.4f"
 
     tb_output = \
-        gen_array(U,  "U_base", "U", "  ", format = format) + "\n" \
+        gen_int("tb_num_compounds", tb_num_compounds)  \
+        + gen_array(U,  "U_base", "U", "  ", format = format) + "\n" \
         + gen_array(mu, "mu_base", "mu", indent = "  ",  format = format) + "\n" \
         + gen_array(B,  "B_base", "B", "  ", format = format) + "\n"
 
@@ -139,7 +137,7 @@ def gen_session(root, outputdir, fixed_type):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples)) + "\n"
+    const_output = gen_const(block_size, num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     if fixed_type:
         types_output = "#define DT_FIXED\n"
@@ -181,8 +179,9 @@ parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-c
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
 parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
 parser.add_argument('--float', action='store_true', help='use floating point')
+parser.add_argument('--block', metavar='N', help='block size (# compounds)', type=int, default=10000)
 args = parser.parse_args()
 
-gen_session(args.root_file, args.output, not args.float)
+gen_session(args.root_file, args.output, args.block, not args.float)
 
 
