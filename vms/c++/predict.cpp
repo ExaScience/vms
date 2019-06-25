@@ -156,9 +156,9 @@ void predict_compound(
           P_base  out[num_compounds][num_proteins]
 )
 {
-    static const U_base  empty_U  [num_samples][num_proteins][num_latent] = {0};
-    static const mu_base empty_mu [num_samples][num_latent] = {0};
-    static const B_base  empty_B  [num_samples][num_features][num_latent] = {0};
+    static const U_base  empty_U  [num_samples][num_proteins][num_latent] = {{{0}}};
+    static const mu_base empty_mu [num_samples][num_latent] = {{0}};
+    static const B_base  empty_B  [num_samples][num_features][num_latent] = {{{0}}};
 
     predict_or_update_model(false, &in[0][0], &out[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
 }
