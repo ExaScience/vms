@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
+#include <chrono>
 
 #include "predict.h"
 #include "smurff_tb.h"
@@ -12,6 +13,12 @@ std::vector<float> values[ntypes];
 
 #define CONVERT2(N) convert(&(N[0][0]), &(N##_fx[0][0]), sizeof(N) / sizeof(N[0][0]))
 #define CONVERT3(N) convert(&(N[0][0][0]), &(N##_fx[0][0][0]), sizeof(N) / sizeof(N[0][0][0]))
+
+double tick() {
+    auto now = std::chrono::system_clock::now().time_since_epoch();
+    double ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    return ms / 1000.;
+}
 
 template <typename F, typename T>
 void convert(const F *in, T *out, int size)
@@ -70,12 +77,13 @@ int main()
     update_model(U_fx, mu_fx, B_fx);
 
     printf("Predicting\n");
-    for(int c=0; c<num_compounds; c++)
-    {
-        predict_compound(tb_input_fx[c], tb_output_fx[c]);
-    }
+    double start = tick();
+    predict_compound(tb_input_fx, tb_output_fx);
 #pragma omp taskwait
+    double stop = tick();
     nerrors += check_result(tb_output_fx, tb_ref);
+    double elapsed = stop-start;
+    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 
 #ifdef DT_OBSERVED_FLOAT
     for (int i = 0; i < ntypes; ++i)

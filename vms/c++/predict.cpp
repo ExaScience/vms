@@ -6,9 +6,9 @@
 #include "predict.fpga.h"
 
 void load_model(
-		const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
-	    const mu_base *mu_in, //[num_samples][num_latent],
-	    const B_base  *B_in)  //[num_samples][num_features][num_latent])
+        const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
+        const mu_base *mu_in, //[num_samples][num_latent],
+        const B_base  *B_in)  //[num_samples][num_features][num_latent])
 {
 #ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
@@ -62,7 +62,7 @@ void features_loop(
 
 void proteins_loop(
 	    P_base predictions[num_proteins],
-		const L_type latents[num_samples][num_latent])
+            const L_type latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -90,14 +90,20 @@ void proteins_loop(
 
 
 void predict(
-		const F_base  features[num_features],
-		      P_base  predictions[num_proteins]
+		const F_base  *features,   //[num_compounds][num_features],
+		      P_base  *predictions //[num_compounds][num_proteins]
 )
 {
+    for(int r=0;r<num_repeat; r++)
+    {
+        L_type latents[num_compounds][num_samples][num_latent];
+        for (int i=0; i<num_compounds; ++i)
+        {
 #pragma HLS DATAFLOW
-		L_type latents[num_samples][num_latent];
-		features_loop(features, latents);
-		proteins_loop(predictions, latents);
+            features_loop(features + (i*num_features), latents[i]);
+            proteins_loop(predictions + (i*num_proteins), latents[i]);
+        }
+    }
 }
 
 
@@ -109,18 +115,18 @@ void predict(
 #warning Neither OMPSS_FPGA nor OMPSS_SMP defined
 #endif
 #pragma omp task \
-    in([num_features]features, \
+    in([num_compounds*num_features]features, \
        [num_samples*num_proteins*num_latent]U_in,\
        [num_samples*num_latent             ]mu_in,\
        [num_samples*num_features*num_latent]B_in) \
-    out([num_proteins]predictions)
+    out([num_compounds*num_proteins]predictions)
 void predict_or_update_model(
                 bool update_model,
-		const F_base  features[num_features],
-		      P_base  predictions[num_proteins],
-		const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
-		const mu_base *mu_in, //[num_samples][num_latent],
-		const B_base  *B_in)  //[num_samples][num_features][num_latent])
+		const F_base  *features,    //[num_compounds*num_features]
+		      P_base  *predictions, //[num_compounds*num_proteins]
+		const U_base  *U_in,        //[num_samples][num_proteins][num_latent]
+		const mu_base *mu_in,       //[num_samples][num_latent]
+		const B_base  *B_in)        //[num_samples][num_features][num_latent]
 {
 	if (update_model)
 	{
@@ -141,14 +147,22 @@ void update_model(
     const B_base  B  [num_samples][num_features][num_latent]
 )
 {
-    predict_or_update_model(true, 0, 0, &U[0][0][0], &mu[0][0], &B[0][0][0]);
+    static const F_base  empty_in [num_compounds][num_features] = {{0}};
+    static       P_base  empty_out[num_compounds][num_proteins];
+
+    predict_or_update_model(true, &empty_in[0][0], &empty_out[0][0], &U[0][0][0], &mu[0][0], &B[0][0][0]);
+#pragma omp taskwait
 }
 
 void predict_compound(
-    const F_base  in[num_features],
-          P_base  out[num_proteins]
+    const F_base  in [num_compounds][num_features],
+          P_base  out[num_compounds][num_proteins]
 )
 {
-    predict_or_update_model(false, in, out, 0, 0, 0);
+    static const U_base  empty_U  [num_samples][num_proteins][num_latent] = {0};
+    static const mu_base empty_mu [num_samples][num_latent] = {0};
+    static const B_base  empty_B  [num_samples][num_features][num_latent] = {0};
+
+    predict_or_update_model(false, &in[0][0], &out[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
 }
 
