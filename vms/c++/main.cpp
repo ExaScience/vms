@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <chrono>
+#include <cstdlib>
 
 #include "predict.h"
 #include "smurff_tb.h"
@@ -63,8 +64,16 @@ int check_result(const F out[num_compounds][num_proteins],
     return nerrors;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    int num_repeat = 1;
+
+    if (argc > 1 && std::atoi(argv[1]))
+    {
+        num_repeat = std::atoi(argv[1]);
+    }
+
+    printf("  nrep: %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
     printf("  ncmpd: %d\n", num_compounds);
     printf("  nfeat: %d\n", num_features);
@@ -90,12 +99,15 @@ int main()
 
     printf("Predicting\n");
     double start = tick();
-    predict_compound(tb_input_fx, tb_output_fx);
+    for(int n=0; n<num_repeat; n++)
+    {
+        predict_compound(tb_input_fx, tb_output_fx);
+    }
 #pragma omp taskwait
     double stop = tick();
     nerrors += check_result(tb_output_fx, tb_ref);
     double elapsed = stop-start;
-    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds / elapsed);
+    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 
 #ifdef DT_OBSERVED_FLOAT
     for (int i = 0; i < ntypes; ++i)
