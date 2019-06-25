@@ -49,8 +49,9 @@ def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
-def gen_const(num_proteins, num_features, num_latent, num_samples):
+def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
     const_output = "#pragma once\n"
+    const_output += gen_int("num_compounds", num_compounds)
     const_output += gen_int("num_proteins",  num_proteins)
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
@@ -127,8 +128,7 @@ def gen_session(root, outputdir, fixed_type):
     else:
         format = "%.4f"
 
-    tb_output = gen_int("num_compounds", num_compounds)
-    tb_output += \
+    tb_output = \
         gen_array(U,  "U_base", "U", "  ", format = format) + "\n" \
         + gen_array(mu, "mu_base", "mu", indent = "  ",  format = format) + "\n" \
         + gen_array(B,  "B_base", "B", "  ", format = format) + "\n"
@@ -139,7 +139,7 @@ def gen_session(root, outputdir, fixed_type):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
+    const_output = gen_const(num_compounds, num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     if fixed_type:
         types_output = "#define DT_FIXED\n"

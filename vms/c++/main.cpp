@@ -83,7 +83,7 @@ int main()
     double stop = tick();
     nerrors += check_result(tb_output_fx, tb_ref);
     double elapsed = stop-start;
-    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
+    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds / elapsed);
 
 #ifdef DT_OBSERVED_FLOAT
     for (int i = 0; i < ntypes; ++i)
