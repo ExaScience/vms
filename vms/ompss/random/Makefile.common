@@ -7,7 +7,7 @@ MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
 
 SRCFILES = predict.cpp main.cpp
-HDRFILES = predict.fpga.h predict.h smurff_const.h smurff_tb.h smurff_types.h
+HDRFILES = predict.fpga.h predict.h smurff_const.h smurff_tb.h smurff_types.h fxp.h
 TOPDIRFILES = $(addprefix $(TOPDIR)/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
@@ -35,7 +35,7 @@ $(PROGRAM_)-d: $(SRCFILES)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
 
 clean:
-	rm -f *.o $(PROGS_)
+	rm -f *.o $(PROGS_) $(PROGRAM_)
 	rm -f *.cpp *.h
 	rm -rf zcu102
 
