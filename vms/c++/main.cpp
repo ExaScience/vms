@@ -12,8 +12,8 @@ const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
 
-#define CONVERT2(N) convert(&(N[0][0]), &(N##_fx[0][0]), sizeof(N) / sizeof(N[0][0]))
-#define CONVERT3(N) convert(&(N[0][0][0]), &(N##_fx[0][0][0]), sizeof(N) / sizeof(N[0][0][0]))
+#define CONVERT2(N, M) convert(&(N[0][0]), &(M[0][0]), sizeof(N) / sizeof(N[0][0]))
+#define CONVERT3(N, M) convert(&(N[0][0][0]), &(M[0][0][0]), sizeof(N) / sizeof(N[0][0][0]))
 
 double tick() {
     auto now = std::chrono::system_clock::now().time_since_epoch();
@@ -30,7 +30,7 @@ void convert(const F *in, T *out, int size)
 
 template <typename F, typename T>
 void convert_input_features(const F in[tb_num_compounds][num_features],
-                                 T out[num_compounds][num_features])
+                                  T out[num_compounds][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
@@ -80,31 +80,43 @@ int main(int argc, char *argv[])
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    static P_base tb_output_fx[num_compounds][num_proteins];
-    static F_base tb_input_fx[num_compounds][num_features];
-    static U_base U_fx[num_samples][num_proteins][num_latent];
-    static mu_base mu_fx[num_samples][num_latent];
-    static B_base B_fx[num_samples][num_features][num_latent];
+    static P_base  tb_output_base[num_compounds][num_proteins];
+    static F_base  tb_input_base[num_compounds][num_features];
+    static U_base  U_base[num_samples][num_proteins][num_latent];
+    static mu_base mu_base[num_samples][num_latent];
+    static B_base  B_base[num_samples][num_features][num_latent];
+
+    static P_type  tb_output_fx[num_compounds][num_proteins];
+    static F_type  tb_input_fx[num_compounds][num_features];
+    static U_type  U_fx[num_samples][num_proteins][num_latent];
+    static mu_type mu_fx[num_samples][num_latent];
+    static B_type  B_fx[num_samples][num_features][num_latent];
+
 
     convert_input_features(tb_input, tb_input_fx);
+    CONVERT3(U, U_fx);
+    CONVERT2(mu, mu_fx);
+    CONVERT3(B, B_fx);
 
-    CONVERT3(U);
-    CONVERT2(mu);
-    CONVERT3(B);
+    CONVERT3(U_fx, U_base);
+    CONVERT2(mu_fx, mu_base);
+    CONVERT3(B_fx, B_base);
+    CONVERT2(tb_input_fx, tb_input_base);
 
     int nerrors = 0;
 
     printf("Updating model\n");
-    update_model(U_fx, mu_fx, B_fx);
+    update_model(U_base, mu_base, B_base);
 
     printf("Predicting\n");
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
-        predict_compound(tb_input_fx, tb_output_fx);
+        predict_compound(tb_input_base, tb_output_base);
     }
 #pragma omp taskwait
     double stop = tick();
+    CONVERT2(tb_output_base, tb_output_fx);
     nerrors += check_result(tb_output_fx, tb_ref);
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);

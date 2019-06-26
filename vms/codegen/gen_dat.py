@@ -81,7 +81,7 @@ def map_to_int(M, dt):
     return M, dtinfo.bits, dtinfo.bits - shift
 
 
-def gen_session(root, outputdir, block_size, fixed_type):
+def gen_session(root, outputdir, block_size):
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
@@ -181,10 +181,9 @@ def gen_session(root, outputdir, block_size, fixed_type):
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
 parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
-parser.add_argument('--float', action='store_true', help='use floating point')
 parser.add_argument('--block', metavar='N', help='block size (# compounds)', type=int, default=10000)
 args = parser.parse_args()
 
-gen_session(args.root_file, args.output, args.block, not args.float)
+gen_session(args.root_file, args.output, args.block)
 
 
