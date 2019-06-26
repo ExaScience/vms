@@ -66,7 +66,7 @@ struct fxp
 
     void check() const
     {
-#ifndef __SYNTHESIS__
+#ifndef NDEBUG
         if(val > std::numeric_limits<T>::max() || val < std::numeric_limits<T>::min())
         {
             std::cerr << (float)(*this) << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
