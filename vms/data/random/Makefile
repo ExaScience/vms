@@ -5,7 +5,7 @@ SRCDIR=$(TOPDIR)/c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
-INCLUDES=-I$(SRCDIR) -Icode
+INCLUDES=-I$(SRCDIR) -Icode -DDT_FIXED
 CXXFLAGS=$(INCLUDES) -pthread -g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
 LDFLAGS=
 
@@ -24,7 +24,7 @@ $(ROOTFILE): $(INPUTDATA) options.ini
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code
-	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
+	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code 
 
 sim: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
 	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) 

@@ -116,63 +116,63 @@ def gen_session(root, outputdir, block_size, fixed_type):
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
 
-    if fixed_type:
-        mu, mu_wl, mu_iwl = map_to_int(mu, np.int8)
-        U, U_wl, U_iwl = map_to_int(U, np.int16)
-        B, B_wl, B_iwl = map_to_int(B, np.int16)
+    mu_fx, mu_wl, mu_iwl = map_to_int(mu, np.int8)
+    U_fx, U_wl, U_iwl = map_to_int(U, np.int16)
+    B_fx, B_wl, B_iwl = map_to_int(B, np.int16)
 
-        tb_in_matrix, F_wl, F_iwl  = map_to_int(tb_in_matrix, np.int16)
-        Pavg, P_wl, P_iwl = map_to_int(Pavg, np.int8)
+    tb_in_matrix_fx, F_wl, F_iwl  = map_to_int(tb_in_matrix, np.int16)
+    Pavg_fx, P_wl, P_iwl = map_to_int(Pavg, np.int8)
 
-        format = "%d"
-    else:
-        format = "%.4f"
-
+    format = "%.4f"
     tb_output = \
         gen_int("tb_num_compounds", tb_num_compounds)  \
-        + gen_array(U,  "U_base", "U", "  ", format = format) + "\n" \
-        + gen_array(mu, "mu_base", "mu", indent = "  ",  format = format) + "\n" \
-        + gen_array(B,  "B_base", "B", "  ", format = format) + "\n"
+        + gen_array(U,  "float", "U", "  ", format = format) + "\n" \
+        + gen_array(mu, "float", "mu", indent = "  ",  format = format) + "\n" \
+        + gen_array(B,  "float", "B", "  ", format = format) + "\n"
 
-    tb_output += gen_array(tb_in_matrix, "F_base", "tb_input", format = format) + "\n"
-    tb_output += gen_array(Pavg, "P_base", "tb_ref", format = format) + "\n"
+    tb_output += gen_array(tb_in_matrix, "float", "tb_input", format = format) + "\n"
+    tb_output += gen_array(Pavg, "float", "tb_ref", format = format) + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
     assert tb_num_features == num_features
 
     const_output = gen_const(block_size, num_proteins, num_features, num_latent, len(samples)) + "\n"
 
-    if fixed_type:
-        types_output = "#define DT_FIXED\n"
-        types_output += '#include "fxp.h"\n\n'
-        types = {
-            8 : "signed char",
-            16 : "signed short",
-            32 : "signed int",
-        }
-        for name, wl, iwl in zip(
-            [ "U", "mu", "B", "F", "P" ],
-            [ U_wl, mu_wl, B_wl, F_wl, P_wl ],
-            [ U_iwl, mu_iwl, B_iwl, F_iwl, P_iwl ],
-        ):
-            types_output += gen_int(name + "_wl", wl)
-            types_output += gen_int(name + "_iwl", iwl)
-            types_output += gen_int(name + "_shift", wl - iwl)
-            types_output += "typedef %s %s_base ;\n" % (types[wl], name)
-            types_output += "typedef fxp<%s, %d> %s_type;\n\n" % (types[wl], iwl, name)
+    types_output = "#ifdef DT_FIXED\n"
+    types_output += '#include "fxp.h"\n\n'
+    types = {
+        8 : "signed char",
+        16 : "signed short",
+        32 : "signed int",
+    }
+    for name, wl, iwl in zip(
+        [ "U", "mu", "B", "F", "P" ],
+        [ U_wl, mu_wl, B_wl, F_wl, P_wl ],
+        [ U_iwl, mu_iwl, B_iwl, F_iwl, P_iwl ],
+    ):
+        types_output += gen_int(name + "_wl", wl)
+        types_output += gen_int(name + "_iwl", iwl)
+        types_output += gen_int(name + "_shift", wl - iwl)
+        types_output += "typedef %s %s_base ;\n" % (types[wl], name)
+        types_output += "typedef fxp<%s, %d> %s_type;\n\n" % (types[wl], iwl, name)
 
-        types_output += "typedef fxp<signed int, 10> L_type;\n"
-        types_output += "typedef fxp<signed int, 10> S_type;\n"
-        types_output += "const float epsilon = 0.5;\n"
-    else:
-        types_output = "#define DT_FLOAT\n"
-        for name in [ "U", "mu", "B", "F", "P" ]:
-            types_output += "typedef float %s_base ;\n" % name
-            types_output += "typedef float %s_type;\n\n" % name
+    types_output += "typedef fxp<signed int, 10> L_type;\n"
+    types_output += "typedef fxp<signed int, 10> S_type;\n"
+    types_output += "const float epsilon = 0.5;\n"
 
-        types_output += "typedef float L_type;\n"
-        types_output += "typedef float S_type;\n"
-        types_output += "const float epsilon = 0.5;\n"
+    types_output += "#elif defined(DT_FLOAT)\n"
+    
+    for name in [ "U", "mu", "B", "F", "P" ]:
+        types_output += "typedef float %s_base ;\n" % name
+        types_output += "typedef float %s_type;\n\n" % name
+
+    types_output += "typedef float L_type;\n"
+    types_output += "typedef float S_type;\n"
+    types_output += "const float epsilon = 0.5;\n"
+        
+    types_output += "#else\n"
+    types_output += "#error Need to defined DT_FIXED or DT_FLOAT\n"
+    types_output += "#endif\n"
 
     gen_file(outputdir, "const.h", const_output)
     gen_file(outputdir, "types.h", types_output)

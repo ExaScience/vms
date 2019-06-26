@@ -29,7 +29,7 @@ void convert(const F *in, T *out, int size)
 }
 
 template <typename F, typename T>
-int convert_input_features(const F in[tb_num_compounds][num_features],
+void convert_input_features(const F in[tb_num_compounds][num_features],
                                  T out[num_compounds][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
