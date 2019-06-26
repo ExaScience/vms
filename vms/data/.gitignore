@@ -3,7 +3,7 @@ code
 output
 *bin
 model
-sim
-sim.dSYM
+sim_*
+sim_*.dSYM
 hls
 *log
