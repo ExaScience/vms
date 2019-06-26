@@ -1,3 +1,9 @@
+#if defined(DT_FIXED) || defined(DT_FLOAT)
+#else
+#warning Default to DT_FIXED
+#define DT_FIXED
+#endif
+
 #include "smurff_const.h"
 #include "smurff_types.h"
 
