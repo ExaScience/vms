@@ -138,8 +138,7 @@ def gen_session(root, outputdir, block_size):
 
     const_output = gen_const(block_size, num_proteins, num_features, num_latent, len(samples)) + "\n"
 
-    types_output = "#ifdef DT_FIXED\n"
-    types_output += '#include "fxp.h"\n\n'
+    const_output += "#ifdef DT_FIXED\n"
     types = {
         8 : "signed char",
         16 : "signed short",
@@ -150,32 +149,13 @@ def gen_session(root, outputdir, block_size):
         [ U_wl, mu_wl, B_wl, F_wl, P_wl ],
         [ U_iwl, mu_iwl, B_iwl, F_iwl, P_iwl ],
     ):
-        types_output += gen_int(name + "_wl", wl)
-        types_output += gen_int(name + "_iwl", iwl)
-        types_output += gen_int(name + "_shift", wl - iwl)
-        types_output += "typedef %s %s_base ;\n" % (types[wl], name)
-        types_output += "typedef fxp<%s, %d> %s_type;\n\n" % (types[wl], iwl, name)
+        const_output += gen_int(name + "_wl", wl)
+        const_output += gen_int(name + "_iwl", iwl)
+        const_output += gen_int(name + "_shift", wl - iwl)
+        const_output += "typedef %s %s_base ;\n" % (types[wl], name)
 
-    types_output += "typedef fxp<signed int, 10> L_type;\n"
-    types_output += "typedef fxp<signed int, 10> S_type;\n"
-    types_output += "const float epsilon = 0.5;\n"
-
-    types_output += "#elif defined(DT_FLOAT)\n"
-    
-    for name in [ "U", "mu", "B", "F", "P" ]:
-        types_output += "typedef float %s_base ;\n" % name
-        types_output += "typedef float %s_type;\n\n" % name
-
-    types_output += "typedef float L_type;\n"
-    types_output += "typedef float S_type;\n"
-    types_output += "const float epsilon = 0.5;\n"
-        
-    types_output += "#else\n"
-    types_output += "#error Need to defined DT_FIXED or DT_FLOAT\n"
-    types_output += "#endif\n"
-
+    const_output += "#endif //DT_FIXED\n"
     gen_file(outputdir, "const.h", const_output)
-    gen_file(outputdir, "types.h", types_output)
 
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')

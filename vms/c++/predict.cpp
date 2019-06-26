@@ -33,7 +33,7 @@ void load_model(
 
 void features_loop(
 	    const F_base features[num_features],
-		L_type latents[num_samples][num_latent])
+		L_base latents[num_samples][num_latent])
 {
 
 	for (int d = 0; d < num_features; d++)
@@ -53,16 +53,16 @@ void features_loop(
 			{
 				L_type  v;
 				if (d==0) v = mu_type(mu[s][k]);
-				else      v = latents[s][k];
+				else      v = L_type(latents[s][k]);
 				L_type prod = feature * B_type(B[s][d][k]);
-				latents[s][k] = v + prod;
+				latents[s][k] = L_type(v + prod);
 			}
 	}
 }
 
 void proteins_loop(
-	    P_base predictions[num_proteins],
-            const L_type latents[num_samples][num_latent])
+	P_base predictions[num_proteins],
+	const L_base latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -73,7 +73,7 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = latents[s][k] * U_type(U[s][d][k]);
+				S_type prod = L_type(latents[s][k]) * U_type(U[s][d][k]);
 				sum = sum + prod;
 			}
 
@@ -94,7 +94,7 @@ void predict(
 		      P_base  *predictions //[num_compounds][num_proteins]
 )
 {
-    L_type latents[num_compounds][num_samples][num_latent];
+    L_base latents[num_compounds][num_samples][num_latent];
     for (int i=0; i<num_compounds; ++i)
     {
 #pragma HLS DATAFLOW
