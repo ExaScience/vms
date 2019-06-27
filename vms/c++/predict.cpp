@@ -90,6 +90,7 @@ void proteins_loop(
 
 
 void predict(
+		int num_compounds,
 		const F_base  *features,   //[num_compounds][num_features],
 		      P_base  *predictions //[num_compounds][num_proteins]
 )
@@ -109,7 +110,6 @@ void predict(
 #elif defined(OMPSS_SMP)
 #pragma omp target device(smp) copy_deps
 #else
-#warning Neither OMPSS_FPGA nor OMPSS_SMP defined
 #endif
 #pragma omp task \
     in([num_compounds*num_features]features, \
@@ -118,7 +118,8 @@ void predict(
        [num_samples*num_features*num_latent]B_in) \
     out([num_compounds*num_proteins]predictions)
 void predict_or_update_model(
-                bool update_model,
+		bool update_model,
+		int num_compounds,
 		const F_base  *features,    //[num_compounds*num_features]
 		      P_base  *predictions, //[num_compounds*num_proteins]
 		const U_base  *U_in,        //[num_samples][num_proteins][num_latent]
@@ -131,7 +132,7 @@ void predict_or_update_model(
 	} 
         else
 	{
-		predict(features, predictions);
+		predict(num_compounds, features, predictions);
 	}
 
 } // end function
@@ -144,22 +145,23 @@ void update_model(
     const B_base  B  [num_samples][num_features][num_latent]
 )
 {
-    static const F_base  empty_in [num_compounds][num_features] = {{0}};
-    static       P_base  empty_out[num_compounds][num_proteins];
+    static const F_base  *empty_in;
+    static       P_base  *empty_out;
 
-    predict_or_update_model(true, &empty_in[0][0], &empty_out[0][0], &U[0][0][0], &mu[0][0], &B[0][0][0]);
+    predict_or_update_model(true, 0, empty_in, empty_out, &U[0][0][0], &mu[0][0], &B[0][0][0]);
 #pragma omp taskwait
 }
 
 void predict_compound(
-    const F_base  in [num_compounds][num_features],
-          P_base  out[num_compounds][num_proteins]
+	int num_compounds,
+    const F_base  in [][num_features],
+          P_base  out[][num_proteins]
 )
 {
     static const U_base  empty_U  [num_samples][num_proteins][num_latent] = {{{0}}};
     static const mu_base empty_mu [num_samples][num_latent] = {{0}};
     static const B_base  empty_B  [num_samples][num_features][num_latent] = {{{0}}};
 
-    predict_or_update_model(false, &in[0][0], &out[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
+    predict_or_update_model(false, num_compounds, &in[0][0], &out[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
 }
 

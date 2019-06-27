@@ -29,8 +29,10 @@ void convert(const F *in, T *out, int size)
 }
 
 template <typename F, typename T>
-void convert_input_features(const F in[tb_num_compounds][num_features],
-                                  T out[num_compounds][num_features])
+void prepare_tb_input(
+    int num_compounds,
+    const F in[tb_num_compounds][num_features],
+    T out[][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
@@ -40,8 +42,10 @@ void convert_input_features(const F in[tb_num_compounds][num_features],
 }
 
 template <typename F, typename T>
-int check_result(const F out[num_compounds][num_proteins],
-                 const T ref[tb_num_compounds][num_proteins])
+int check_result(
+    int num_compounds,
+    const F out[][num_proteins],
+    const T ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
     for (int c = 0; c < num_compounds; c++)
@@ -67,11 +71,18 @@ int check_result(const F out[num_compounds][num_proteins],
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
+    int num_compounds = 10;
 
     if (argc > 1 && std::atoi(argv[1]))
     {
         num_repeat = std::atoi(argv[1]);
     }
+
+    if (argc > 2 && std::atoi(argv[2]))
+    {
+        num_compounds = std::atoi(argv[2]);
+    }
+    
 
     printf("  nrep: %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
@@ -80,20 +91,21 @@ int main(int argc, char *argv[])
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    static P_base  tb_output_base[num_compounds][num_proteins];
-    static F_base  tb_input_base[num_compounds][num_features];
-    static U_base  U_base[num_samples][num_proteins][num_latent];
-    static mu_base mu_base[num_samples][num_latent];
-    static B_base  B_base[num_samples][num_features][num_latent];
+    P_base  tb_output_base[num_compounds][num_proteins];
+    F_base  tb_input_base[num_compounds][num_features];
+    U_base  U_base[num_samples][num_proteins][num_latent];
+    mu_base mu_base[num_samples][num_latent];
+    B_base  B_base[num_samples][num_features][num_latent];
 
-    static P_type  tb_output_fx[num_compounds][num_proteins];
-    static F_type  tb_input_fx[num_compounds][num_features];
-    static U_type  U_fx[num_samples][num_proteins][num_latent];
-    static mu_type mu_fx[num_samples][num_latent];
-    static B_type  B_fx[num_samples][num_features][num_latent];
+    P_type  tb_output_fx[num_compounds][num_proteins];
+    F_type  tb_input_fx[num_compounds][num_features];
+    U_type  U_fx[num_samples][num_proteins][num_latent];
+    mu_type mu_fx[num_samples][num_latent];
+    B_type  B_fx[num_samples][num_features][num_latent];
 
 
-    convert_input_features(tb_input, tb_input_fx);
+    prepare_tb_input(num_compounds, tb_input, tb_input_fx);
+
     CONVERT3(U, U_fx);
     CONVERT2(mu, mu_fx);
     CONVERT3(B, B_fx);
@@ -112,12 +124,12 @@ int main(int argc, char *argv[])
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
-        predict_compound(tb_input_base, tb_output_base);
+        predict_compound(num_compounds, tb_input_base, tb_output_base);
     }
 #pragma omp taskwait
     double stop = tick();
     CONVERT2(tb_output_base, tb_output_fx);
-    nerrors += check_result(tb_output_fx, tb_ref);
+    nerrors += check_result(num_compounds, tb_output_fx, tb_ref);
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 

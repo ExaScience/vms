@@ -6,7 +6,7 @@ MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
 
-SRCFILES = predict.cpp main.cpp
+SRCFILES = predict.cpp test_bench
 HDRFILES = predict.fpga.h predict.h vms_const.h vms_tb.h vms_types.h fxp.h
 TOPDIRFILES = $(addprefix $(TOPDIR)/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
