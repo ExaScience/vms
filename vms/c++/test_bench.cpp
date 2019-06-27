@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     }
     
 
+    printf("  dt: %s\n", DT_NAME);
     printf("  nrep: %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
     printf("  ncmpd: %d\n", num_compounds);

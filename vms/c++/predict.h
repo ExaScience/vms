@@ -1,12 +1,13 @@
 #if defined(DT_FIXED) || defined(DT_FLOAT)
 #else
-#warning Default to DT_FIXED
 #define DT_FIXED
 #endif
 
 #include "vms_const.h"
 
 #ifdef DT_FIXED
+
+#define DT_NAME "fxp<T,I>"
 
 #include "fxp.h"
 
@@ -29,6 +30,8 @@ typedef fxp<S_base, S_iwl> S_type;
 const float epsilon = 0.5;
 
 #elif defined(DT_FLOAT)
+
+#define DT_NAME "float"
 
 typedef float U_base ;
 typedef float U_type;
