@@ -35,14 +35,9 @@ void load_model(
 }
 
 void features_loop(
-	    const F_base features_in[num_features],
+	    const F_base features[num_features],
 		L_base latents[num_samples][num_latent])
 {
-	F_base features[num_features];
-#pragma HLS ARRAY_PARTITION variable=features complete dim=1
- // local copy
-	std::memcpy(features, features_in, sizeof(features));
-
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -68,12 +63,9 @@ void features_loop(
 }
 
 void proteins_loop(
-	P_base predictions_out[num_proteins],
+	P_base predictions[num_proteins],
 	const L_base latents[num_samples][num_latent])
 {
-	P_base predictions[num_proteins];
-#pragma HLS ARRAY_PARTITION variable=predictions complete dim=1
-
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -96,8 +88,6 @@ void proteins_loop(
 			);
 		predictions[d] = aggr;
 	} // end proteins
-
-	std::memcpy(predictions_out, predictions, sizeof(predictions));
 }
 
 
