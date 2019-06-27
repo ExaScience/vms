@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 #include "predict.h"
-#include "smurff_tb.h"
+#include "vms_tb.h"
 
 #ifdef DT_OBSERVED_FLOAT
 const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};

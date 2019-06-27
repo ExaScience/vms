@@ -4,7 +4,7 @@
 #define DT_FIXED
 #endif
 
-#include "smurff_const.h"
+#include "vms_const.h"
 
 #ifdef DT_FIXED
 

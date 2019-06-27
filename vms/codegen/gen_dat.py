@@ -14,7 +14,7 @@ import argparse
 
 
 def gen_file(dir, suffix, content):
-    with open(pth.join(dir, "smurff_" + suffix), "w") as os:
+    with open(pth.join(dir, "vms_" + suffix), "w") as os:
         os.write(content)
 
 

@@ -13,7 +13,7 @@ LDFLAGS=
 
 ROOTFILE=model/root.ini
 INPUTDATA=test.sdm train.sdm side_c2v.ddm
-MODELFILES=code/smurff_const.h code/smurff_tb.h
+MODELFILES=code/vms_const.h code/vms_tb.h
 
 .PHONY: hls run clean
 
