@@ -6,7 +6,7 @@ CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
 INCLUDES=-I$(SRCDIR) -Icode 
-CXXFLAGS=$(INCLUDES) -pthread -Wall -Wno-unknown-pragmas 
+CXXFLAGS=$(INCLUDES) -std=c++11 -pthread -Wall -Wno-unknown-pragmas
 CXXFLAGS+=-g -O0 -fsanitize=address 
 LDFLAGS=
 
