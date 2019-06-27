@@ -49,9 +49,8 @@ def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
-def gen_const(num_compounds, num_proteins, num_features, num_latent, num_samples):
+def gen_const(num_proteins, num_features, num_latent, num_samples):
     const_output = "#pragma once\n"
-    const_output += gen_int("num_compounds", num_compounds)
     const_output += gen_int("num_proteins",  num_proteins)
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
@@ -81,7 +80,7 @@ def map_to_int(M, dt):
     return M, dtinfo.bits, dtinfo.bits - shift
 
 
-def gen_session(root, outputdir, block_size):
+def gen_session(root, outputdir):
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
@@ -136,7 +135,7 @@ def gen_session(root, outputdir, block_size):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(block_size, num_proteins, num_features, num_latent, len(samples)) + "\n"
+    const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     const_output += "#ifdef DT_FIXED\n"
     types = {
@@ -161,9 +160,8 @@ def gen_session(root, outputdir, block_size):
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
 parser.add_argument('--root', metavar='root-file', dest="root_file", type=str, help='root file', default="root.ini")
 parser.add_argument('--output', metavar='DIR', type=str, help='output directory', default=".")
-parser.add_argument('--block', metavar='N', help='block size (# compounds)', type=int, default=10000)
 args = parser.parse_args()
 
-gen_session(args.root_file, args.output, args.block)
+gen_session(args.root_file, args.output)
 
 

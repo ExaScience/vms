@@ -26,7 +26,7 @@ $(ROOTFILE): $(INPUTDATA) options.ini
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code
-	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code --block 3
+	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 sim_fx: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
 	$(CXX) -DDT_FIXED $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) 
