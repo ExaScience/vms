@@ -30,3 +30,4 @@ $(PETALINUX_CONFIG): $(BSP)
 
 boot: $(PETALINUX_CONFIG) $(BITSTREAM)
 	autoVivado --verbose --name=$(PROGRAM_) --dir=${PWD}/$(BOARD) --board=$(BOARD) --task_manager --clock=200 --from_step=boot --to_step=boot
+	cp $(BOARD)/$(PROGRAM_)_autoVivado/BOOT.BIN .

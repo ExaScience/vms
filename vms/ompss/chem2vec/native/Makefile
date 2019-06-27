@@ -4,10 +4,10 @@ default: native
 
 include ../Makefile.common
 
-native: $(PROGRAM_)
-	./$(PROGRAM_)
+native: $(PROGRAM_)_fx
+	./$(PROGRAM_)_fx
 
-$(PROGRAM_): $(SRCFILES)
-	        $(CXX) $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
+$(PROGRAM_)_fx: $(SRCFILES)
+	        $(CXX) -DDT_FIXED $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
 
 

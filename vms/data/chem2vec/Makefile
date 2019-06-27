@@ -6,7 +6,9 @@ CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
 INCLUDES=-I$(SRCDIR) -Icode
-CXXFLAGS=$(INCLUDES) -pthread -g -O0 -Wall -Wno-unknown-pragmas -fsanitize=address 
+CXXFLAGS=$(INCLUDES) -pthread -Wall -Wno-unknown-pragmas
+# CXXFLAGS +=-g -O0 -fsanitize=address 
+CXXFLAGS +=-g -O3
 LDFLAGS=
 
 ROOTFILE=model/root.ini
