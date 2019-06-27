@@ -5,11 +5,14 @@
 
 #include "predict.fpga.h"
 
+static const int block_size = 10000;
+
 void load_model(
         const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
         const mu_base *mu_in, //[num_samples][num_latent],
         const B_base  *B_in)  //[num_samples][num_features][num_latent])
 {
+#define USE_MEMCPY
 #ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
 	std::memcpy(U,  U_in, sizeof(U));
@@ -35,7 +38,9 @@ void features_loop(
 	    const F_base features_in[num_features],
 		L_base latents[num_samples][num_latent])
 {
-	F_base features[num_features]; // local copy
+	F_base features[num_features];
+#pragma HLS ARRAY_PARTITION variable=features complete dim=1
+ // local copy
 	std::memcpy(features, features_in, sizeof(features));
 
 	for (int d = 0; d < num_features; d++)
@@ -67,6 +72,7 @@ void proteins_loop(
 	const L_base latents[num_samples][num_latent])
 {
 	P_base predictions[num_proteins];
+#pragma HLS ARRAY_PARTITION variable=predictions complete dim=1
 
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -96,7 +102,7 @@ void proteins_loop(
 
 
 void predict(
-		int num_compounds,
+		int num_compounds, // <=block_size
 		const F_base  *features,   //[num_compounds][num_features],
 		      P_base  *predictions //[num_compounds][num_proteins]
 )
@@ -132,6 +138,11 @@ void predict_or_update_model(
 		const mu_base *mu_in,       //[num_samples][num_latent]
 		const B_base  *B_in)        //[num_samples][num_features][num_latent]
 {
+#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
+#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
+#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
+#pragma HLS INTERFACE m_axi port=mu_in depth=num_samples*num_latent
+#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
 	if (update_model)
 	{
 		load_model(U_in, mu_in, B_in);
@@ -168,6 +179,17 @@ void predict_compound(
     static const mu_base empty_mu [num_samples][num_latent] = {{0}};
     static const B_base  empty_B  [num_samples][num_features][num_latent] = {{{0}}};
 
-    predict_or_update_model(false, num_compounds, &in[0][0], &out[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
+    F_base  in_block [block_size][num_features];
+    P_base  out_block[block_size][num_proteins];
+
+    for(int i=0; i<num_compounds; i+=block_size)
+    {
+        int nc = num_compounds - i;
+        if (nc > block_size) nc = block_size;
+        
+        memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
+        predict_or_update_model(false, nc, &in_block[0][0], &out_block[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
+        memcpy(&out[i][0], &out_block[0][0], nc*num_proteins*sizeof(P_base));
+    }
 }
 
