@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-#include <chrono>
+#include <ctime>
 #include <cstdlib>
 
 #include "predict.h"
@@ -16,9 +16,7 @@ std::vector<float> values[ntypes];
 #define CONVERT3(N, M) convert(&(N[0][0][0]), &(M[0][0][0]), sizeof(N) / sizeof(N[0][0][0]))
 
 double tick() {
-    auto now = std::chrono::system_clock::now().time_since_epoch();
-    double ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-    return ms / 1000.;
+    return (double)clock() / CLOCKS_PER_SEC;
 }
 
 template <typename F, typename T>
