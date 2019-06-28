@@ -1,7 +1,4 @@
-TOPDIR=../..
-
-
-SRCDIR=$(TOPDIR)/c++
+SRCDIR=../../c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
@@ -17,9 +14,6 @@ MODELFILES=code/vms_const.h code/vms_tb.h
 
 .PHONY: hls run clean
 
-run: sim
-	./sim
-
 $(INPUTDATA): make.py
 	python make.py
 
@@ -31,15 +25,15 @@ $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
-sim: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS)
-
 clean:
 	rm -rf model code hls
-	rm -f sim
-	rm -rf sim.dSYM
+	$(MAKE) -C fpga-zcu102 clean
+	$(MAKE) -C native clean
+	$(MAKE) -C smp-arm64 clean
+	$(MAKE) -C smp-x86 clean
 
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	ln -sf $(addprefix ../,$(HEADERFILES)) code/
 	ln -sf $(addprefix ../,$(CXXFILES)) code/
 	vivado_hls $(TOPDIR)/codegen/run.tcl
+
