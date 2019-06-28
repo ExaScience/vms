@@ -163,21 +163,31 @@ void predict_compound(
           P_base  out[][num_proteins]
 )
 {
-    static const U_base  empty_U  [num_samples][num_proteins][num_latent] = {{{0}}};
-    static const mu_base empty_mu [num_samples][num_latent] = {{0}};
-    static const B_base  empty_B  [num_samples][num_features][num_latent] = {{{0}}};
+    static const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
+    static const mu_base empty_mu [num_samples*num_latent] = {0};
+    static const B_base  empty_B  [num_samples*num_features*num_latent] = {0};
 
-    static F_base  in_block [block_size][num_features];
-    static P_base  out_block[block_size][num_proteins];
-
-    for(int i=0; i<num_compounds; i+=block_size)
+    int i;
+    for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
-        int nc = num_compounds - i;
-        if (nc > block_size) nc = block_size;
-        
+        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
+    }
+
+    // last block left-overs
+    int nc = num_compounds - i;
+    if (nc == 0) {
+#pragma omp taskwait
+    } else {
+        F_base *in_block = new F_base[block_size*num_features];
+        P_base *out_block= new P_base[block_size*num_proteins];
+
         memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        predict_or_update_model(false, nc, &in_block[0][0], &out_block[0][0], &empty_U[0][0][0], &empty_mu[0][0], &empty_B[0][0][0]);
-        memcpy(&out[i][0], &out_block[0][0], nc*num_proteins*sizeof(P_base));
+        predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
+#pragma omp taskwait
+        memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
+
+        delete[] in_block;
+        delete[] out_block;
     }
 }
 
