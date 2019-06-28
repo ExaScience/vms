@@ -1,4 +1,6 @@
-SRCDIR=../../c++
+
+TOPDIR=../..
+SRCDIR=$(TOPDIR)/c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
