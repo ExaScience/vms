@@ -1,4 +1,8 @@
+#include <cstring>
+
 #include "predict.h"
+
+static const int block_size = 20;
 
 static U_base U[num_samples][num_proteins][num_latent];
 static mu_base mu[num_samples][num_latent];
