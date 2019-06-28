@@ -5,6 +5,8 @@
 
 #include "vms_const.h"
 
+static const int block_size = 1000;
+
 #ifdef DT_FIXED
 
 #define DT_NAME "fxp<T,I>"

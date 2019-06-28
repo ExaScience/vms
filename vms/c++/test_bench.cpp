@@ -82,10 +82,11 @@ int main(int argc, char *argv[])
     }
     
 
-    printf("  dt: %s\n", DT_NAME);
-    printf("  nrep: %d\n", num_repeat);
+    printf("  dt:    %s\n", DT_NAME);
+    printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
     printf("  ncmpd: %d\n", num_compounds);
+    printf("  blks:  %d\n", block_size);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
