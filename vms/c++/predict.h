@@ -31,6 +31,10 @@ typedef fxp<S_base, S_iwl> S_type;
 
 const float epsilon = 0.5;
 
+#define CRC_INIT(crc) (crc) = 0
+#define CRC_ADD(crc, value) (crc) ^= (value)
+#define CRC_FMT "0x%04x"
+
 #elif defined(DT_FLOAT)
 
 #define DT_NAME "float"
@@ -57,6 +61,10 @@ typedef float S_base;
 typedef float S_type;
 
 const float epsilon = 0.5;
+
+#define CRC_INIT(crc) (crc) = .0
+#define CRC_ADD(crc, value) (crc) += (value)
+#define CRC_FMT "%.2f"
 
 #else
 #error Need to defined DT_FIXED or DT_FLOAT

@@ -35,19 +35,57 @@ void prepare_tb_input(
         for (int p = 0; p < num_features; p++)
             out[c][p] = F_type(in [c%tb_num_compounds][p]);
 }
+void prepare_model(
+    const float U_in[num_samples][num_proteins][num_latent],
+    const float mu_in[num_samples][num_latent],
+    const float B_in[num_samples][num_features][num_latent],
+    U_base U_out[num_samples][num_proteins][num_latent],
+    mu_base mu_out[num_samples][num_latent],
+    B_base B_out[num_samples][num_features][num_latent],
+    P_base &U_check,
+    P_base &mu_check,
+    P_base &B_check
+    )
+{
+	CRC_INIT(U_check);
+	CRC_INIT(mu_check);
+	CRC_INIT(B_check);
 
-template <typename F, typename T>
+    for (int i = 0; i < num_samples; i++)
+    {
+        for (int j = 0; j < num_proteins; j++)
+            for (int k = 0; k < num_latent; k++)
+            {
+                U_out[i][j][k] = U_type(U_in[i][j][k]);
+                CRC_ADD(U_check, U_out[i][j][k]);
+            }
+
+        for (int j = 0; j < num_latent; j++)
+        {
+            mu_out[i][j] = mu_type(mu_in[i][j]);
+            CRC_ADD(mu_check, mu_out[i][j]);
+        }
+
+        for (int j = 0; j < num_features; j++)
+            for (int k = 0; k < num_latent; k++)
+            {
+                B_out[i][j][k] = B_type(B_in[i][j][k]);
+                CRC_ADD(B_check, B_out[i][j][k]);
+            }
+    }
+}
+
 int check_result(
     int num_compounds,
-    const F out[][num_proteins],
-    const T ref[tb_num_compounds][num_proteins])
+    const P_base out[][num_proteins],
+    const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
         {
             float o = P_type(out[c][p]);
-            float r = P_type(ref[c % tb_num_compounds][p]);
+            float r = ref[c % tb_num_compounds][p];
             if (std::abs(o - r) < epsilon)
             {
                 //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
@@ -93,28 +131,23 @@ int main(int argc, char *argv[])
     U_base  U_base[num_samples][num_proteins][num_latent];
     mu_base mu_base[num_samples][num_latent];
     B_base  B_base[num_samples][num_features][num_latent];
-
-    P_type  tb_output_fx[num_compounds][num_proteins];
-    U_type  U_fx[num_samples][num_proteins][num_latent];
-    mu_type mu_fx[num_samples][num_latent];
-    B_type  B_fx[num_samples][num_features][num_latent];
+    P_base U_check_tb, mu_check_tb, B_check_tb;
 
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
-
-    CONVERT3(U, U_fx);
-    CONVERT2(mu, mu_fx);
-    CONVERT3(B, B_fx);
-
-    CONVERT3(U_fx, U_base);
-    CONVERT2(mu_fx, mu_base);
-    CONVERT3(B_fx, B_base);
+    prepare_model(U, mu, B, U_base, mu_base, B_base, U_check_tb, mu_check_tb, B_check_tb);
 
     int nerrors = 0;
 
     printf("Updating model\n");
-    P_base U_check, mu_check, B_check;
+    P_base U_check = 0, mu_check = 0, B_check = 0;
     update_model(U_base, mu_base, B_base, U_check, mu_check, B_check);
-    printf("  Checksums 0x%x, 0x%x, 0x%x\n", U_check, mu_check, B_check);
+    printf("  Computed checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT "\n", U_check, mu_check, B_check);
+    printf("  Expected checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT "\n", U_check_tb, mu_check_tb, B_check_tb);
+    if (U_check != U_check_tb || mu_check != mu_check_tb || B_check != B_check_tb)
+    {
+        return -2;
+    }
+
 
     printf("Predicting\n");
     double start = tick();
@@ -124,8 +157,7 @@ int main(int argc, char *argv[])
     }
 #pragma omp taskwait
     double stop = tick();
-    CONVERT2(tb_output_base, tb_output_fx);
-    nerrors += check_result(num_compounds, tb_output_fx, tb_ref);
+    nerrors += check_result(num_compounds, tb_output_base, tb_ref);
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 

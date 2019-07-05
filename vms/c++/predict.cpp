@@ -5,29 +5,31 @@
 
 void checksum_model(P_base *out)
 {
-#ifdef DT_FIXED
-	P_base U_check = 0;
-	P_base mu_check = 0;
-	P_base B_check = 0;
+	P_base U_check;
+	P_base mu_check;
+	P_base B_check;
+
+	CRC_INIT(U_check);
+	CRC_INIT(mu_check);
+	CRC_INIT(B_check);
 
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U_check ^= U[i][j][k];
+                CRC_ADD(U_check, U[i][j][k]);
 
         for (int j = 0; j < num_latent; j++)
-           mu_check ^= mu[i][j];
+           CRC_ADD(mu_check, mu[i][j]);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B_check ^= B[i][j][k];
+                CRC_ADD(B_check, B[i][j][k]);
 	}
 
 	out[0] = U_check;
 	out[1] = mu_check;
 	out[2] = B_check;
-#endif
 }
 
 void load_model(
