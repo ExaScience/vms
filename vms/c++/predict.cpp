@@ -174,9 +174,9 @@ void update_model(
     const U_base  U  [num_samples][num_proteins][num_latent],
     const mu_base mu [num_samples][num_latent],
     const B_base  B  [num_samples][num_features][num_latent],
-	const P_base U_check,
-	const P_base mu_check,
-	const P_base B_check
+	P_base &U_check,
+	P_base &mu_check,
+	P_base &B_check
 )
 {
     static F_base  in_block [block_size*num_features];
@@ -185,9 +185,9 @@ void update_model(
     predict_or_update_model(true, 0, in_block, out_block, &U[0][0][0], &mu[0][0], &B[0][0][0]);
 #pragma omp taskwait
 
-	assert(U_check == out_block[0]);
-	assert(mu_check == out_block[1]);
-	assert(B_check == out_block[2]);
+	U_check = out_block[0];
+	mu_check = out_block[1];
+	B_check = out_block[2];
 }
 
 void predict_compound(

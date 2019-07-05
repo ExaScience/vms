@@ -112,7 +112,9 @@ int main(int argc, char *argv[])
     int nerrors = 0;
 
     printf("Updating model\n");
-    update_model(U_base, mu_base, B_base, 0, 0, 0);
+    P_base U_check, mu_check, B_check;
+    update_model(U_base, mu_base, B_base, U_check, mu_check, B_check);
+    printf("  Checksums 0x%x, 0x%x, 0x%x\n", U_check, mu_check, B_check);
 
     printf("Predicting\n");
     double start = tick();
