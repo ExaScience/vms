@@ -1,15 +1,40 @@
-#include <cstdio>
-#include <cstring>
 
 #define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 #include "predict.fpga.h"
 
-void load_model(
-        const U_base  *U_in,  //[num_samples][num_proteins][num_latent],
-        const mu_base *mu_in, //[num_samples][num_latent],
-        const B_base  *B_in)  //[num_samples][num_features][num_latent])
+void checksum_model(P_base *out)
 {
+#ifdef DT_FIXED
+	P_base U_check = 0;
+	P_base mu_check = 0;
+	P_base B_check = 0;
+
+    for (int i = 0; i < num_samples; i++)
+    {
+        for (int j = 0; j < num_proteins; j++)
+            for (int k = 0; k < num_latent; k++)
+                U_check ^= U[i][j][k];
+
+        for (int j = 0; j < num_latent; j++)
+           mu_check ^= mu[i][j];
+
+        for (int j = 0; j < num_features; j++)
+            for (int k = 0; k < num_latent; k++)
+                B_check ^= B[i][j][k];
+	}
+
+	out[0] = U_check;
+	out[1] = mu_check;
+	out[2] = B_check;
+#endif
+}
+
+void load_model(
+		const U_base *U_in,   //[num_samples][num_proteins][num_latent],
+		const mu_base *mu_in, //[num_samples][num_latent],
+		const B_base *B_in)   //[num_samples][num_features][num_latent])
+	{
 #define USE_MEMCPY
 #ifdef USE_MEMCPY
 	std::memcpy(mu, mu_in, sizeof(mu));
@@ -134,6 +159,7 @@ void predict_or_update_model(
 	if (update_model)
 	{
 		load_model(U_in, mu_in, B_in);
+		checksum_model(predictions);
 	} 
         else
 	{
@@ -147,14 +173,21 @@ void predict_or_update_model(
 void update_model(
     const U_base  U  [num_samples][num_proteins][num_latent],
     const mu_base mu [num_samples][num_latent],
-    const B_base  B  [num_samples][num_features][num_latent]
+    const B_base  B  [num_samples][num_features][num_latent],
+	const P_base U_check,
+	const P_base mu_check,
+	const P_base B_check
 )
 {
-    static F_base  in_block [block_size][num_features];
-    static P_base  out_block[block_size][num_proteins];
+    static F_base  in_block [block_size*num_features];
+    static P_base  out_block[block_size*num_proteins];
 
-    predict_or_update_model(true, 0, &in_block[0][0], &out_block[0][0], &U[0][0][0], &mu[0][0], &B[0][0][0]);
+    predict_or_update_model(true, 0, in_block, out_block, &U[0][0][0], &mu[0][0], &B[0][0][0]);
 #pragma omp taskwait
+
+	assert(U_check == out_block[0]);
+	assert(mu_check == out_block[1]);
+	assert(B_check == out_block[2]);
 }
 
 void predict_compound(

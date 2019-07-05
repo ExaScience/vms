@@ -26,17 +26,14 @@ void convert(const F *in, T *out, int size)
         out[i] = in[i];
 }
 
-template <typename F, typename T>
 void prepare_tb_input(
     int num_compounds,
-    const F in[tb_num_compounds][num_features],
-    T out[][num_features])
+    const float in[tb_num_compounds][num_features],
+    F_base out[][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
-        {
-            out[c][p] = in [c%tb_num_compounds][p];
-        }
+            out[c][p] = F_type(in [c%tb_num_compounds][p]);
 }
 
 template <typename F, typename T>
@@ -98,13 +95,11 @@ int main(int argc, char *argv[])
     B_base  B_base[num_samples][num_features][num_latent];
 
     P_type  tb_output_fx[num_compounds][num_proteins];
-    F_type  tb_input_fx[num_compounds][num_features];
     U_type  U_fx[num_samples][num_proteins][num_latent];
     mu_type mu_fx[num_samples][num_latent];
     B_type  B_fx[num_samples][num_features][num_latent];
 
-
-    prepare_tb_input(num_compounds, tb_input, tb_input_fx);
+    prepare_tb_input(num_compounds, tb_input, tb_input_base);
 
     CONVERT3(U, U_fx);
     CONVERT2(mu, mu_fx);
@@ -113,12 +108,11 @@ int main(int argc, char *argv[])
     CONVERT3(U_fx, U_base);
     CONVERT2(mu_fx, mu_base);
     CONVERT3(B_fx, B_base);
-    CONVERT2(tb_input_fx, tb_input_base);
 
     int nerrors = 0;
 
     printf("Updating model\n");
-    update_model(U_base, mu_base, B_base);
+    update_model(U_base, mu_base, B_base, 0, 0, 0);
 
     printf("Predicting\n");
     double start = tick();

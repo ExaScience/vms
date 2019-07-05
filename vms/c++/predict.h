@@ -62,12 +62,13 @@ const float epsilon = 0.5;
 #error Need to defined DT_FIXED or DT_FLOAT
 #endif
 
-
 void update_model(
-    const U_base  U  [num_samples][num_proteins][num_latent],
-    const mu_base mu [num_samples][num_latent],
-    const B_base  B  [num_samples][num_features][num_latent]
-);
+    const U_base U[num_samples][num_proteins][num_latent],
+    const mu_base mu[num_samples][num_latent],
+    const B_base B[num_samples][num_features][num_latent],
+    const P_base U_check,
+    const P_base mu_check,
+    const P_base B_chec);
 
 void predict_compound(
     int num_compounds,
