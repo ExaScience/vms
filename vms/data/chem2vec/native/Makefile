@@ -8,10 +8,10 @@ native: $(PROGRAM_)_fx $(PROGRAM_)_fp
 	./$(PROGRAM_)_fx
 	./$(PROGRAM_)_fp
 
-$(PROGRAM_)_fp: $(SRCFILES)
+$(PROGRAM_)_fp: $(SRCFILES) $(HEADERFILES)
 	        $(CXX) -DDT_FLOAT $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)_fx: $(SRCFILES)
+$(PROGRAM_)_fx: $(SRCFILES) $(HEADERFILES)
 	        $(CXX) -DDT_FIXED $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
 
 
