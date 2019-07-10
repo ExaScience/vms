@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstdlib>
 
+
 #include "predict.h"
 #include "vms_tb.h"
 
@@ -33,7 +34,7 @@ void prepare_tb_input(
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
-            out[c][p] = F_type(in [c%tb_num_compounds][p]);
+            out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
 void prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
@@ -56,20 +57,20 @@ void prepare_model(
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                U_out[i][j][k] = U_type(U_in[i][j][k]);
+                U_out[i][j][k] = U_base(U_type(U_in[i][j][k]));
                 CRC_ADD(U_check, U_out[i][j][k]);
             }
 
         for (int j = 0; j < num_latent; j++)
         {
-            mu_out[i][j] = mu_type(mu_in[i][j]);
+            mu_out[i][j] = mu_base(mu_type(mu_in[i][j]));
             CRC_ADD(mu_check, mu_out[i][j]);
         }
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                B_out[i][j][k] = B_type(B_in[i][j][k]);
+                B_out[i][j][k] = B_base(B_type(B_in[i][j][k]));
                 CRC_ADD(B_check, B_out[i][j][k]);
             }
     }
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
         num_compounds = std::atoi(argv[2]);
     }
     
+    std::cout << typeid(P_type).name() << std::endl;
 
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
@@ -160,19 +162,6 @@ int main(int argc, char *argv[])
     nerrors += check_result(num_compounds, tb_output_base, tb_ref);
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
-
-#ifdef DT_OBSERVED_FLOAT
-    for (int i = 0; i < ntypes; ++i)
-    {
-        std::cout << typenames[i] << "; size: " << values[i].size();
-        if (values[i].size() > 0)
-        {
-            std::cout << "; min: " << *std::min_element(values[i].begin(), values[i].end())
-                      << "; max: " << *std::max_element(values[i].begin(), values[i].end());
-        }
-        std::cout << std::endl;
-    }
-#endif
 
     return nerrors;
 }

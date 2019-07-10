@@ -82,7 +82,7 @@ void features_loop(
 				if (d==0) v = mu_type(mu[s][k]);
 				else      v = L_type(latents[s][k]);
 				L_type prod = feature * B_type(B[s][d][k]);
-				latents[s][k] = L_type(v + prod);
+				latents[s][k] = L_base(L_type(v + prod));
 			}
 	}
 }
@@ -111,7 +111,7 @@ void proteins_loop(
 			sum >> log_num_samples
 #endif
 			);
-		predictions[d] = aggr;
+		predictions[d] = P_base(aggr);
 	} // end proteins
 }
 
