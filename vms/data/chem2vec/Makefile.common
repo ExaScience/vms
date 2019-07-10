@@ -1,7 +1,7 @@
 
 CFLAGS_      = $(CFLAGS) -O1 -std=c++11 
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
-#MCXX_FLAGS_   += -k --verbose
+MCXX_FLAGS_   += -k --verbose
 MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
@@ -35,7 +35,9 @@ $(PROGRAM_)-d: $(SRCFILES)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
 
 clean:
-	rm -f *.o $(PROGS_) $(PROGRAM_)
+	rm -f *.o $(PROGS_)
+	rm -f $(PROGRAM_)_fp
+	rm -f $(PROGRAM_)_fx
 	rm -f *.cpp *.h
 	rm -rf zcu102
 
