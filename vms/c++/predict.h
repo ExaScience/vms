@@ -40,25 +40,30 @@ const float epsilon = 0.5;
 #define DT_NAME "float"
 
 typedef float U_base ;
-typedef float U_type;
-
 typedef float mu_base ;
-typedef float mu_type;
-
 typedef float B_base ;
-typedef float B_type;
-
 typedef float F_base ;
-typedef float F_type;
-
 typedef float P_base ;
-typedef float P_type;
-
 typedef float L_base;
-typedef float L_type;
-
 typedef float S_base;
+
+#if 0
+typedef observable<float, U_id> U_type;
+typedef observable<float, mu_id> mu_type;
+typedef observable<float, B_id> B_type;
+typedef observable<float, F_id> F_type;
+typedef observable<float, P_id> P_type;
+typedef observable<float, L_id> L_type;
+typedef observable<float, S_id> S_type;
+#else
+typedef float U_type;
+typedef float mu_type;
+typedef float B_type;
+typedef float F_type;
+typedef float P_type;
+typedef float L_type;
 typedef float S_type;
+#endif
 
 const float epsilon = 0.5;
 
@@ -73,10 +78,7 @@ const float epsilon = 0.5;
 void update_model(
     const U_base U[num_samples][num_proteins][num_latent],
     const mu_base mu[num_samples][num_latent],
-    const B_base B[num_samples][num_features][num_latent],
-    P_base &U_check,
-    P_base &mu_check,
-    P_base &B_chec);
+    const B_base B[num_samples][num_features][num_latent]);
 
 void predict_compound(
     int num_compounds,

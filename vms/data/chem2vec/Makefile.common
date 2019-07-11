@@ -1,4 +1,3 @@
-
 CFLAGS_      = $(CFLAGS) -O0 -g -std=c++11
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
 MCXX_FLAGS_   += -k --verbose
@@ -7,7 +6,7 @@ MCXX_FLAGS_D_ = --debug -g
 LDFLAGS_     = $(LDFLAGS)
 
 SRCFILES = predict.cpp test_bench.cpp
-HDRFILES = predict.fpga.h predict.h vms_const.h vms_tb.h fxp.h
+HDRFILES = predict.fpga.h predict.h vms_const.h vms_tb.h fxp.h observed_float.h
 TOPDIRFILES = $(addprefix $(TOPDIR)/code/,$(SRCFILES) $(HDRFILES))
 PROGRAM_ = predict
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d

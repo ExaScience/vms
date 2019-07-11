@@ -12,9 +12,12 @@ LDFLAGS=
 
 ROOTFILE=model/root.ini
 INPUTDATA=test.sdm train.sdm side_c2v.ddm
+
 MODELFILES=code/vms_const.h code/vms_tb.h
 
-.PHONY: hls run clean
+model: $(MODELFILES)
+
+.PHONY: hls run clean model
 
 $(INPUTDATA): make.py
 	python make.py
@@ -25,6 +28,7 @@ $(ROOTFILE): $(INPUTDATA) options.ini
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
+	ln -sf $(addprefix ../,$(CXXFILES) $(HEADERFILES)) code/
 	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 clean:
