@@ -46,7 +46,7 @@ add_expr<T1, IWL1, T2, IWL2> operator+(const fxp<T1, IWL1> &a, const fxp<T2, IWL
 template<typename T, int IWL>
 struct fxp
 {
-	static const int wl = sizeof(T) * 8;
+    static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
 
@@ -64,19 +64,25 @@ struct fxp
     }
 
 
-    void check() const
+    void check(float ref) const
     {
 #ifndef NDEBUG
-        if(val > std::numeric_limits<T>::max() || val < std::numeric_limits<T>::min())
+        const float epsilon = (2. / (float)(1L<<shift));
+        float cur = (float)(*this);
+        if(std::abs(cur - ref) < epsilon)
         {
-            std::cerr << (float)(*this) << " does not fit in fxp<" << wl << "," << iwl << ">" << std::endl;
+            // all clear :)
+        }
+        else
+        {
+            std::cerr << cur << " not equal to ref " << ref << " in fxp<" << wl << "," << iwl << ">" << std::endl;
             abort();
         }
 #endif
     }
 
-    fxp(float v) : val(v*(1L<<shift)) { check(); } 
-    fxp(T v = (T)0xdead) : val(v) { check(); } 
+    fxp(float v) : val(v*(1L<<shift)) { check(v); } 
+    fxp(T v = (T)0xdead) : val(v) { } 
 
     template<typename otherT, int otherIWL>
     fxp(fxp<otherT, otherIWL> v)
@@ -85,7 +91,8 @@ struct fxp
             val = v.val >> (v.shift - shift);
         else 
             val = v.val << (shift - v.shift);
-        check();
+
+        check((float)v);
     }
 
     template<typename T1, int IWL1, typename T2, int IWL2>
@@ -100,7 +107,7 @@ struct fxp
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
-        assert(((float)(*this) - ((float)mul.a * (float)mul.b)) < 0.01);
+        check((float)mul.a * (float)mul.b);
     }
 
 
@@ -118,11 +125,7 @@ struct fxp
         if (s > 0) val = val << s;
         else       val = val >> -s;
 
-        float af = (float)(add.a);
-        float bf = (float)(add.b);
-        float tf = (float)(*this);
-        float f = tf - (af + bf);
-        assert(fabs(f)< 0.01);
+        check((float)(add.a) + (float)(add.b));
     }
 
     fxp<T, IWL> operator>>(const int s)
