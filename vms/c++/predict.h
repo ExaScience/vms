@@ -3,8 +3,6 @@
 #define DT_FIXED
 #endif
 
-#include "observer.h"
-
 #include "vms_const.h"
 
 static const int block_size = 1000;
@@ -80,10 +78,7 @@ const float epsilon = 0.5;
 void update_model(
     const U_base U[num_samples][num_proteins][num_latent],
     const mu_base mu[num_samples][num_latent],
-    const B_base B[num_samples][num_features][num_latent],
-    P_base &U_check,
-    P_base &mu_check,
-    P_base &B_chec);
+    const B_base B[num_samples][num_features][num_latent]);
 
 void predict_compound(
     int num_compounds,

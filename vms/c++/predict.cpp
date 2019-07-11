@@ -3,33 +3,45 @@
 
 #include "predict.fpga.h"
 
-void checksum_model(P_base *out)
+void checksum_model(const F_base *features,
+					P_base *out,
+					const U_base  *U,  //[num_samples][num_proteins][num_latent]
+					const mu_base *mu, //[num_samples][num_latent]
+					const B_base  *B)  //[num_samples][num_features][num_latent])
 {
 	P_base U_check;
 	P_base mu_check;
 	P_base B_check;
+	P_base F_check;
 
 	CRC_INIT(U_check);
 	CRC_INIT(mu_check);
 	CRC_INIT(B_check);
+	CRC_INIT(F_check);
 
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                CRC_ADD(U_check, U[i][j][k]);
+                CRC_ADD(U_check, (*U++));
 
         for (int j = 0; j < num_latent; j++)
-           CRC_ADD(mu_check, mu[i][j]);
+           CRC_ADD(mu_check, (*mu++));
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                CRC_ADD(B_check, B[i][j][k]);
+                CRC_ADD(B_check, (*B++));
+	}
+
+    for (int i = 0; i < block_size * num_features; i++)
+    {
+		CRC_ADD(F_check, features[i]);
 	}
 
 	out[0] = U_check;
 	out[1] = mu_check;
 	out[2] = B_check;
+	out[3] = F_check;
 }
 
 void load_model(
@@ -39,9 +51,9 @@ void load_model(
 	{
 #define USE_MEMCPY
 #ifdef USE_MEMCPY
-	std::memcpy(mu, mu_in, sizeof(mu));
-	std::memcpy(U,  U_in, sizeof(U));
-	std::memcpy(B,  B_in, sizeof(B));
+	std::memcpy(mu_local, mu_in, sizeof(mu_local));
+	std::memcpy(U_local,  U_in, sizeof(U_local));
+	std::memcpy(B_local,  B_in, sizeof(B_local));
 #else
     for (int i = 0; i < num_samples; i++)
     {
@@ -79,9 +91,9 @@ void features_loop(
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
-				if (d==0) v = mu_type(mu[s][k]);
+				if (d==0) v = mu_type(mu_local[s][k]);
 				else      v = L_type(latents[s][k]);
-				L_type prod = feature * B_type(B[s][d][k]);
+				L_type prod = feature * B_type(B_local[s][d][k]);
 				latents[s][k] = L_base(L_type(v + prod));
 			}
 	}
@@ -100,7 +112,7 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = L_type(latents[s][k]) * U_type(U[s][d][k]);
+				S_type prod = L_type(latents[s][k]) * U_type(U_local[s][d][k]);
 				sum = sum + prod;
 			}
 
@@ -153,15 +165,15 @@ void predict_or_update_model(
 		const mu_base *mu_in,       //[num_samples][num_latent]
 		const B_base  *B_in)        //[num_samples][num_features][num_latent]
 {
-#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
-#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
-#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
-#pragma HLS INTERFACE m_axi port=mu_in depth=num_samples*num_latent
-#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
+//#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
+//#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
+//#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
+//#pragma HLS INTERFACE m_axi port=mu_in depth=num_samples*num_latent
+//#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
 	if (update_model)
 	{
 		load_model(U_in, mu_in, B_in);
-		checksum_model(predictions);
+		checksum_model(features, predictions, &U_local[0][0][0], &mu_local[0][0], &B_local[0][0][0]);
 	} 
         else
 	{
@@ -173,24 +185,26 @@ void predict_or_update_model(
 
 
 void update_model(
-    const U_base  U  [num_samples][num_proteins][num_latent],
-    const mu_base mu [num_samples][num_latent],
-    const B_base  B  [num_samples][num_features][num_latent],
-	P_base &U_check,
-	P_base &mu_check,
-	P_base &B_check
-)
+    const U_base  U_in  [num_samples][num_proteins][num_latent],
+    const mu_base mu_in [num_samples][num_latent],
+    const B_base  B_in  [num_samples][num_features][num_latent])
 {
     static F_base  in_block [block_size*num_features];
-    static P_base  out_block[block_size*num_proteins];
+    in_block [0] = 1;
+    in_block [block_size*num_features - 1] = 2;
 
-    predict_or_update_model(true, 0, in_block, out_block, &U[0][0][0], &mu[0][0], &B[0][0][0]);
+    static P_base  out_block_1[block_size*num_proteins];
+    static P_base  out_block_2[block_size*num_proteins];
+
+    predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
 
-	U_check = out_block[0];
-	mu_check = out_block[1];
-	B_check = out_block[2];
+	checksum_model(in_block, out_block_2, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
+
+    printf("  Computed checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0], out_block_1[1], out_block_1[2], out_block_1[3]);
+    printf("  Expected checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0], out_block_2[1], out_block_2[2], out_block_2[3]);
 }
+
 
 void predict_compound(
 	int num_compounds,

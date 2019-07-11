@@ -13,18 +13,8 @@ const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
 
-#define CONVERT2(N, M) convert(&(N[0][0]), &(M[0][0]), sizeof(N) / sizeof(N[0][0]))
-#define CONVERT3(N, M) convert(&(N[0][0][0]), &(M[0][0][0]), sizeof(N) / sizeof(N[0][0][0]))
-
 double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
-}
-
-template <typename F, typename T>
-void convert(const F *in, T *out, int size)
-{
-    for (int i = 0; i < size; ++i)
-        out[i] = in[i];
 }
 
 void prepare_tb_input(
@@ -141,15 +131,7 @@ int main(int argc, char *argv[])
     int nerrors = 0;
 
     printf("Updating model\n");
-    P_base U_check = 0, mu_check = 0, B_check = 0;
-    update_model(U_base, mu_base, B_base, U_check, mu_check, B_check);
-    printf("  Computed checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT "\n", U_check, mu_check, B_check);
-    printf("  Expected checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT "\n", U_check_tb, mu_check_tb, B_check_tb);
-    if (U_check != U_check_tb || mu_check != mu_check_tb || B_check != B_check_tb)
-    {
-        return -2;
-    }
-
+    update_model(U_base, mu_base, B_base);
 
     printf("Predicting\n");
     double start = tick();
