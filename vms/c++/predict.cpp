@@ -220,6 +220,7 @@ void predict_compound(
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
+        printf("Full task\n");
         predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
     }
 
@@ -232,6 +233,7 @@ void predict_compound(
         P_base *out_block= new P_base[block_size*num_proteins];
 
         memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
+        printf("Last part task\n");
         predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
 #pragma omp taskwait
         memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));

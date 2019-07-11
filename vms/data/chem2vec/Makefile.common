@@ -1,5 +1,4 @@
-
-CFLAGS_      = $(CFLAGS) -O1 -std=c++14
+CFLAGS_      = $(CFLAGS) -O0 -g -std=c++11
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
 MCXX_FLAGS_   += -k --verbose
 MCXX_FLAGS_I_ = --instrument
