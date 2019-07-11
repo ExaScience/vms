@@ -201,8 +201,9 @@ void update_model(
 
 	checksum_model(in_block, out_block_2, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
 
-    printf("  Computed checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0], out_block_1[1], out_block_1[2], out_block_1[3]);
-    printf("  Expected checksums " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0], out_block_2[1], out_block_2[2], out_block_2[3]);
+    printf("Checksums U, mu, B, F\n");
+    printf("  Computed: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0], out_block_1[1], out_block_1[2], out_block_1[3]);
+    printf("  Expected: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0], out_block_2[1], out_block_2[2], out_block_2[3]);
 }
 
 
