@@ -119,12 +119,12 @@ int main(int argc, char *argv[])
     P_base  tb_output_base[num_compounds][num_proteins];
     F_base  tb_input_base[num_compounds][num_features];
     U_base  U_base[num_samples][num_proteins][num_latent];
-    M_base M_base[num_samples][num_latent];
+    M_base  M_base[num_samples][num_latent];
     B_base  B_base[num_samples][num_features][num_latent];
-    P_base U_check_tb, M_check_tb, B_check_tb;
+    P_base  U_check_tb, M_check_tb, B_check_tb;
 
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
-    prepare_model(U, mu, B, U_base, M_base, B_base, U_check_tb, M_check_tb, B_check_tb);
+    prepare_model(U, M, B, U_base, M_base, B_base, U_check_tb, M_check_tb, B_check_tb);
 
     int nerrors = 0;
 

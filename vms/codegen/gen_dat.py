@@ -126,7 +126,7 @@ def gen_session(root, outputdir):
     tb_output = \
         gen_int("tb_num_compounds", tb_num_compounds)  \
         + gen_array(U,  "float", "U", "  ", format = format) + "\n" \
-        + gen_array(mu, "float", "mu", indent = "  ",  format = format) + "\n" \
+        + gen_array(mu, "float", "M", indent = "  ",  format = format) + "\n" \
         + gen_array(B,  "float", "B", "  ", format = format) + "\n"
 
     tb_output += gen_array(tb_in_matrix, "float", "tb_input", format = format) + "\n"
@@ -144,7 +144,7 @@ def gen_session(root, outputdir):
         32 : "signed int",
     }
     for name, wl, iwl in zip(
-        [ "U", "mu", "B", "F", "P" ],
+        [ "U", "M", "B", "F", "P" ],
         [ U_wl, M_wl, B_wl, F_wl, P_wl ],
         [ U_iwl, M_iwl, B_iwl, F_iwl, P_iwl ],
     ):

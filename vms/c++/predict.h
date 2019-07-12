@@ -39,11 +39,11 @@ const float epsilon = 0.5;
 
 #define DT_NAME "float"
 
-typedef float U_base ;
-typedef float M_base ;
-typedef float B_base ;
-typedef float F_base ;
-typedef float P_base ;
+typedef float U_base;
+typedef float M_base;
+typedef float B_base;
+typedef float F_base;
+typedef float P_base;
 typedef float L_base;
 typedef float S_base;
 
@@ -75,22 +75,22 @@ const float epsilon = 0.5;
 #error Need to defined DT_FIXED or DT_FLOAT
 #endif
 
-typedef F_base  F_arr[][num_features];
-typedef P_base  P_arr[][num_proteins];
+typedef F_base F_arr[][num_features];
+typedef P_base P_arr[][num_proteins];
 
-typedef F_base  F_blk[block_size][num_features];
-typedef P_base  P_blk[block_size][num_proteins];
+typedef F_base F_blk[block_size][num_features];
+typedef P_base P_blk[block_size][num_proteins];
 
-typedef F_base  F_flat[block_size*num_features];
-typedef P_base  P_flat[block_size*num_proteins];
+typedef F_base F_flat[block_size*num_features];
+typedef P_base P_flat[block_size*num_proteins];
 
-typedef U_base  U_arr[num_samples][num_proteins][num_latent];
+typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
-typedef B_base  B_arr[num_samples][num_features][num_latent];
+typedef B_base B_arr[num_samples][num_features][num_latent];
 
-typedef U_base   U_flat[num_samples*num_proteins*num_latent];
+typedef U_base U_flat[num_samples*num_proteins*num_latent];
 typedef M_base M_flat[num_samples*num_latent];
-typedef B_base   B_flat[num_samples*num_features*num_latent];
+typedef B_base B_flat[num_samples*num_features*num_latent];
 
 void update_model(const U_arr U, const M_arr mu, const B_arr B);
 
