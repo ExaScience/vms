@@ -149,11 +149,11 @@ void predict_block(
 #else
 #endif
 #pragma omp task \
-    in([block_size*num_features]features, \
-       [num_samples*num_proteins*num_latent]U_in,\
-       [num_samples*num_latent             ]M_in,\
-       [num_samples*num_features*num_latent]B_in) \
-    out([block_size*num_proteins]predictions)
+    in([block_size*num_features]features_ptr, \
+       [num_samples*num_proteins*num_latent]U_ptr,\
+       [num_samples*num_latent             ]M_ptr,\
+       [num_samples*num_features*num_latent]B_ptr) \
+    out([block_size*num_proteins]predictions_ptr)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
@@ -194,8 +194,7 @@ void update_model(
     const M_arr M_in,
     const  B_arr  B_in)
 {
-    F_blk  in_block;
-    in_block [0][0] = 1;
+    F_blk  in_block = {{1}};
     in_block [block_size-1][num_features-1] = 2;
 
     P_blk  out_block_1;
