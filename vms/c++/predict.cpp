@@ -49,7 +49,6 @@ void load_model(
 		const mu_base *mu_in, //[num_samples][num_latent],
 		const B_base *B_in)   //[num_samples][num_features][num_latent])
 	{
-#define USE_MEMCPY
 #ifdef USE_MEMCPY
 	std::memcpy(mu_local, mu_in, sizeof(mu_local));
 	std::memcpy(U_local,  U_in, sizeof(U_local));
@@ -59,14 +58,14 @@ void load_model(
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U[i][j][k] = *(U_in++);
+                U_local[i][j][k] = *(U_in++);
 
         for (int j = 0; j < num_latent; j++)
-           mu[i][j] = *(mu_in++);
+           mu_local[i][j] = *(mu_in++);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B[i][j][k] = *(B_in++);
+                B_local[i][j][k] = *(B_in++);
     }
 #endif
 }
@@ -78,11 +77,11 @@ void features_loop(
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = B complete dim = 3
-#pragma HLS ARRAY_PARTITION variable = B complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = mu complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = mu complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = mu_local complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = mu_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
@@ -106,8 +105,8 @@ void proteins_loop(
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = U complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = U complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 		S_type sum(.0F);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
