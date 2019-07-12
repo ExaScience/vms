@@ -142,19 +142,19 @@ void predict_block(
 #else
 #endif
 #pragma omp task \
-    in([block_size*num_features]features_ptr, \
-       [num_samples*num_proteins*num_latent]U_ptr,\
-       [num_samples*num_latent             ]M_ptr,\
-       [num_samples*num_features*num_latent]B_ptr) \
-    out([block_size*num_proteins]predictions_ptr)
+    in([block_size]features_ptr, \
+       [num_samples]U_ptr,\
+       [num_samples]M_ptr,\
+       [num_samples]B_ptr) \
+    out([block_size]predictions_ptr)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_flat features_ptr,    //[block_size*num_features]
-		      P_flat predictions_ptr, //[block_size*num_proteins]
-		const U_flat U_ptr,           //[num_samples][num_proteins][num_latent]
-		const M_flat M_ptr,           //[num_samples][num_latent]
-		const B_flat B_ptr)           //[num_samples][num_features][num_latent]
+		const F_blk features,    //[block_size*num_features]
+		      P_blk predictions, //[block_size*num_proteins]
+		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+		const M_arr M_in,        //[num_samples][num_latent]
+		const B_arr B_in)        //[num_samples][num_features][num_latent]
 {
 //#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
 //#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
@@ -162,11 +162,6 @@ void predict_or_update_model(
 //#pragma HLS INTERFACE m_axi port=M_in depth=num_samples*num_latent
 //#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
 
-	const F_arr &features = *reinterpret_cast<const F_arr *>(features_ptr);
-	      P_arr &predictions = *reinterpret_cast<P_arr *>(predictions_ptr);
-	const U_arr &U_in  = *reinterpret_cast<const U_arr *>(U_ptr);
-	const M_arr &M_in = *reinterpret_cast<const M_arr *>(M_ptr);
-	const B_arr &B_in  = *reinterpret_cast<const B_arr *>(B_ptr);
 
 	if (update_model)
 	{
@@ -193,7 +188,7 @@ void update_model(
     P_blk  out_block_1;
     P_blk  out_block_2;
 
-    predict_or_update_model(true, 0, &in_block[0][0], &out_block_1[0][0], &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
+    predict_or_update_model(true, 0, in_block, out_block_1, U_in, M_in, B_in);
 #pragma omp taskwait
 
 	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
@@ -206,15 +201,15 @@ void update_model(
 
 void predict_compound(int num_compounds, const F_blk in, P_blk out)
 {
-    const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
-    const M_base empty_mu [num_samples*num_latent] = {0};
-    const B_base  empty_B  [num_samples*num_features*num_latent] = {0};
+    const U_arr empty_U = {{{0}}};
+    const M_arr empty_mu = {{0}};
+    const B_arr empty_B = {{{0}}};
 
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
         printf("Full task\n");
-        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
+        predict_or_update_model(false, block_size, in, out, empty_U, empty_mu, empty_B);
     }
 
     // last block left-overs
@@ -222,8 +217,8 @@ void predict_compound(int num_compounds, const F_blk in, P_blk out)
     if (nc == 0) {
 #pragma omp taskwait
     } else {
-		F_base in_block[block_size * num_features];
-		P_base out_block[block_size * num_proteins];
+		F_blk in_block;
+		P_blk out_block;
 
 		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
         printf("Last part task\n");
