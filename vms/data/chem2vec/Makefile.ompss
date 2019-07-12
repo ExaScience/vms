@@ -10,11 +10,11 @@ run: $(PROGS_)
 	./$(PROGRAM_)-d
 	./$(PROGRAM_)-i
 
-$(PROGRAM_)-p: $(SRCFILES)
-	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
+$(PROGRAM_)-p: $(DEPS)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)-i: $(SRCFILES)
-	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
+$(PROGRAM_)-i: $(DEPS)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)-d: $(SRCFILES)
-	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
+$(PROGRAM_)-d: $(DEPS)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
