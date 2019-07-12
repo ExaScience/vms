@@ -142,11 +142,11 @@ void predict_block(
 #else
 #endif
 #pragma omp task \
-    in([block_size]features_ptr, \
-       [num_samples]U_ptr,\
-       [num_samples]M_ptr,\
-       [num_samples]B_ptr) \
-    out([block_size]predictions_ptr)
+    in([block_size]features, \
+       [num_samples]U_in,\
+       [num_samples]M_in,\
+       [num_samples]B_in) \
+    out([block_size]predictions)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
