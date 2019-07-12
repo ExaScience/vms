@@ -1,0 +1,20 @@
+MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
+MCXX_FLAGS_   += -k --verbose
+MCXX_FLAGS_I_ = --instrument
+MCXX_FLAGS_D_ = --debug -g
+
+PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
+
+run: $(PROGS_)
+	./$(PROGRAM_)-p
+	./$(PROGRAM_)-d
+	./$(PROGRAM_)-i
+
+$(PROGRAM_)-p: $(SRCFILES)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $^ -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-i: $(SRCFILES)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $^ -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-d: $(SRCFILES)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $^ -o $@ $(LDFLAGS_)
