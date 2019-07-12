@@ -189,12 +189,12 @@ void update_model(
     const mu_base mu_in [num_samples][num_latent],
     const B_base  B_in  [num_samples][num_features][num_latent])
 {
-    static F_base  in_block [block_size*num_features];
+    F_base  in_block [block_size*num_features];
     in_block [0] = 1;
     in_block [block_size*num_features - 1] = 2;
 
-    static P_base  out_block_1[block_size*num_proteins];
-    static P_base  out_block_2[block_size*num_proteins];
+    P_base  out_block_1[block_size*num_proteins];
+    P_base  out_block_2[block_size*num_proteins];
 
     predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
@@ -213,9 +213,9 @@ void predict_compound(
           P_base  out[][num_proteins]
 )
 {
-    static const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
-    static const mu_base empty_mu [num_samples*num_latent] = {0};
-    static const B_base  empty_B  [num_samples*num_features*num_latent] = {0};
+    const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
+    const mu_base empty_mu [num_samples*num_latent] = {0};
+    const B_base  empty_B  [num_samples*num_features*num_latent] = {0};
 
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
@@ -229,17 +229,14 @@ void predict_compound(
     if (nc == 0) {
 #pragma omp taskwait
     } else {
-        F_base *in_block = new F_base[block_size*num_features];
-        P_base *out_block= new P_base[block_size*num_proteins];
+		F_base in_block[block_size * num_features];
+		P_base out_block[block_size * num_proteins];
 
-        memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
+		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
         printf("Last part task\n");
         predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
 #pragma omp taskwait
         memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
-
-        delete[] in_block;
-        delete[] out_block;
     }
 }
 
