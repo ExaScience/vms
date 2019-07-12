@@ -3,8 +3,8 @@
 
 #include "predict.fpga.h"
 
-void checksum_model(const F_arr features,
-					      P_arr out,
+void checksum_model(const F_blk features,
+					      P_blk out,
 					const U_arr  U,
 					const M_arr M,
 					const B_arr  B)
@@ -162,9 +162,9 @@ void predict_or_update_model(
 //#pragma HLS INTERFACE m_axi port=M_in depth=num_samples*num_latent
 //#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
 
-	const F_arr &features = *reinterpret_cast<const F_arr *>(features_ptr);
-	      P_arr &predictions = *reinterpret_cast<P_arr *>(predictions_ptr);
-	const U_arr &U_in  = *reinterpret_cast<const U_arr *>(U_ptr);
+	const F_blk &features = *reinterpret_cast<const F_blk *>(features_ptr);
+	      P_blk &predictions = *reinterpret_cast<P_blk *>(predictions_ptr);
+        const U_arr &U_in  = *reinterpret_cast<const U_arr *>(U_ptr);
 	const M_arr &M_in = *reinterpret_cast<const M_arr *>(M_ptr);
 	const B_arr &B_in  = *reinterpret_cast<const B_arr *>(B_ptr);
 
@@ -204,7 +204,7 @@ void update_model(
 }
 
 
-void predict_compound(int num_compounds, const F_blk in, P_blk out)
+void predict_compound(int num_compounds, const F_flx in, P_flx out)
 {
     const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
     const M_base empty_mu [num_samples*num_latent] = {0};
