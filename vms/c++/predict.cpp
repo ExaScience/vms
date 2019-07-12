@@ -6,7 +6,7 @@
 void checksum_model(const F_arr features,
 					      P_arr out,
 					const U_arr  U,
-					const M_arr mu,
+					const M_arr M,
 					const B_arr  B)
 {
 	P_base U_check;
@@ -26,7 +26,7 @@ void checksum_model(const F_arr features,
                 CRC_ADD(U_check, U[i][j][k]);
 
         for (int j = 0; j < num_latent; j++)
-           CRC_ADD(M_check, mu[i][j]);
+           CRC_ADD(M_check, M[i][j]);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
@@ -205,7 +205,7 @@ void update_model(
 
 	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
 
-    printf("Checksums U, mu, B, F\n");
+    printf("Checksums U, M, B, F\n");
     printf("  Computed: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0][0], out_block_1[0][1], out_block_1[0][2], out_block_1[0][3]);
     printf("  Expected: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0][0], out_block_2[0][1], out_block_2[0][2], out_block_2[0][3]);
 }
