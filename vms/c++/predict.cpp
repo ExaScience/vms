@@ -3,19 +3,19 @@
 
 #include "predict.fpga.h"
 
-void checksum_model(const F_base *features,
-					P_base *out,
-					const U_base  *U,  //[num_samples][num_proteins][num_latent]
-					const mu_base *mu, //[num_samples][num_latent]
-					const B_base  *B)  //[num_samples][num_features][num_latent])
+void checksum_model(const F_arr features,
+					      P_arr out,
+					const U_arr  U,
+					const M_arr mu,
+					const B_arr  B)
 {
 	P_base U_check;
-	P_base mu_check;
+	P_base M_check;
 	P_base B_check;
 	P_base F_check;
 
 	CRC_INIT(U_check);
-	CRC_INIT(mu_check);
+	CRC_INIT(M_check);
 	CRC_INIT(B_check);
 	CRC_INIT(F_check);
 
@@ -23,49 +23,48 @@ void checksum_model(const F_base *features,
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                CRC_ADD(U_check, (*U++));
+                CRC_ADD(U_check, U[i][j][k]);
 
         for (int j = 0; j < num_latent; j++)
-           CRC_ADD(mu_check, (*mu++));
+           CRC_ADD(M_check, mu[i][j]);
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                CRC_ADD(B_check, (*B++));
+                CRC_ADD(B_check, B[i][j][k]);
 	}
 
-    for (int i = 0; i < block_size * num_features; i++)
-    {
-		CRC_ADD(F_check, features[i]);
-	}
+	for (int i = 0; i < block_size; i++)
+		for (int j = 0; j < num_features; j++)
+			CRC_ADD(F_check, features[i][j]);
 
-	out[0] = U_check;
-	out[1] = mu_check;
-	out[2] = B_check;
-	out[3] = F_check;
+	out[0][0] = U_check;
+	out[0][1] = M_check;
+	out[0][2] = B_check;
+	out[0][3] = F_check;
 }
 
 void load_model(
-		const U_base *U_in,   //[num_samples][num_proteins][num_latent],
-		const mu_base *mu_in, //[num_samples][num_latent],
-		const B_base *B_in)   //[num_samples][num_features][num_latent])
+		const U_arr U_in,   //[num_samples][num_proteins][num_latent],
+		const M_arr M_in, //[num_samples][num_latent],
+		const B_arr B_in)   //[num_samples][num_features][num_latent])
 	{
 #ifdef USE_MEMCPY
-	std::memcpy(mu_local, mu_in, sizeof(mu_local));
-	std::memcpy(U_local,  U_in, sizeof(U_local));
-	std::memcpy(B_local,  B_in, sizeof(B_local));
+	std::memcpy(M_local, M_in, sizeof(M_local));
+	std::memcpy(U_local, U_in, sizeof(U_local));
+	std::memcpy(B_local, B_in, sizeof(B_local));
 #else
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U_local[i][j][k] = *(U_in++);
+                U_local[i][j][k] = U_in[i][j][k];
 
         for (int j = 0; j < num_latent; j++)
-           mu_local[i][j] = *(mu_in++);
+           M_local[i][j] = M_in[i][j];
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B_local[i][j][k] = *(B_in++);
+                B_local[i][j][k] = B_in[i][j][k];
     }
 #endif
 }
@@ -80,8 +79,8 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
 #pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = mu_local complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = mu_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
@@ -90,7 +89,7 @@ void features_loop(
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
-				if (d==0) v = mu_type(mu_local[s][k]);
+				if (d==0) v = M_type(M_local[s][k]);
 				else      v = L_type(latents[s][k]);
 				L_type prod = feature * B_type(B_local[s][d][k]);
 				latents[s][k] = L_base(L_type(v + prod));
@@ -127,18 +126,18 @@ void proteins_loop(
 }
 
 
-void predict(
+void predict_block(
 		int num_compounds, // <= block_size
-		const F_base  *features,   //[block_size][num_features],
-		      P_base  *predictions //[block_size][num_proteins]
+		const F_blk  features,   //[block_size][num_features],
+		      P_blk  predictions //[block_size][num_proteins]
 )
 {
     for (int i=0; i<num_compounds; ++i)
     {
 #pragma HLS DATAFLOW
 		L_base latents[num_samples][num_latent];
-        features_loop(features + (i*num_features), latents);
-        proteins_loop(predictions + (i*num_proteins), latents);
+        features_loop(features[i], latents);
+        proteins_loop(predictions[i], latents);
     }
 }
 
@@ -152,31 +151,38 @@ void predict(
 #pragma omp task \
     in([block_size*num_features]features, \
        [num_samples*num_proteins*num_latent]U_in,\
-       [num_samples*num_latent             ]mu_in,\
+       [num_samples*num_latent             ]M_in,\
        [num_samples*num_features*num_latent]B_in) \
     out([block_size*num_proteins]predictions)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_base  *features,    //[block_size*num_features]
-		      P_base  *predictions, //[block_size*num_proteins]
-		const U_base  *U_in,        //[num_samples][num_proteins][num_latent]
-		const mu_base *mu_in,       //[num_samples][num_latent]
-		const B_base  *B_in)        //[num_samples][num_features][num_latent]
+		const F_flat features_ptr,    //[block_size*num_features]
+		      P_flat predictions_ptr, //[block_size*num_proteins]
+		const U_flat U_ptr,           //[num_samples][num_proteins][num_latent]
+		const M_flat M_ptr,           //[num_samples][num_latent]
+		const B_flat B_ptr)           //[num_samples][num_features][num_latent]
 {
 //#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
 //#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
 //#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
-//#pragma HLS INTERFACE m_axi port=mu_in depth=num_samples*num_latent
+//#pragma HLS INTERFACE m_axi port=M_in depth=num_samples*num_latent
 //#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
+
+	const F_arr &features = *reinterpret_cast<const F_arr *>(features_ptr);
+	      P_arr &predictions = *reinterpret_cast<P_arr *>(predictions_ptr);
+	const U_arr &U_in  = *reinterpret_cast<const U_arr *>(U_ptr);
+	const M_arr &M_in = *reinterpret_cast<const M_arr *>(M_ptr);
+	const B_arr &B_in  = *reinterpret_cast<const B_arr *>(B_ptr);
+
 	if (update_model)
 	{
-		load_model(U_in, mu_in, B_in);
-		checksum_model(features, predictions, &U_local[0][0][0], &mu_local[0][0], &B_local[0][0][0]);
+		load_model(U_in, M_in, B_in);
+		checksum_model(features, predictions, U_local, M_local, B_local);
 	} 
         else
 	{
-		predict(num_compounds, features, predictions);
+		predict_block(num_compounds, features, predictions);
 	}
 
 } // end function
@@ -184,36 +190,32 @@ void predict_or_update_model(
 
 
 void update_model(
-    const U_base  U_in  [num_samples][num_proteins][num_latent],
-    const mu_base mu_in [num_samples][num_latent],
-    const B_base  B_in  [num_samples][num_features][num_latent])
+    const  U_arr  U_in,
+    const M_arr M_in,
+    const  B_arr  B_in)
 {
-    F_base  in_block [block_size*num_features];
-    in_block [0] = 1;
-    in_block [block_size*num_features - 1] = 2;
+    F_blk  in_block;
+    in_block [0][0] = 1;
+    in_block [block_size-1][num_features-1] = 2;
 
-    P_base  out_block_1[block_size*num_proteins];
-    P_base  out_block_2[block_size*num_proteins];
+    P_blk  out_block_1;
+    P_blk  out_block_2;
 
-    predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
+    predict_or_update_model(true, 0, &in_block[0][0], &out_block_1[0][0], &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
 
-	checksum_model(in_block, out_block_2, &U_in[0][0][0], &mu_in[0][0], &B_in[0][0][0]);
+	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
 
     printf("Checksums U, mu, B, F\n");
-    printf("  Computed: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0], out_block_1[1], out_block_1[2], out_block_1[3]);
-    printf("  Expected: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0], out_block_2[1], out_block_2[2], out_block_2[3]);
+    printf("  Computed: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0][0], out_block_1[0][1], out_block_1[0][2], out_block_1[0][3]);
+    printf("  Expected: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0][0], out_block_2[0][1], out_block_2[0][2], out_block_2[0][3]);
 }
 
 
-void predict_compound(
-	int num_compounds,
-    const F_base  in [][num_features],
-          P_base  out[][num_proteins]
-)
+void predict_compound(int num_compounds, const F_blk in, P_blk out)
 {
     const U_base  empty_U  [num_samples*num_proteins*num_latent] = {0};
-    const mu_base empty_mu [num_samples*num_latent] = {0};
+    const M_base empty_mu [num_samples*num_latent] = {0};
     const B_base  empty_B  [num_samples*num_features*num_latent] = {0};
 
     int i;

@@ -19,5 +19,4 @@ predict-i
 predict-p
 sim
 sim_*
-sim_*.dSYM
-sim.dSYM
+*.dSYM

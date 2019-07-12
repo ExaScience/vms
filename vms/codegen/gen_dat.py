@@ -115,7 +115,7 @@ def gen_session(root, outputdir):
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
 
-    mu_fx, mu_wl, mu_iwl = map_to_int(mu, np.int8)
+    M_fx, M_wl, M_iwl = map_to_int(mu, np.int8)
     U_fx, U_wl, U_iwl = map_to_int(U, np.int16)
     B_fx, B_wl, B_iwl = map_to_int(B, np.int16)
 
@@ -145,8 +145,8 @@ def gen_session(root, outputdir):
     }
     for name, wl, iwl in zip(
         [ "U", "mu", "B", "F", "P" ],
-        [ U_wl, mu_wl, B_wl, F_wl, P_wl ],
-        [ U_iwl, mu_iwl, B_iwl, F_iwl, P_iwl ],
+        [ U_wl, M_wl, B_wl, F_wl, P_wl ],
+        [ U_iwl, M_iwl, B_iwl, F_iwl, P_iwl ],
     ):
         const_output += gen_int(name + "_wl", wl)
         const_output += gen_int(name + "_iwl", iwl)

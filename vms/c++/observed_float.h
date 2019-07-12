@@ -1,7 +1,7 @@
 #include <vector>
 #include <algorithm>
 
-enum types { U_id, mu_id, F_id, P_id, B_id, S_id, T_id, ntypes };
+enum types { U_id, M_id, F_id, P_id, B_id, S_id, T_id, ntypes };
 
 extern std::vector<float> values[ntypes];
 

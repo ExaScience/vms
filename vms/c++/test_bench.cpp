@@ -28,18 +28,18 @@ void prepare_tb_input(
 }
 void prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
-    const float mu_in[num_samples][num_latent],
+    const float M_in[num_samples][num_latent],
     const float B_in[num_samples][num_features][num_latent],
     U_base U_out[num_samples][num_proteins][num_latent],
-    mu_base mu_out[num_samples][num_latent],
+    M_base M_out[num_samples][num_latent],
     B_base B_out[num_samples][num_features][num_latent],
     P_base &U_check,
-    P_base &mu_check,
+    P_base &M_check,
     P_base &B_check
     )
 {
 	CRC_INIT(U_check);
-	CRC_INIT(mu_check);
+	CRC_INIT(M_check);
 	CRC_INIT(B_check);
 
     for (int i = 0; i < num_samples; i++)
@@ -53,8 +53,8 @@ void prepare_model(
 
         for (int j = 0; j < num_latent; j++)
         {
-            mu_out[i][j] = mu_base(mu_type(mu_in[i][j]));
-            CRC_ADD(mu_check, mu_out[i][j]);
+            M_out[i][j] = M_base(M_type(M_in[i][j]));
+            CRC_ADD(M_check, M_out[i][j]);
         }
 
         for (int j = 0; j < num_features; j++)
@@ -119,17 +119,17 @@ int main(int argc, char *argv[])
     P_base  tb_output_base[num_compounds][num_proteins];
     F_base  tb_input_base[num_compounds][num_features];
     U_base  U_base[num_samples][num_proteins][num_latent];
-    mu_base mu_base[num_samples][num_latent];
+    M_base M_base[num_samples][num_latent];
     B_base  B_base[num_samples][num_features][num_latent];
-    P_base U_check_tb, mu_check_tb, B_check_tb;
+    P_base U_check_tb, M_check_tb, B_check_tb;
 
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
-    prepare_model(U, mu, B, U_base, mu_base, B_base, U_check_tb, mu_check_tb, B_check_tb);
+    prepare_model(U, mu, B, U_base, M_base, B_base, U_check_tb, M_check_tb, B_check_tb);
 
     int nerrors = 0;
 
     printf("Updating model\n");
-    update_model(U_base, mu_base, B_base);
+    update_model(U_base, M_base, B_base);
 
     printf("Predicting\n");
     double start = tick();

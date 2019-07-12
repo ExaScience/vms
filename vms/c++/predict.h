@@ -14,7 +14,7 @@ static const int block_size = 1000;
 #include "fxp.h"
 
 typedef fxp<U_base, U_iwl> U_type;
-typedef fxp<mu_base, mu_iwl> mu_type;
+typedef fxp<M_base, M_iwl> M_type;
 typedef fxp<B_base, B_iwl> B_type;
 typedef fxp<F_base, F_iwl> F_type;
 typedef fxp<P_base, P_iwl> P_type;
@@ -40,7 +40,7 @@ const float epsilon = 0.5;
 #define DT_NAME "float"
 
 typedef float U_base ;
-typedef float mu_base ;
+typedef float M_base ;
 typedef float B_base ;
 typedef float F_base ;
 typedef float P_base ;
@@ -49,7 +49,7 @@ typedef float S_base;
 
 #if 0
 typedef observable<float, U_id> U_type;
-typedef observable<float, mu_id> mu_type;
+typedef observable<float, M_id> M_type;
 typedef observable<float, B_id> B_type;
 typedef observable<float, F_id> F_type;
 typedef observable<float, P_id> P_type;
@@ -57,7 +57,7 @@ typedef observable<float, L_id> L_type;
 typedef observable<float, S_id> S_type;
 #else
 typedef float U_type;
-typedef float mu_type;
+typedef float M_type;
 typedef float B_type;
 typedef float F_type;
 typedef float P_type;
@@ -75,13 +75,23 @@ const float epsilon = 0.5;
 #error Need to defined DT_FIXED or DT_FLOAT
 #endif
 
-void update_model(
-    const U_base U[num_samples][num_proteins][num_latent],
-    const mu_base mu[num_samples][num_latent],
-    const B_base B[num_samples][num_features][num_latent]);
+typedef F_base  F_arr[][num_features];
+typedef P_base  P_arr[][num_proteins];
 
-void predict_compound(
-    int num_compounds,
-    const F_base  in [][num_features],
-          P_base  out[][num_proteins]
-);
+typedef F_base  F_blk[block_size][num_features];
+typedef P_base  P_blk[block_size][num_proteins];
+
+typedef F_base  F_flat[block_size*num_features];
+typedef P_base  P_flat[block_size*num_proteins];
+
+typedef U_base  U_arr[num_samples][num_proteins][num_latent];
+typedef M_base M_arr[num_samples][num_latent];
+typedef B_base  B_arr[num_samples][num_features][num_latent];
+
+typedef U_base   U_flat[num_samples*num_proteins*num_latent];
+typedef M_base M_flat[num_samples*num_latent];
+typedef B_base   B_flat[num_samples*num_features*num_latent];
+
+void update_model(const U_arr U, const M_arr mu, const B_arr B);
+
+void predict_compound(int num_compounds, const F_arr in, P_arr out);
