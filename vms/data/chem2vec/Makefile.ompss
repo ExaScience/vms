@@ -1,5 +1,5 @@
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
-MCXX_FLAGS_   += -k --verbose
+MCXX_FLAGS_   += -k # --verbose
 MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 
