@@ -5,6 +5,7 @@ BOARD=zcu102
 default: boot
 
 include $(TOPDIR)/Makefile.common
+include $(TOPDIR)/Makefile.ompss
 
 MCXX   = aarch64-linux-gnu-fpgacxx
 CFLAGS_ += -DOMPSS_FPGA
@@ -18,6 +19,9 @@ bitstream: $(BITSTREAM)
 boot: BOOT.BIN
 
 .PHONY: bitstream boot default
+
+$(SRCFILES): $(DEPS)
+	ln -sf $(DEPS) ./
 
 $(BITSTREAM): $(SRCFILES)
 	mkdir -p $(BUILDDIR)
