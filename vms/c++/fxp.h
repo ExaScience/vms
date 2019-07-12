@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-
 #include <iostream>
 #include <limits>
 
@@ -49,6 +48,13 @@ struct fxp
     static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
+    static float epsilon()
+    {
+        float eps = (256.F / (float)(1L << shift));
+        eps = std::max(eps, 256.F * std::numeric_limits<float>::epsilon());
+        //std::cerr << "fxp<" << wl << "," << iwl << ">" << " (eps: " << eps << ")" << std::endl;
+        return eps;
+    }
 
     typedef T base_type;
 
@@ -64,19 +70,25 @@ struct fxp
     }
 
 
-    void check(float ref) const
+    void check(float ref, float eps = -1.) const
     {
 #ifndef NDEBUG
-        const float epsilon = (2. / (float)(1L<<shift));
         float cur = (float)(*this);
-        if(std::abs(cur - ref) < epsilon)
+        float diff = std::abs(cur - ref);
+        if (eps == -1.) eps = epsilon();
+
+        if(diff < eps) 
         {
             // all clear :)
         }
         else
         {
-            std::cerr << cur << " not equal to ref " << ref << " in fxp<" << wl << "," << iwl << ">" << std::endl;
-            abort();
+            std::cerr << cur << " not equal to ref " << ref 
+                      << " in fxp<" << wl << "," << iwl << ">"
+                      << " (eps: " << eps 
+                      << ", diff: " << diff 
+                      << ", diff/eps: " << diff/eps << ")" << std::endl;
+            //abort();
         }
 #endif
     }
@@ -92,7 +104,8 @@ struct fxp
         else 
             val = v.val << (shift - v.shift);
 
-        check((float)v);
+        float eps = std::max(fxp<otherT, otherIWL>::epsilon(), epsilon());
+        check((float)v, eps);
     }
 
     template<typename T1, int IWL1, typename T2, int IWL2>
@@ -107,7 +120,10 @@ struct fxp
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
-        check((float)mul.a * (float)mul.b);
+        float eps;
+        eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
+        eps = std::max(eps, epsilon());
+        check((float)mul.a * (float)mul.b, eps);
     }
 
 
@@ -125,7 +141,10 @@ struct fxp
         if (s > 0) val = val << s;
         else       val = val >> -s;
 
-        check((float)(add.a) + (float)(add.b));
+        float eps;
+        eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
+        eps = std::max(eps, epsilon());
+        check((float)(add.a) + (float)(add.b), eps);
     }
 
     fxp<T, IWL> operator>>(const int s)

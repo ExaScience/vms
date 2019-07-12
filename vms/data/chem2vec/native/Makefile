@@ -10,10 +10,11 @@ native: $(PROGRAM_)_fx $(PROGRAM_)_fp
 
 CFLAGS_ += -fsanitize=address
 
-$(PROGRAM_)_fp: $(SRCFILES) $(HEADERFILES)
-	        $(CXX) -DDT_FLOAT $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)_fx: $(SRCFILES) $(HEADERFILES)
-	        $(CXX) -DDT_FIXED $(CFLAGS_)  $^ -o $@ $(LDFLAGS_)
+$(PROGRAM_)_fp: $(DEPS)
+	        $(CXX) -DDT_FLOAT $(CFLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)_fx: $(DEPS)
+	        $(CXX) -DDT_FIXED $(CFLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
 
