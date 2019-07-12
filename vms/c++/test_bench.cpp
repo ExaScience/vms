@@ -107,8 +107,6 @@ int main(int argc, char *argv[])
         num_compounds = std::atoi(argv[2]);
     }
     
-    std::cout << typeid(P_type).name() << std::endl;
-
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
