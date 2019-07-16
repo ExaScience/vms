@@ -142,7 +142,7 @@ void predict_one_block(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2		
 
         features_loop(&features[i*num_features], latents);
-        proteins_loop(&predictions[i*num_compounds], latents);
+        proteins_loop(&predictions[i*num_proteins], latents);
     }
 }
 
@@ -194,11 +194,11 @@ void update_model(
     const  B_arr B_in)
 {
     F_flat  in_block;
-	in_block[0] = 1;
-    in_block[(block_size-1)*(num_features-1)] = 2;
+	for (int i=0; i<num_features; i++)
+		in_block[i] = i;
 
     P_flat out_block_1;
-    P_flat  out_block_2;
+    P_flat out_block_2;
 
     predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
@@ -221,7 +221,7 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
         printf("Full task\n");
-        predict_or_update_model(false, block_size, &in[0][0], &out[0][0], empty_U, empty_mu, empty_B);
+        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
     }
 
     // last block left-overs
