@@ -78,6 +78,14 @@ void features_loop(
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
+#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
+
+#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
+
 		const F_type feature(features[d]);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
@@ -98,6 +106,8 @@ void proteins_loop(
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 1
+#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 		S_type sum(.0F);
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
