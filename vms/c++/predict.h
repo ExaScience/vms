@@ -78,9 +78,6 @@ const float epsilon = 0.5;
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];
 
-typedef F_base F_blk[block_size][num_features];
-typedef P_base P_blk[block_size][num_proteins];
-
 typedef F_base F_flat[block_size*num_features];
 typedef P_base P_flat[block_size*num_proteins];
 
@@ -94,4 +91,4 @@ typedef B_base B_flat[num_samples*num_features*num_latent];
 
 void update_model(const U_arr U, const M_arr mu, const B_arr B);
 
-void predict_compound(int num_compounds, const F_flx in, P_flx out);
+void predict_compounds(int num_compounds, const F_flx in, P_flx out);

@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
-        predict_compound(num_compounds, tb_input_base, tb_output_base);
+        predict_compounds(num_compounds, tb_input_base, tb_output_base);
     }
 #pragma omp taskwait
     double stop = tick();
