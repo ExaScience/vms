@@ -78,9 +78,6 @@ const float epsilon = 0.5;
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];
 
-typedef F_base F_blk[block_size][num_features];
-typedef P_base P_blk[block_size][num_proteins];
-
 typedef F_base F_flat[block_size*num_features];
 typedef P_base P_flat[block_size*num_proteins];
 
