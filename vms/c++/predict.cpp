@@ -153,10 +153,10 @@ void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
 		const F_flat features,    //[block_size*num_features]
-		      F_flat predictions, //[block_size*num_proteins]
-		const F_flat U_in,        //[num_samples][num_proteins][num_latent]
-		const F_flat M_in,        //[num_samples][num_latent]
-		const F_flat B_in)        //[num_samples][num_features][num_latent]
+		      P_flat predictions, //[block_size*num_proteins]
+		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
+		const M_flat M_in,        //[num_samples][num_latent]
+		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
 //#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
 //#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
@@ -201,7 +201,7 @@ void update_model(
 }
 
 
-void predict_blocks(int num_compounds, const F_flx in, P_flx out)
+void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 {
     const U_flat empty_U = {0};
     const M_flat empty_mu = {0};
