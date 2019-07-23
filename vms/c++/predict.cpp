@@ -33,8 +33,10 @@ void checksum_model(const F_flat features,
                 CRC_ADD(B_check, B[i][j][k]);
 	}
 
-	for (int j = 0; j < num_features; j++)
-		CRC_ADD(F_check, features[j]);
+	int c = 0;
+	for (int i = 0; i < block_size; i++)
+		for (int j = 0; j < num_features; j++)
+			CRC_ADD(F_check, features[c++]);
 
 	out[0] = U_check;
 	out[1] = M_check;
@@ -194,8 +196,13 @@ void update_model(
     const  B_arr B_in)
 {
     F_flat  in_block;
-	for (int i=0; i<num_features; i++)
-		in_block[i] = i;
+	int c = 0;
+	for (int i=0; i<block_size; i++)
+		for (int j=0; j<num_features; j++)
+		{
+			in_block[c] = c;
+			c++;
+		}
 
     P_flat out_block_1;
     P_flat out_block_2;
