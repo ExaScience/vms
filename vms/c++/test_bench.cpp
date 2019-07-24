@@ -146,5 +146,11 @@ int main(int argc, char *argv[])
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 
+    delete[] tb_output_base;
+    delete[] tb_input_base;
+    delete[] Ub;
+    delete[] Mb;
+    delete[] Bb;
+
     return nerrors;
 }
