@@ -24,12 +24,14 @@ $(INPUTDATA): make.py
 
 $(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model
-	smurff --ini options.ini --save-prefix model
+	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+		smurff --ini options.ini --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
 	ln -sf $(addprefix ../,$(CXXFILES) $(HEADERFILES)) code/
-	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
+	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+	    python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 clean:
 	rm -rf model code hls
