@@ -1,6 +1,6 @@
 #if defined(DT_FIXED) || defined(DT_FLOAT)
 #else
-#define DT_FLOAT
+#define DT_FIXED
 #endif
 
 #include "vms_const.h"
