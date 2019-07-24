@@ -62,10 +62,10 @@ void print_checksum(P_flat out)
 
 	for (int c = 0; c < block_size * num_proteins - 3;)
 	{
-		assert(out[c++] == U_check);
-		assert(out[c++] == M_check);
-		assert(out[c++] == B_check);
-		assert(out[c++] == F_check);
+		assert(out[c] == U_check); c++;
+		assert(out[c] == M_check); c++;
+		assert(out[c] == B_check); c++;
+		assert(out[c] == F_check); c++;
 	}
 }
 
@@ -252,7 +252,6 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
-        printf("Full task\n");
         predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
     }
 
@@ -265,7 +264,6 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 		P_flat out_block;
 
 		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        printf("Last part task\n");
         predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
 #pragma omp taskwait
         memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
