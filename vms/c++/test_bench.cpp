@@ -117,20 +117,22 @@ int main(int argc, char *argv[])
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    P_base  tb_output_base[num_compounds][num_proteins];
-    F_base  tb_input_base[num_compounds][num_features];
-    U_base  U_base[num_samples][num_proteins][num_latent];
-    M_base  M_base[num_samples][num_latent];
-    B_base  B_base[num_samples][num_features][num_latent];
+    auto  tb_output_base = new P_base[num_compounds][num_proteins];
+    auto  tb_input_base  = new F_base[num_compounds][num_features];
+
+    auto  Ub = new U_base[num_samples][num_proteins][num_latent];
+    auto  Mb = new M_base[num_samples][num_latent];
+    auto  Bb = new B_base[num_samples][num_features][num_latent];
+
     P_base  U_check_tb, M_check_tb, B_check_tb;
 
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
-    prepare_model(U, M, B, U_base, M_base, B_base, U_check_tb, M_check_tb, B_check_tb);
+    prepare_model(U, M, B, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
 
     int nerrors = 0;
 
     printf("Updating model\n");
-    update_model(U_base, M_base, B_base);
+    update_model(Ub, Mb, Bb);
 
     printf("Predicting\n");
     double start = tick();
