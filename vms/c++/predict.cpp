@@ -132,7 +132,7 @@ void proteins_loop(
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
-#pragma HLS PIPELINE II = 1
+#pragma HLS PIPELINE II = 4
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 		S_type sum(.0F);
