@@ -185,7 +185,7 @@ void predict_one_block(
        [num_samples*num_proteins*num_latent]U_in,\
        [num_samples*num_latent]M_in,\
        [num_samples*num_features*num_latent]B_in) \
-    out([block_size]predictions)
+    out([block_size*num_proteins]predictions)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
