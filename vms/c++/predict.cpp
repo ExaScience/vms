@@ -33,15 +33,40 @@ void checksum_model(const F_flat features,
                 CRC_ADD(B_check, B[i][j][k]);
 	}
 
+	{
 	int c = 0;
 	for (int i = 0; i < block_size; i++)
 		for (int j = 0; j < num_features; j++)
 			CRC_ADD(F_check, features[c++]);
+	}
 
-	out[0] = U_check;
-	out[1] = M_check;
-	out[2] = B_check;
-	out[3] = F_check;
+	{
+		for (int c = 0; c < block_size * num_proteins - 3;)
+		{
+			out[c++] = U_check;
+			out[c++] = M_check;
+			out[c++] = B_check;
+			out[c++] = F_check;
+		}
+	}
+}
+
+void print_checksum(P_flat out)
+{
+	P_base U_check = out[0];
+	P_base M_check = out[1];
+	P_base B_check = out[2];
+	P_base F_check = out[3];
+
+    printf(CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", U_check, M_check, B_check, F_check);
+
+	for (int c = 0; c < block_size * num_proteins - 3;)
+	{
+		assert(out[c++] == U_check);
+		assert(out[c++] == M_check);
+		assert(out[c++] == B_check);
+		assert(out[c++] == F_check);
+	}
 }
 
 void load_model(
@@ -211,10 +236,10 @@ void update_model(
 #pragma omp taskwait
 
 	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
-
-    printf("Checksums U, M, B, F\n");
-    printf("  Computed: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_1[0], out_block_1[1], out_block_1[2], out_block_1[3]);
-    printf("  Expected: " CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", out_block_2[0], out_block_2[1], out_block_2[2], out_block_2[3]);
+    printf("FPGA checksums U, M, B, F: ");
+	print_checksum(out_block_1);
+    printf("CPU  checksums U, M, B, F: ");
+	print_checksum(out_block_2);
 }
 
 
