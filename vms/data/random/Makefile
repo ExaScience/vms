@@ -1,45 +1,47 @@
+
 TOPDIR=../..
-
-
 SRCDIR=$(TOPDIR)/c++
 CXXFILES=$(wildcard $(SRCDIR)/*.cpp)
 HEADERFILES=$(wildcard $(SRCDIR)/*.h)
 
-INCLUDES=-I$(SRCDIR) -Icode 
-CXXFLAGS=$(INCLUDES) -std=c++11 -pthread -Wall -Wno-unknown-pragmas
-CXXFLAGS+=-g -O0 -fsanitize=address 
+INCLUDES=-I$(SRCDIR) -Icode
+CXXFLAGS=$(INCLUDES) -pthread -Wall -Wno-unknown-pragmas
+# CXXFLAGS +=-g -O0 -fsanitize=address 
+CXXFLAGS +=-g -O3
 LDFLAGS=
 
 ROOTFILE=model/root.ini
-INPUTDATA=test.mtx train.mtx feat_0_0.mtx
+INPUTDATA=test.sdm train.sdm side_c2v.ddm
+
 MODELFILES=code/vms_const.h code/vms_tb.h
 
-.PHONY: hls run clean
+model: $(MODELFILES)
 
-run: sim_fx sim_float
-	./sim_float
-	./sim_fx
+.PHONY: hls run clean model
+
+$(INPUTDATA): make.py
+	python make.py
 
 $(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model
-	smurff --ini options.ini --save-prefix model
+	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+		smurff --ini options.ini --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
-	mkdir -p code
-	python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
-
-sim_fx: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) -DDT_FIXED $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) 
-
-sim_float: $(MODELFILES) $(CXXFILES) $(HEADERFILES) Makefile
-	$(CXX) -DDT_FLOAT $(CXXFLAGS) $(CXXFILES) -o $@ $(LDFLAGS) 
+	mkdir -p code 
+	ln -sf $(addprefix ../,$(CXXFILES) $(HEADERFILES)) code/
+	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+	    python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 clean:
 	rm -rf model code hls
-	rm -f sim
-	rm -rf sim.dSYM
+	$(MAKE) -C fpga-zcu102 clean
+	$(MAKE) -C native clean
+	$(MAKE) -C smp-arm64 clean
+	$(MAKE) -C smp-x86 clean
 
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	ln -sf $(addprefix ../,$(HEADERFILES)) code/
 	ln -sf $(addprefix ../,$(CXXFILES)) code/
 	vivado_hls $(TOPDIR)/codegen/run.tcl
+
