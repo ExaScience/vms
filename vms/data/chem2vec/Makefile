@@ -11,16 +11,12 @@ CXXFLAGS +=-g -O3
 LDFLAGS=
 
 ROOTFILE=model/root.ini
-INPUTDATA=test.sdm train.sdm side_c2v.ddm
 
 MODELFILES=code/vms_const.h code/vms_tb.h
 
 model: $(MODELFILES)
 
 .PHONY: hls run clean model
-
-$(INPUTDATA): make.py
-	python make.py
 
 $(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model

@@ -1,0 +1,4 @@
+INPUTDATA=test.sdm train.sdm side_c2v.ddm
+
+$(INPUTDATA): make.py
+	python make.py
