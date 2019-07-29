@@ -117,12 +117,12 @@ int main(int argc, char *argv[])
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    auto  tb_output_base = new P_base[num_compounds][num_proteins];
-    auto  tb_input_base  = new F_base[num_compounds][num_features];
+    P_base (*tb_output_base)[num_proteins] = new P_base[num_compounds][num_proteins];
+    F_base (*tb_input_base)[num_features] = new F_base[num_compounds][num_features];
 
-    auto  Ub = new U_base[num_samples][num_proteins][num_latent];
-    auto  Mb = new M_base[num_samples][num_latent];
-    auto  Bb = new B_base[num_samples][num_features][num_latent];
+    U_base (*Ub)[num_proteins][num_latent] = new U_base[num_samples][num_proteins][num_latent];
+    M_base (*Mb)[num_latent]               = new M_base[num_samples][num_latent];
+    B_base (*Bb)[num_features][num_latent] = new B_base[num_samples][num_features][num_latent];
 
     P_base  U_check_tb, M_check_tb, B_check_tb;
 
