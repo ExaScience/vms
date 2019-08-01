@@ -3,6 +3,8 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <cstring>
+#include <limits>
 
 
 #include "predict.h"
@@ -17,6 +19,24 @@ double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
 }
 
+template<typename T>
+const char *to_binary(T x)
+{
+    static char b[128]; // should be enough
+
+    int i=sizeof(T) * 8;
+    b[i] = '\0';
+    while(i>0)
+    {
+        i--;
+        if (x & 1) b[i] = '1';
+        else b[i] = '0';
+        x >>= 1;
+    }
+
+    return b;
+}
+
 void prepare_tb_input(
     int num_compounds,
     const float F_in[tb_num_compounds][num_features],
@@ -25,8 +45,14 @@ void prepare_tb_input(
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
         {
-            float val =F_in [c%tb_num_compounds][p];
-            F_out[c][p] = F_base(F_type(val));
+            F_base val = 0;
+            //if (p<1) val = p * 4.;
+            if (p==1) {
+                float vf = -128. * (2-p);
+                val = F_base(F_type(vf));
+                printf("F[%d][%d]   = %.2f (%d - %s)\n", c, p, vf, val, to_binary(val));
+            }
+            F_out[c][p] = val;
         }
 }
 void prepare_model(
@@ -52,14 +78,26 @@ void prepare_model(
             {
                 float val;
                 //val = U[i][j][k];
-                if (j==0 && k<4 && i<1) val = 1.; else val = 0.;
+                if (j==0 && k==2 && i<1) 
+                {
+                    val = 1.;
+                    printf("U[%d][%d][%d] = %.2f (%d)\n", i,j,k, val, U_base(U_type(val)));
+                } else val = 0.;
                 U_out[i][j][k] = U_base(U_type(val));
                 CRC_ADD(U_check, U_out[i][j][k]);
             }
 
         for (int j = 0; j < num_latent; j++)
         {
-            float val = .0; //M[i][j];
+            float val; //M[i][j];
+            if (i<1 && j==2) 
+            {
+                val = 0.25;
+                M_base val_base = M_base(M_type(val));
+                printf("M[%d][%d]    = %.2f (%d %s)\n", i,j, val, val_base, to_binary(val_base));
+            }
+            else 
+                val = .0;
             M_out[i][j] =  M_base(M_type(val));
             CRC_ADD(M_check, M_out[i][j]);
         }
@@ -67,11 +105,15 @@ void prepare_model(
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                float val;
-                if (j<4 && k<4 && i<1) val = B[i][j][k]; else val = 0.;
-                B_out[i][j][k] = B_base(B_type(val));
+                B_base val;
+                if (j<4 && k == 2 && i<1) {
+                    val = 5944; //B[0][1][2]; // B[i][j][k];
+                    printf("B[%d][%d][%d] = %.2f (%d %s)\n", i,j,k, (float)(B_type(val)), val, to_binary(val));
+                } else val = 0;
+                B_out[i][j][k] = val;
                 CRC_ADD(B_check, B_out[i][j][k]);
             }
+
     }
 }
 
@@ -88,16 +130,7 @@ int check_result(
         {
             float o = P_type(out[c][p]);
             float r = ref[c % tb_num_compounds][p];
-            if (std::abs(o - r) < epsilon || o == .0)
-            {
-                //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
-            }
-            else
-            {
-                printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
-                printf("         [%d][%d]: %d != %d\n", c, p, out[c][p], P_base(P_type(r)));
-                nerrors++;
-            }
+            printf("at [%d][%d]: %.2f (%d)\n", c, p, o, out[c][p]);
         }
 
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
