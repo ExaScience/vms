@@ -3,7 +3,7 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
-#include <cstring>
+#include <string>
 #include <limits>
 
 
@@ -20,22 +20,27 @@ double tick() {
 }
 
 template<typename T>
-const char *to_binary(T x)
+std::string to_binary(T x)
 {
-    static char b[128]; // should be enough
+    std::string ret;
 
-    int i=sizeof(T) * 8;
-    b[i] = '\0';
-    while(i>0)
+    for(int i=0;i<sizeof(T) * 8;++i)
     {
-        i--;
-        if (x & 1) b[i] = '1';
-        else b[i] = '0';
+        if ((i%4) == 0 && i!=0) ret = '_' + ret;
+        if (x & 1) ret = '1' + ret; //prepend!
+        else       ret = '0' + ret; 
         x >>= 1;
     }
 
-    return b;
+    return ret;
 }
+
+template<typename T>
+void print_fxp(T x)
+{
+    printf("%8.2f (%6d -- 0x%8x -- %20s)\n", (float)x, x.val, x.val, to_binary(x.val).c_str());
+}
+
 
 void prepare_tb_input(
     int num_compounds,
@@ -50,7 +55,8 @@ void prepare_tb_input(
             if (p==1) {
                 float vf = -128. * (2-p);
                 val = F_base(F_type(vf));
-                printf("F[%d][%d]   = %.2f (%d - %s)\n", c, p, vf, val, to_binary(val));
+                printf("F[%d][%d]    = ", c, p);
+                print_fxp(F_type(vf));
             }
             F_out[c][p] = val;
         }
@@ -81,7 +87,8 @@ void prepare_model(
                 if (j==0 && k==2 && i<1) 
                 {
                     val = 1.;
-                    printf("U[%d][%d][%d] = %.2f (%d)\n", i,j,k, val, U_base(U_type(val)));
+                    printf("U[%d][%d][%d] = ", i,j,k);
+                    print_fxp(U_type(val));
                 } else val = 0.;
                 U_out[i][j][k] = U_base(U_type(val));
                 CRC_ADD(U_check, U_out[i][j][k]);
@@ -93,8 +100,8 @@ void prepare_model(
             if (i<1 && j==2) 
             {
                 val = 0.25;
-                M_base val_base = M_base(M_type(val));
-                printf("M[%d][%d]    = %.2f (%d %s)\n", i,j, val, val_base, to_binary(val_base));
+                printf("M[%d][%d]    = ", i,j);
+                print_fxp(M_type(val));
             }
             else 
                 val = .0;
@@ -108,7 +115,8 @@ void prepare_model(
                 B_base val;
                 if (j<4 && k == 2 && i<1) {
                     val = 5944; //B[0][1][2]; // B[i][j][k];
-                    printf("B[%d][%d][%d] = %.2f (%d %s)\n", i,j,k, (float)(B_type(val)), val, to_binary(val));
+                    printf("B[%d][%d][%d] = ", i,j,k);
+                    print_fxp(B_type(val));
                 } else val = 0;
                 B_out[i][j][k] = val;
                 CRC_ADD(B_check, B_out[i][j][k]);
