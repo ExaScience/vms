@@ -38,33 +38,33 @@ std::string to_binary(T x)
 template<typename T>
 void print_fxp(T x)
 {
-    printf("%8.2f (%6d -- 0x%8x -- %20s)\n", (float)x, x.val, x.val, to_binary(x.val).c_str());
+    printf("fxp<%2d,%2d>: %8.2f (%6d -- 0x%8x -- %20s)\n", T::iwl, T::shift, (float)x, x.val, x.val, to_binary(x.val).c_str());
 }
 
 
 void prepare_tb_input(
     int num_compounds,
-    const float F_in[tb_num_compounds][num_features],
+    signed short f, 
     F_base F_out[][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
         {
-            F_base val = 0;
-            //if (p<1) val = p * 4.;
             if (p==1) {
-                float vf = -128. * (2-p);
-                val = F_base(F_type(vf));
+                F_type val(f);
                 printf("F[%d][%d]    = ", c, p);
-                print_fxp(F_type(vf));
+                print_fxp(val);
+                F_out[c][p] = F_base(val);
             }
-            F_out[c][p] = val;
+            else 
+            {
+                F_out[c][p] = 0;
+            }
         }
 }
+
 void prepare_model(
-    const float U_in[num_samples][num_proteins][num_latent],
-    const float M_in[num_samples][num_latent],
-    const float B_in[num_samples][num_features][num_latent],
+    int b,
     U_base U_out[num_samples][num_proteins][num_latent],
     M_base M_out[num_samples][num_latent],
     B_base B_out[num_samples][num_features][num_latent],
@@ -97,13 +97,13 @@ void prepare_model(
         for (int j = 0; j < num_latent; j++)
         {
             float val; //M[i][j];
-            if (i<1 && j==2) 
+            /*if (i<1 && j==2) 
             {
                 val = 0.25;
                 printf("M[%d][%d]    = ", i,j);
                 print_fxp(M_type(val));
             }
-            else 
+            else */
                 val = .0;
             M_out[i][j] =  M_base(M_type(val));
             CRC_ADD(M_check, M_out[i][j]);
@@ -113,8 +113,8 @@ void prepare_model(
             for (int k = 0; k < num_latent; k++)
             {
                 B_base val;
-                if (j<4 && k == 2 && i<1) {
-                    val = 5944; //B[0][1][2]; // B[i][j][k];
+                if (j == 2 && k == 2 && i<1) {
+                    val = b; //B[0][1][2]; // B[i][j][k];
                     printf("B[%d][%d][%d] = ", i,j,k);
                     print_fxp(B_type(val));
                 } else val = 0;
@@ -148,7 +148,9 @@ int check_result(
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
-    int num_compounds = 10;
+    int num_compounds = 1;
+    int b = -1;
+    int f = -1;
 
     if (argc > 1 && std::atoi(argv[1]))
     {
@@ -157,7 +159,12 @@ int main(int argc, char *argv[])
 
     if (argc > 2 && std::atoi(argv[2]))
     {
-        num_compounds = std::atoi(argv[2]);
+        b = std::atoi(argv[2]);
+    }
+
+    if (argc > 3 && std::atoi(argv[3]))
+    {
+        f = std::atoi(argv[3]);
     }
     
     printf("  dt:    %s\n", DT_NAME);
@@ -178,25 +185,23 @@ int main(int argc, char *argv[])
 
     P_base  U_check_tb, M_check_tb, B_check_tb;
 
-    prepare_tb_input(num_compounds, tb_input, tb_input_base);
-    prepare_model(U, M, B, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
-
     int nerrors = 0;
+    for (int i=0; i<num_repeat; i++) {
+        prepare_tb_input(num_compounds, f, tb_input_base);
+        prepare_model(b, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
 
-    printf("Updating model\n");
-    update_model(Ub, Mb, Bb);
+        printf("Updating model\n");
+        update_model(Ub, Mb, Bb);
 
-    printf("Predicting\n");
-    double start = tick();
-    for(int n=0; n<num_repeat; n++)
-    {
+        printf("Predicting\n");
+        double start = tick();
         predict_compounds(num_compounds, tb_input_base, tb_output_base);
-    }
 #pragma omp taskwait
-    double stop = tick();
-    nerrors += check_result(num_compounds, tb_output_base, tb_ref);
-    double elapsed = stop-start;
-    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
+        double stop = tick();
+        nerrors += check_result(num_compounds, tb_output_base, tb_ref);
+        double elapsed = stop-start;
+        printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
+    }
 
     delete[] tb_output_base;
     delete[] tb_input_base;
