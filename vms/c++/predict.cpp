@@ -19,36 +19,36 @@ void checksum_model(const F_flat features,
 	CRC_INIT(B_check);
 	CRC_INIT(F_check);
 
-    for (int i = 0; i < num_samples; i++)
-    {
-        for (int j = 0; j < num_proteins; j++)
-            for (int k = 0; k < num_latent; k++)
-                CRC_ADD(U_check, U[i][j][k]);
+        for (int i = 0; i < num_samples; i++)
+        {
+            for (int j = 0; j < num_proteins; j++)
+                for (int k = 0; k < num_latent; k++)
+                    CRC_ADD(U_check, U[i][j][k]);
 
-        for (int j = 0; j < num_latent; j++)
-           CRC_ADD(M_check, M[i][j]);
+            for (int j = 0; j < num_latent; j++)
+                CRC_ADD(M_check, M[i][j]);
 
-        for (int j = 0; j < num_features; j++)
-            for (int k = 0; k < num_latent; k++)
-                CRC_ADD(B_check, B[i][j][k]);
-	}
+            for (int j = 0; j < num_features; j++)
+                for (int k = 0; k < num_latent; k++)
+                    CRC_ADD(B_check, B[i][j][k]);
+        }
 
-	{
-	int c = 0;
-	for (int i = 0; i < block_size; i++)
-		for (int j = 0; j < num_features; j++)
-			CRC_ADD(F_check, features[c++]);
-	}
+        {
+            int c = 0;
+            for (int i = 0; i < block_size; i++)
+                for (int j = 0; j < num_features; j++)
+                    CRC_ADD(F_check, features[c++]);
+        }
 
-	{
-		for (int c = 0; c < block_size * num_proteins - 3;)
-		{
-			out[c++] = U_check;
-			out[c++] = M_check;
-			out[c++] = B_check;
-			out[c++] = F_check;
-		}
-	}
+        {
+            for (int c = 0; c < block_size * num_proteins - 3;)
+            {
+                out[c++] = U_check;
+                out[c++] = M_check;
+                out[c++] = B_check;
+                out[c++] = F_check;
+            }
+        }
 }
 
 void print_checksum(P_flat out)
