@@ -20,7 +20,6 @@ typedef float P_type;
 typedef float L_type;
 typedef float S_type;
 
-const float epsilon = 0.5;
 
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];

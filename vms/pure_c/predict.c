@@ -1,8 +1,6 @@
-
-#include <cassert>
-#include <cstdio>
-#include <cstring>
-#include <cstring>
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "predict.h"
 
@@ -16,9 +14,9 @@ void load_model(
 		const B_flat B_in)   //[num_samples][num_features][num_latent])
 	{
 #ifdef USE_MEMCPY
-	std::memcpy(M_local, M_in, sizeof(M_local));
-	std::memcpy(U_local, U_in, sizeof(U_local));
-	std::memcpy(B_local, B_in, sizeof(B_local));
+	memcpy(M_local, M_in, sizeof(M_local));
+	memcpy(U_local, U_in, sizeof(U_local));
+	memcpy(B_local, B_in, sizeof(B_local));
 #else
 	int f = 0;
 	int g = 0;
@@ -54,15 +52,15 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
-		const F_type feature(features[d]);
+		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
-				if (d==0) v = M_type(M_local[s][k]);
-				else      v = L_type(latents[s][k]);
-				L_type prod = feature * B_type(B_local[s][d][k]);
-				latents[s][k] = L_base(L_type(v + prod));
+				if (d==0) v = M_local[s][k];
+				else      v = latents[s][k];
+				L_type prod = feature * B_local[s][d][k];
+				latents[s][k] = v + prod;
 			}
 	}
 }
@@ -76,16 +74,16 @@ void proteins_loop(
 #pragma HLS PIPELINE II = 3
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
-		S_type sum(.0F);
+		S_type sum = .0F;
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = L_type(latents[s][k]) * U_type(U_local[s][d][k]);
+				S_type prod = latents[s][k] * U_local[s][d][k];
 				sum = sum + prod;
 			}
 
 		P_type aggr = sum / num_samples;
-		predictions[d] = P_base(aggr);
+		predictions[d] = aggr;
 	} // end proteins
 }
 
@@ -109,7 +107,7 @@ void predict_one_block(
 }
 
 void predict_or_update_model(
-		bool update_model,
+		int update_model,
 		int num_compounds,
 		const F_flat features,    //[block_size*num_features]
 		      P_flat predictions, //[block_size*num_proteins]
@@ -153,7 +151,7 @@ void update_model(
     P_flat out_block_1;
     P_flat out_block_2;
 
-    predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
+    predict_or_update_model(1, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
 }
 
 
@@ -166,20 +164,17 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
-        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
+        predict_or_update_model(0, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
     }
 
     // last block left-overs
     int nc = num_compounds - i;
-    if (nc == 0) {
-#pragma omp taskwait
-    } else {
+    if (nc > 0) {
 		F_flat in_block;
 		P_flat out_block;
 
 		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
-#pragma omp taskwait
+        predict_or_update_model(0, nc, in_block, out_block, empty_U, empty_mu, empty_B);
         memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
     }
 }

@@ -1,15 +1,17 @@
-#include <cstdio>
-#include <cmath>
-#include <iostream>
-#include <ctime>
-#include <cstdlib>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "predict.h"
 #include "vms_tb.h"
 
+const float epsilon = 0.5;
+
 double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
 }
+
 void prepare_tb_input(
     int num_compounds,
     const float in[tb_num_compounds][num_features],
@@ -17,7 +19,7 @@ void prepare_tb_input(
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
-            out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
+            out[c][p] = in [c%tb_num_compounds][p];
 }
 
 int check_result(
@@ -29,9 +31,9 @@ int check_result(
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
         {
-            float o = P_type(out[c][p]);
+            float o = out[c][p];
             float r = ref[c % tb_num_compounds][p];
-            if (std::abs(o - r) < epsilon)
+            if (fabs(o - r) < epsilon)
             {
                 //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
             }
@@ -51,14 +53,17 @@ int main(int argc, char *argv[])
     int num_repeat = 1;
     int num_compounds = 10;
 
-    if (argc > 1 && std::atoi(argv[1]))
+    P_base (*tb_output_block)[num_proteins] =  malloc(sizeof(P_base) * num_compounds * num_proteins);
+    F_base (*tb_input_block)[num_features] = malloc(sizeof(F_base) * num_compounds * num_features);
+
+    if (argc > 1 && atoi(argv[1]))
     {
-        num_repeat = std::atoi(argv[1]);
+        num_repeat = atoi(argv[1]);
     }
 
-    if (argc > 2 && std::atoi(argv[2]))
+    if (argc > 2 && atoi(argv[2]))
     {
-        num_compounds = std::atoi(argv[2]);
+        num_compounds = atoi(argv[2]);
     }
     
     printf("  dt:    %s\n", DT_NAME);
@@ -75,8 +80,6 @@ int main(int argc, char *argv[])
     printf("Updating model\n");
     update_model(U, M, B);
 
-    P_base (*tb_output_block)[num_proteins] = new P_base[num_compounds][num_proteins];
-    F_base (*tb_input_block)[num_features] = new F_base[num_compounds][num_features];
     prepare_tb_input(num_compounds, tb_input, tb_input_block);
 
     printf("Predicting\n");
