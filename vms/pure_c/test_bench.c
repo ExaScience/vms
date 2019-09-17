@@ -88,7 +88,6 @@ int main(int argc, char *argv[])
     {
         predict_compounds(num_compounds, tb_input, tb_output_block);
     }
-#pragma omp taskwait
     double stop = tick();
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);
     double elapsed = stop-start;

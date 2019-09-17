@@ -43,14 +43,7 @@ void features_loop(
 {
 	for (int d = 0; d < num_features; d++)
 	{
-#pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
-#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
 		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
@@ -71,9 +64,6 @@ void proteins_loop(
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
-#pragma HLS PIPELINE II = 3
-#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 		S_type sum = .0F;
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
@@ -96,10 +86,7 @@ void predict_one_block(
 {
     for (int i=0; i<num_compounds; ++i)
     {
-#pragma HLS DATAFLOW
 		L_base latents[num_samples][num_latent];
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2		
 
         features_loop(&features[i*num_features], latents);
         proteins_loop(&predictions[i*num_proteins], latents);
@@ -115,12 +102,6 @@ void predict_or_update_model(
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
-//#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
-//#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
-//#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
-//#pragma HLS INTERFACE m_axi port=M_in depth=num_samples*num_latent
-//#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
-
 	if (update_model)
 	{
 		load_model(U_in, M_in, B_in);
@@ -157,25 +138,25 @@ void update_model(
 
 void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 {
-    const U_flat empty_U = {0};
-    const M_flat empty_mu = {0};
-    const B_flat empty_B = {0};
+	const U_flat empty_U = {0};
+	const M_flat empty_mu = {0};
+	const B_flat empty_B = {0};
 
-    int i;
-    for(i=0; i<=num_compounds - block_size; i+=block_size)
-    {
-        predict_or_update_model(0, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
-    }
+	int i;
+	for(i=0; i<=num_compounds - block_size; i+=block_size)
+	{
+		predict_or_update_model(0, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
+	}
 
-    // last block left-overs
-    int nc = num_compounds - i;
-    if (nc > 0) {
+	// last block left-overs
+	int nc = num_compounds - i;
+	if (nc > 0) {
 		F_flat in_block;
 		P_flat out_block;
 
 		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        predict_or_update_model(0, nc, in_block, out_block, empty_U, empty_mu, empty_B);
-        memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
-    }
+		predict_or_update_model(0, nc, in_block, out_block, empty_U, empty_mu, empty_B);
+		memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
+	}
 }
 
