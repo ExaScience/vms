@@ -18,6 +18,8 @@ model: $(MODELFILES)
 
 .PHONY: hls run clean model
 
+CONDA_PREFIX ?= $(dir $(CONDA_EXE))..
+
 $(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model
 	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \

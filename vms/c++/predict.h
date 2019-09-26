@@ -78,16 +78,16 @@ const float epsilon = 0.5;
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];
 
-typedef F_base F_flat[block_size*num_features];
-typedef P_base P_flat[block_size*num_proteins];
+typedef F_base F_blk[block_size][num_features];
+typedef P_base P_blk[block_size][num_proteins];
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-typedef U_base U_flat[num_samples*num_proteins*num_latent];
-typedef M_base M_flat[num_samples*num_latent];
-typedef B_base B_flat[num_samples*num_features*num_latent];
+typedef U_base U_flat[num_samples][num_proteins][num_latent];
+typedef M_base M_flat[num_samples][num_latent];
+typedef B_base B_flat[num_samples][num_features][num_latent];
 
 void update_model(const U_arr U, const M_arr mu, const B_arr B);
 
