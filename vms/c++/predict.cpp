@@ -189,9 +189,9 @@ void predict_or_update_model(
 		int num_compounds,
 		const F_blk features,    //[block_size*num_features]
 		      P_blk predictions,  //[block_size*num_proteins]
-		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
-		const M_flat M_in,        //[num_samples][num_latent]
-		const B_flat B_in)        //[num_samples][num_features][num_latent]
+		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+		const M_arr M_in,        //[num_samples][num_latent]
+		const B_arr B_in)        //[num_samples][num_features][num_latent]
 {
 //#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
 //#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins

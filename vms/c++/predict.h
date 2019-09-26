@@ -85,10 +85,6 @@ typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-typedef U_base U_flat[num_samples][num_proteins][num_latent];
-typedef M_base M_flat[num_samples][num_latent];
-typedef B_base B_flat[num_samples][num_features][num_latent];
-
 void update_model(const U_arr U, const M_arr mu, const B_arr B);
 
 void predict_compounds(int num_compounds, const F_flx in, P_flx out);
