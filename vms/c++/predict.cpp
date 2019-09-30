@@ -155,8 +155,8 @@ void proteins_loop(
 
 void predict_one_block(
 		int num_compounds, // <= block_size
-		const F_blk features,   //[block_size*num_features],
-		      P_blk predictions //[block_size*num_proteins]
+		const F_blk features,   //[block_size][num_features],
+		      P_blk predictions //[block_size][num_proteins]
 )
 {
     for (int i=0; i<num_compounds; ++i)
@@ -187,8 +187,8 @@ void predict_one_block(
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_blk features,    //[block_size*num_features]
-		      P_blk predictions,  //[block_size*num_proteins]
+		const F_blk features,    //[block_size][num_features]
+		      P_blk predictions,  //[block_size][num_proteins]
 		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
 		const M_arr M_in,        //[num_samples][num_latent]
 		const B_arr B_in)        //[num_samples][num_features][num_latent]
