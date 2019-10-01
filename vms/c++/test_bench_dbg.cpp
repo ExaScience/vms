@@ -15,6 +15,10 @@ const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
 
+float b = -1;
+float f = -1;
+float u = -1;
+
 double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
 }
@@ -44,16 +48,15 @@ void print_fxp(T x)
 
 void prepare_tb_input(
     int num_compounds,
-    signed short f, 
     F_base F_out[][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
         {
             if (p==1) {
-                F_type val(f);
+                float val = f;
                 printf("F[%d][%d]    = ", c, p);
-                print_fxp(val);
+                print_fxp(F_type(val));
                 F_out[c][p] = F_base(val);
             }
             else 
@@ -64,7 +67,6 @@ void prepare_tb_input(
 }
 
 void prepare_model(
-    int b,
     U_base U_out[num_samples][num_proteins][num_latent],
     M_base M_out[num_samples][num_latent],
     B_base B_out[num_samples][num_features][num_latent],
@@ -83,10 +85,9 @@ void prepare_model(
             for (int k = 0; k < num_latent; k++)
             {
                 float val;
-                //val = U[i][j][k];
-                if (j==0 && k==2 && i<1) 
+                if (i > 5 && j == 0 && k < 16) 
                 {
-                    val = 1.;
+                    val = u; //U[i][j][k];
                     printf("U[%d][%d][%d] = ", i,j,k);
                     print_fxp(U_type(val));
                 } else val = 0.;
@@ -112,13 +113,13 @@ void prepare_model(
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                B_base val;
-                if (j == 2 && k == 2 && i<1) {
+                float val;
+                if (i > 5 && j == 1 && k < 16) {
                     val = b; //B[0][1][2]; // B[i][j][k];
                     printf("B[%d][%d][%d] = ", i,j,k);
                     print_fxp(B_type(val));
                 } else val = 0;
-                B_out[i][j][k] = val;
+                B_out[i][j][k] = B_base(B_type(val));
                 CRC_ADD(B_check, B_out[i][j][k]);
             }
 
@@ -149,22 +150,28 @@ int main(int argc, char *argv[])
 {
     int num_repeat = 1;
     int num_compounds = 1;
-    int b = -1;
-    int f = -1;
 
     if (argc > 1 && std::atoi(argv[1]))
     {
         num_repeat = std::atoi(argv[1]);
     }
 
-    if (argc > 2 && std::atoi(argv[2]))
+    if (argc > 2 && std::atof(argv[2]))
     {
-        b = std::atoi(argv[2]);
+        b = std::atof(argv[2]);
+        printf("  b:    %f\n", b);
     }
 
-    if (argc > 3 && std::atoi(argv[3]))
+    if (argc > 3 && std::atof(argv[3]))
     {
-        f = std::atoi(argv[3]);
+        f = std::atof(argv[3]);
+        printf("  f:    %f\n", f);
+    }
+
+    if (argc > 4 && std::atof(argv[4]))
+    {
+        u = std::atof(argv[4]);
+        printf("  u:    %f\n", u);
     }
     
     printf("  dt:    %s\n", DT_NAME);
@@ -187,8 +194,8 @@ int main(int argc, char *argv[])
 
     int nerrors = 0;
     for (int i=0; i<num_repeat; i++) {
-        prepare_tb_input(num_compounds, f, tb_input_base);
-        prepare_model(b, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
+        prepare_tb_input(num_compounds, tb_input_base);
+        prepare_model(Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
 
         printf("Updating model\n");
         update_model(Ub, Mb, Bb);
