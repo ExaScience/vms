@@ -27,4 +27,4 @@ clean:
 	rm -rf zcu102
 	rm -f $(PROGRAM_).xtasks.config 
 	rm -f $(PROGRAM_).bit 
-	rm -f BOOT.BIN .
+	rm -f BOOT.BIN
