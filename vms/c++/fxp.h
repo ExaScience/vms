@@ -72,7 +72,7 @@ struct fxp
 
     void check(float ref, float eps = -1.) const
     {
-#ifndef NDEBUG
+#ifdef DT_CHECK
         float cur = (float)(*this);
         float diff = std::abs(cur - ref);
         if (eps == -1.) eps = epsilon();
