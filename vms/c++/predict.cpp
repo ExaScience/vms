@@ -173,7 +173,7 @@ void predict_one_block(
 
 
 #ifdef OMPSS_FPGA
-#pragma omp target device(fpga) copy_deps localmem()
+#pragma omp target device(fpga) copy_deps 
 #elif defined(OMPSS_SMP)
 #pragma omp target device(smp) copy_deps
 #else
@@ -187,11 +187,11 @@ void predict_one_block(
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_blk features,    //[block_size][num_features]
-		      P_blk predictions,  //[block_size][num_proteins]
-		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-		const M_arr M_in,        //[num_samples][num_latent]
-		const B_arr B_in)        //[num_samples][num_features][num_latent]
+	        F_blk features,    //[block_size][num_features]
+	        P_blk predictions,  //[block_size][num_proteins]
+	        U_arr U_in,        //[num_samples][num_proteins][num_latent]
+	        M_arr M_in,        //[num_samples][num_latent]
+	        B_arr B_in)        //[num_samples][num_features][num_latent]
 {
 //#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
 //#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
@@ -214,9 +214,9 @@ void predict_or_update_model(
 
 
 void update_model(
-    const  U_arr U_in,
-    const  M_arr M_in,
-    const  B_arr B_in)
+      U_arr U_in,
+      M_arr M_in,
+      B_arr B_in)
 {
     F_blk  in_block;
 	int c = 0;
@@ -241,11 +241,11 @@ void update_model(
 }
 
 
-void predict_compounds(int num_compounds, const F_flx in, P_flx out)
+void predict_compounds(int num_compounds, F_flx in, P_flx out)
 {
-    const U_arr empty_U = {{{0}}};
-    const M_arr empty_M = {{0}};
-    const B_arr empty_B = {{{0}}};
+     U_arr empty_U = {{{0}}};
+     M_arr empty_M = {{0}};
+     B_arr empty_B = {{{0}}};
 
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
