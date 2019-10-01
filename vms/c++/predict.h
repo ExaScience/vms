@@ -22,11 +22,11 @@ typedef fxp<P_base, P_iwl> P_type;
 // -- fixed fixed
 
 typedef signed int L_base;
-const int L_iwl = 10;
+const int L_iwl = 12;
 typedef fxp<L_base, L_iwl> L_type;
 
 typedef signed int S_base;
-const int S_iwl = 10;
+const int S_iwl = 12;
 typedef fxp<S_base, S_iwl> S_type;
 
 const float epsilon = 0.5;
