@@ -1,6 +1,6 @@
-#if defined(DT_FIXED) || defined(DT_FLOAT)
+#if defined(DT_FIXED) || defined(DT_FLOAT) || defined(DT_HALF)
 #else
-#define DT_FIXED
+#define DT_FLOAT
 #endif
 
 #include "vms_const.h"
@@ -71,8 +71,36 @@ const float epsilon = 0.5;
 #define CRC_ADD(crc, value) (crc) += (value)
 #define CRC_FMT "%.2f"
 
+#elif defined(DT_HALF)
+
+#define DT_NAME "half"
+
+#include “hls_half.h”
+
+typedef half U_base;
+typedef half M_base;
+typedef half B_base;
+typedef half F_base;
+typedef half P_base;
+typedef float L_base;
+typedef float S_base;
+
+typedef half U_type;
+typedef half M_type;
+typedef half B_type;
+typedef half F_type;
+typedef half P_type;
+typedef float L_type;
+typedef float S_type;
+
+const float epsilon = 0.5;
+
+#define CRC_INIT(crc) (crc) = .5
+#define CRC_ADD(crc, value) (crc) += (value)
+#define CRC_FMT "%.2f"
+
 #else
-#error Need to defined DT_FIXED or DT_FLOAT
+#error Need to defined DT_FIXED, DT_FLOAT or DT_HALF
 #endif
 
 typedef F_base F_flx[][num_features];
