@@ -13,9 +13,20 @@ FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
 
-CFLAGS_      = $(CFLAGS) -O0 -g -std=c++11 -I$(SRCDIR) -I$(MODELDIR)
+CFLAGS_      = $(CFLAGS) -O0 -g -I$(SRCDIR) -I$(MODELDIR)
 LDFLAGS_     = $(LDFLAGS)
 
+ifeq ($(XILINX_VIVADO),)
+#Homebrew sc_fixed<>
+SYSTEMCROOT=/usr/local/opt/systemc
+else
+# Vivado Xilinx sc_fixed<>
+SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+CXX=$(XILINX_VIVADO)/lnx64/tools/clang-3.9/bin/clang++
+endif
+
+SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
+SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
 .PHONY: clean
 
