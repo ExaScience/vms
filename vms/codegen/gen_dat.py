@@ -137,7 +137,6 @@ def gen_session(root, outputdir):
 
     const_output = gen_const(num_proteins, num_features, num_latent, len(samples)) + "\n"
 
-    const_output += "#ifdef DT_FIXED\n"
     types = {
         8 : "signed char",
         16 : "signed short",
@@ -151,9 +150,7 @@ def gen_session(root, outputdir):
         const_output += gen_int(name + "_wl", wl)
         const_output += gen_int(name + "_iwl", iwl)
         const_output += gen_int(name + "_shift", wl - iwl)
-        const_output += "typedef %s %s_base ;\n" % (types[wl], name)
 
-    const_output += "#endif //DT_FIXED\n"
     gen_file(outputdir, "const.h", const_output)
 
 

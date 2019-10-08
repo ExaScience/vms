@@ -18,15 +18,17 @@ model: $(MODELFILES)
 
 .PHONY: hls run clean model
 
+CONDA_BIN = $(dir $(CONDA_EXE))
+
 $(ROOTFILE): $(INPUTDATA) options.ini
 	mkdir -p model
-	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+	source $(CONDA_BIN)/activate smurff-0.14 && \
 		smurff --ini options.ini --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
 	ln -sf $(addprefix ../,$(CXXFILES) $(HEADERFILES)) code/
-	source $(CONDA_PREFIX)/bin/activate smurff-0.14 && \
+	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 clean:

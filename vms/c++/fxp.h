@@ -1,33 +1,5 @@
 #pragma once
 
-#define SYSTEMC_FIXED
-
-#ifdef SYSTEMC_FIXED
-#define SC_INCLUDE_FX
-#include <systemc.h>
-
-template<typename T, int IWL>
-struct fxp : public sc_fixed<sizeof(T) * 8, IWL> 
-{
-    static const int wl = sizeof(T) * 8;
-    static const int iwl = IWL;
-    static const int shift = wl - iwl;
-
-	operator float() const {
-		return this->to_float();
-	}
-
-    operator T() const
-    {
-        return (T)(*this << shift);
-    }
-
-    fxp(float v) : sc_fixed<wl,iwl>(v) {}
-    fxp(T v = (T)0xdead) : sc_fixed<wl,iwl>((float)v / (float)(1<<shift)) {}
-};
-
-#else
-
 #include <utility>
 #include <cassert>
 #include <cmath>
@@ -187,5 +159,3 @@ struct fxp
         printf(" iwl = %d\n", iwl);
     }
 };
-
-#endif

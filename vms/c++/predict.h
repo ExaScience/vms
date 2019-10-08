@@ -1,4 +1,4 @@
-#if defined(DT_FIXED) || defined(DT_FLOAT) || defined(DT_HALF)
+#if defined(DT_FIXED) || defined(DT_FLOAT) || defined(DT_HALF) || defined(DT_MIXED)
 #else
 #define DT_FLOAT
 #endif
@@ -7,27 +7,65 @@
 
 static const int block_size = 1000;
 
+const int L_wl = 32;
+const int L_iwl = 12;
+const int S_wl = 32;
+const int S_iwl = 12;
+
 #ifdef DT_FIXED
 
 #define DT_NAME "fxp<T,I>"
 
 #include "fxp.h"
 
+template<int N> struct int_type;
+template<> struct int_type< 8> { typedef signed char T; };
+template<> struct int_type<16> { typedef signed short T; };
+template<> struct int_type<32> { typedef signed int T; };
+
+typedef int_type<U_wl>::T U_base;
+typedef int_type<M_wl>::T M_base;
+typedef int_type<B_wl>::T B_base;
+typedef int_type<F_wl>::T F_base;
+typedef int_type<P_wl>::T P_base;
+typedef int_type<L_wl>::T L_base;
+typedef int_type<S_wl>::T S_base;
+
 typedef fxp<U_base, U_iwl> U_type;
 typedef fxp<M_base, M_iwl> M_type;
 typedef fxp<B_base, B_iwl> B_type;
 typedef fxp<F_base, F_iwl> F_type;
 typedef fxp<P_base, P_iwl> P_type;
-
-// -- fixed fixed
-
-typedef signed int L_base;
-const int L_iwl = 12;
 typedef fxp<L_base, L_iwl> L_type;
-
-typedef signed int S_base;
-const int S_iwl = 12;
 typedef fxp<S_base, S_iwl> S_type;
+
+const float epsilon = 0.5;
+
+#define CRC_INIT(crc) (crc) = 0xd1
+#define CRC_ADD(crc, value) (crc) ^= (value)
+#define CRC_FMT "0x%04x"
+
+#elif defined(DT_MIXED)
+
+#define DT_NAME "float + sc_fixed<WL,IWL>"
+
+#define SC_INCLUDE_FX
+#include <systemc.h>
+
+typedef float U_base;
+typedef float M_base;
+typedef float B_base;
+typedef float F_base;
+typedef float P_base;
+
+typedef sc_fixed<U_wl, U_iwl> U_type;
+typedef sc_fixed<M_wl, M_iwl> M_type;
+typedef sc_fixed<B_wl, B_iwl> B_type;
+typedef sc_fixed<F_wl, F_iwl> F_type;
+typedef sc_fixed<P_wl, P_iwl> P_type;
+
+typedef sc_fixed<L_wl, L_iwl> L_type;
+typedef sc_fixed<S_wl, S_iwl> S_type;
 
 const float epsilon = 0.5;
 
