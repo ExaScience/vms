@@ -3,11 +3,12 @@
 
 #include "predict.fpga.h"
 
+template<typename Ut, typename Mt, typename Bt>
 void checksum_model(const F_flat features,
 					      P_flat out,
-					const U_arr U,
-					const M_arr M,
-					const B_arr B)
+					const Ut U,
+					const Mt M,
+					const Bt B)
 {
 	P_base U_check;
 	P_base M_check;
@@ -19,36 +20,36 @@ void checksum_model(const F_flat features,
 	CRC_INIT(B_check);
 	CRC_INIT(F_check);
 
-        for (int i = 0; i < num_samples; i++)
-        {
-            for (int j = 0; j < num_proteins; j++)
-                for (int k = 0; k < num_latent; k++)
-                    CRC_ADD(U_check, U[i][j][k]);
+	for (int i = 0; i < num_samples; i++)
+	{
+		for (int j = 0; j < num_proteins; j++)
+			for (int k = 0; k < num_latent; k++)
+				CRC_ADD(U_check, U_base(U[i][j][k]));
 
-            for (int j = 0; j < num_latent; j++)
-                CRC_ADD(M_check, M[i][j]);
+		for (int j = 0; j < num_latent; j++)
+			CRC_ADD(M_check, M_base(M[i][j]));
 
-            for (int j = 0; j < num_features; j++)
-                for (int k = 0; k < num_latent; k++)
-                    CRC_ADD(B_check, B[i][j][k]);
-        }
+		for (int j = 0; j < num_features; j++)
+			for (int k = 0; k < num_latent; k++)
+				CRC_ADD(B_check, B_base(B[i][j][k]));
+	}
 
-        {
-            int c = 0;
-            for (int i = 0; i < block_size; i++)
-                for (int j = 0; j < num_features; j++)
-                    CRC_ADD(F_check, features[c++]);
-        }
+	{
+		int c = 0;
+		for (int i = 0; i < block_size; i++)
+			for (int j = 0; j < num_features; j++)
+				CRC_ADD(F_check, features[c++]);
+	}
 
-        {
-            for (int c = 0; c < block_size * num_proteins - 3;)
-            {
-                out[c++] = U_check;
-                out[c++] = M_check;
-                out[c++] = B_check;
-                out[c++] = F_check;
-            }
-        }
+	{
+		for (int c = 0; c < block_size * num_proteins - 3;)
+		{
+			out[c++] = U_check;
+			out[c++] = M_check;
+			out[c++] = B_check;
+			out[c++] = F_check;
+		}
+	}
 }
 
 void print_checksum(P_flat out)
@@ -100,7 +101,7 @@ void load_model(
 
 void features_loop(
 	    const F_base features[num_features],
-		L_base latents[num_samples][num_latent])
+		L_type latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_features; d++)
 	{
@@ -121,14 +122,14 @@ void features_loop(
 				if (d==0) v = M_type(M_local[s][k]);
 				else      v = L_type(latents[s][k]);
 				L_type prod = feature * B_type(B_local[s][d][k]);
-				latents[s][k] = L_base(L_type(v + prod));
+				latents[s][k] = L_type(v + prod);
 			}
 	}
 }
 
 void proteins_loop(
 	P_base predictions[num_proteins],
-	const L_base latents[num_samples][num_latent])
+	const L_type latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -164,7 +165,7 @@ void predict_one_block(
     for (int i=0; i<num_compounds; ++i)
     {
 #pragma HLS DATAFLOW
-		L_base latents[num_samples][num_latent];
+		L_type latents[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents complete dim = 2		
 

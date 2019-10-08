@@ -69,9 +69,10 @@ typedef sc_fixed<S_wl, S_iwl> S_type;
 
 const float epsilon = 0.5;
 
-#define CRC_INIT(crc) (crc) = 0xd1
-#define CRC_ADD(crc, value) (crc) ^= (value)
-#define CRC_FMT "0x%04x"
+
+#define CRC_INIT(crc) (crc) = .5
+#define CRC_ADD(crc, value) (crc) += (value)
+#define CRC_FMT "%.2f"
 
 #elif defined(DT_FLOAT)
 
