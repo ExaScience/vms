@@ -12,16 +12,29 @@ const int L_iwl = 12;
 const int S_wl = 32;
 const int S_iwl = 12;
 
-#ifdef DT_FIXED
+const float epsilon = 0.5;
 
+#if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
+#define DT_FIXED_INT
+#define DT_FIXED_EXT
+#elif defined(DT_MIXED)
+#define DT_NAME "float + fxp<WL,IWL>"
+#define DT_FIXED_INT
+#define DT_FLOAT_EXT
+#elif defined(DT_FLOAT)
+#define DT_NAME "float"
+#define DT_FLOAT_INT
+#define DT_FLOAT_EXT
+#elif defined(DT_HALF)
+#define DT_NAME "half"
+#define DT_FLOAT_EXT
+#define DT_HALF_INT
+#endif
+
+#ifdef DT_FIXED_EXT
 
 #include "fxp.h"
-
-template<int N> struct int_type;
-template<> struct int_type< 8> { typedef signed char T; };
-template<> struct int_type<16> { typedef signed short T; };
-template<> struct int_type<32> { typedef signed int T; };
 
 typedef int_type<U_wl>::T U_base;
 typedef int_type<M_wl>::T M_base;
@@ -31,70 +44,38 @@ typedef int_type<P_wl>::T P_base;
 typedef int_type<L_wl>::T L_base;
 typedef int_type<S_wl>::T S_base;
 
-typedef fxp<U_base, U_iwl> U_type;
-typedef fxp<M_base, M_iwl> M_type;
-typedef fxp<B_base, B_iwl> B_type;
-typedef fxp<F_base, F_iwl> F_type;
-typedef fxp<P_base, P_iwl> P_type;
-typedef fxp<L_base, L_iwl> L_type;
-typedef fxp<S_base, S_iwl> S_type;
-
-const float epsilon = 0.5;
-
 #define CRC_INIT(crc) (crc) = 0xd1
 #define CRC_ADD(crc, value) (crc) ^= (value)
 #define CRC_FMT "0x%04x"
 
-#elif defined(DT_MIXED)
-
-#define DT_NAME "float + sc_fixed<WL,IWL>"
-
-#define SC_INCLUDE_FX
-#include <systemc.h>
+#else // DT_FLOAT_EXT
 
 typedef float U_base;
 typedef float M_base;
 typedef float B_base;
 typedef float F_base;
 typedef float P_base;
-
-typedef sc_fixed<U_wl, U_iwl> U_type;
-typedef sc_fixed<M_wl, M_iwl> M_type;
-typedef sc_fixed<B_wl, B_iwl> B_type;
-typedef sc_fixed<F_wl, F_iwl> F_type;
-typedef sc_fixed<P_wl, P_iwl> P_type;
-
-typedef sc_fixed<L_wl, L_iwl> L_type;
-typedef sc_fixed<S_wl, S_iwl> S_type;
-
-const float epsilon = 0.5;
-
 
 #define CRC_INIT(crc) (crc) = .5
 #define CRC_ADD(crc, value) (crc) += (value)
 #define CRC_FMT "%.2f"
 
-#elif defined(DT_FLOAT)
+#endif
 
-#define DT_NAME "float"
+#ifdef DT_FIXED_INT
 
-typedef float U_base;
-typedef float M_base;
-typedef float B_base;
-typedef float F_base;
-typedef float P_base;
-typedef float L_base;
-typedef float S_base;
+#include "fxp.h"
 
-#if 0
-typedef observable<float, U_id> U_type;
-typedef observable<float, M_id> M_type;
-typedef observable<float, B_id> B_type;
-typedef observable<float, F_id> F_type;
-typedef observable<float, P_id> P_type;
-typedef observable<float, L_id> L_type;
-typedef observable<float, S_id> S_type;
-#else
+typedef fxp<int_type<U_wl>::T, U_iwl> U_type;
+typedef fxp<int_type<M_wl>::T, M_iwl> M_type;
+typedef fxp<int_type<B_wl>::T, B_iwl> B_type;
+typedef fxp<int_type<F_wl>::T, F_iwl> F_type;
+typedef fxp<int_type<P_wl>::T, P_iwl> P_type;
+typedef fxp<int_type<L_wl>::T, L_iwl> L_type;
+typedef fxp<int_type<S_wl>::T, S_iwl> S_type;
+
+#elif defined(DT_FLOAT_INT)
+
 typedef float U_type;
 typedef float M_type;
 typedef float B_type;
@@ -102,27 +83,10 @@ typedef float F_type;
 typedef float P_type;
 typedef float L_type;
 typedef float S_type;
-#endif
 
-const float epsilon = 0.5;
-
-#define CRC_INIT(crc) (crc) = .5
-#define CRC_ADD(crc, value) (crc) += (value)
-#define CRC_FMT "%.2f"
-
-#elif defined(DT_HALF)
-
-#define DT_NAME "half"
+#elif defined(DT_HALF_INT)
 
 #include “hls_half.h”
-
-typedef half U_base;
-typedef half M_base;
-typedef half B_base;
-typedef half F_base;
-typedef half P_base;
-typedef float L_base;
-typedef float S_base;
 
 typedef half U_type;
 typedef half M_type;
@@ -132,14 +96,8 @@ typedef half P_type;
 typedef float L_type;
 typedef float S_type;
 
-const float epsilon = 0.5;
-
-#define CRC_INIT(crc) (crc) = .5
-#define CRC_ADD(crc, value) (crc) += (value)
-#define CRC_FMT "%.2f"
-
 #else
-#error Need to defined DT_FIXED, DT_FLOAT or DT_HALF
+#error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
 typedef F_base F_flx[][num_features];
