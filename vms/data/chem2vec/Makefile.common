@@ -22,6 +22,7 @@ SYSTEMCROOT=/usr/local/opt/systemc
 else
 # Vivado Xilinx sc_fixed<>
 SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
+SYSTEMCROOT=$(XILINX_VIVADO)
 CXX=$(XILINX_VIVADO)/lnx64/tools/clang-3.9/bin/clang++
 endif
 

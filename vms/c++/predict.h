@@ -1,8 +1,3 @@
-#if defined(DT_FIXED) || defined(DT_FLOAT) || defined(DT_HALF) || defined(DT_MIXED)
-#else
-#define DT_FLOAT
-#endif
-
 #include "vms_const.h"
 
 static const int block_size = 1000;

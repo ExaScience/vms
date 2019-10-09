@@ -80,7 +80,7 @@ int check_result(
             float r = ref[c % tb_num_compounds][p];
             if (std::abs(o - r) < epsilon)
             {
-                //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+                printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
             }
             else
             {
