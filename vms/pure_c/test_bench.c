@@ -7,6 +7,7 @@
 #include "vms_tb.h"
 
 const float epsilon = 0.5;
+const int float_size = sizeof(float) * 8;
 
 double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
@@ -93,5 +94,8 @@ int main(int argc, char *argv[])
     double elapsed = stop-start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
 
+    // terra-ops aka 10^12 ops
+    double tops = (double)num_repeat * (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
+    printf("%.4f tera-ops; %.4f tera-ops/second (%d-bit floating point ops)\n", tops, tops/elapsed, float_size);
     return nerrors;
 }
