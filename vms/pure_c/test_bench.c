@@ -54,8 +54,6 @@ int main(int argc, char *argv[])
     int num_repeat = 1;
     int num_compounds = 10;
 
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])malloc(sizeof(P_base) * num_compounds * num_proteins);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features]) malloc(sizeof(F_base) * num_compounds * num_features);
 
     if (argc > 1 && atoi(argv[1]))
     {
@@ -66,7 +64,10 @@ int main(int argc, char *argv[])
     {
         num_compounds = atoi(argv[2]);
     }
-    
+   
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])malloc(sizeof(P_base) * num_compounds * num_proteins);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])malloc(sizeof(F_base) * num_compounds * num_features); 
+
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
