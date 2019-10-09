@@ -1,6 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 1000;
+#define block_size 1000
 
 #define DT_NAME "float"
 
