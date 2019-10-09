@@ -9,9 +9,16 @@
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
+#ifdef _OPENMP
+#include <omp.h>
+double tick() {
+    return (double)omp_get_wtime();
+}
+#else
 double tick() {
     return (double)clock() / CLOCKS_PER_SEC;
 }
+#endif
 
 void prepare_tb_input(
     int num_compounds,

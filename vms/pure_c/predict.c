@@ -84,6 +84,7 @@ void predict_one_block(
 		      P_flat predictions //[block_size*num_proteins]
 )
 {
+#pragma omp parallel for schedule(guided)
     for (int i=0; i<num_compounds; ++i)
     {
 		L_base latents[num_samples][num_latent];
