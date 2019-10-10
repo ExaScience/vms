@@ -38,8 +38,8 @@ void load_model(
 }
 
 void features_loop(
-	    const F_base features[num_features],
-		L_base latents[num_samples][num_latent])
+        const F_base features[num_features],
+        L_base latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_features; d++)
 	{
@@ -60,7 +60,7 @@ void features_loop(
 
 void proteins_loop(
 	P_base predictions[num_proteins],
-	const L_base latents[num_samples][num_latent])
+	L_base latents[num_samples][num_latent])
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -87,8 +87,7 @@ void predict_one_block(
 #pragma omp parallel for schedule(guided)
     for (int i=0; i<num_compounds; ++i)
     {
-		L_base latents[num_samples][num_latent];
-
+        L_base latents[num_samples][num_latent];
         features_loop(&features[i*num_features], latents);
         proteins_loop(&predictions[i*num_proteins], latents);
     }
