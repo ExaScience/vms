@@ -80,8 +80,8 @@ void proteins_loop(
 
 void predict_one_block(
 		int num_compounds, // <= block_size
-		const F_flat features,   //[block_size*num_features],
-		      P_flat predictions //[block_size*num_proteins]
+		F_flat features,   //[block_size*num_features],
+		P_flat predictions //[block_size*num_proteins]
 )
 {
 #pragma omp parallel for schedule(guided)
@@ -96,7 +96,7 @@ void predict_one_block(
 void predict_or_update_model(
 		int update_model,
 		int num_compounds,
-		const F_flat features,    //[block_size*num_features]
+		      F_flat features,    //[block_size*num_features]
 		      P_flat predictions, //[block_size*num_proteins]
 		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
 		const M_flat M_in,        //[num_samples][num_latent]
@@ -136,7 +136,7 @@ void update_model(
 }
 
 
-void predict_compounds(int num_compounds, const F_flx in, P_flx out)
+void predict_compounds(int num_compounds, F_flx in, P_flx out)
 {
 	const U_flat empty_U = {0};
 	const M_flat empty_mu = {0};

@@ -32,7 +32,7 @@ void prepare_tb_input(
 
 int check_result(
     int num_compounds,
-    const P_base out[][num_proteins],
+    P_base out[][num_proteins],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
-        predict_compounds(num_compounds, tb_input, tb_output_block);
+        predict_compounds(num_compounds, tb_input_block, tb_output_block);
     }
     double stop = tick();
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);
