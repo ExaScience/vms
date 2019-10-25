@@ -144,7 +144,7 @@ void proteins_loop(
 			}
 
 		P_type aggr(
-#ifdef DT_FLOAT
+#if defined(DT_FLOAT) || defined(DT_HALF)
 			sum / num_samples
 #else
 			sum >> log_num_samples
