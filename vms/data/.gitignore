@@ -1,6 +1,7 @@
 */*/*.cpp
 */*/*.h
 */*/BOOT.BIN
+*/*/predict.*.orig
 */*/predict.bit
 */*/predict.xtasks.config
 */*/zcu102
