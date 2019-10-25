@@ -22,6 +22,8 @@ boot: BOOT.BIN
 
 $(SRCFILES): $(DEPS)
 	ln -sf $(DEPS) ./
+	mv predict.h predict.h.orig
+	echo '#define DT_FLOAT' | cat - predict.h.orig >predict.h 
 
 $(BITSTREAM): $(SRCFILES)
 	mkdir -p $(BUILDDIR)
