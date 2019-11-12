@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 
 TOPDIR=../..
 SRCDIR=$(TOPDIR)/c++
