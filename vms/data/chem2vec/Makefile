@@ -32,7 +32,7 @@ $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	    python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
 clean:
-	rm -rf model code hls
+	rm -rf model code
 	$(MAKE) -C fpga-zcu102 clean
 	$(MAKE) -C native clean
 	$(MAKE) -C smp-arm64 clean
