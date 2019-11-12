@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -x
 set -e
@@ -16,4 +16,4 @@ export XTASKS_CONFIG_FILE=predict.xtasks.config
 #export NX_ARGS="--instrumentation=extrae"
 export EXTRAE_CONFIG_FILE=extrae.xml
 
-./predict-i $* | tee stdout.log
+time ./predict-i $* | tee stdout.log

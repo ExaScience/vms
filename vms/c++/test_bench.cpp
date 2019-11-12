@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cmath>
 #include <iostream>
-#include <ctime>
+#include <chrono>
 #include <cstdlib>
 
 
@@ -14,7 +14,9 @@ std::vector<float> values[ntypes];
 #endif
 
 double tick() {
-    return (double)clock() / CLOCKS_PER_SEC;
+    auto now = std::chrono::system_clock::now().time_since_epoch();
+    double ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    return ms / 1000.;
 }
 
 void prepare_tb_input(
@@ -80,7 +82,7 @@ int check_result(
             float r = ref[c % tb_num_compounds][p];
             if (std::abs(o - r) < epsilon)
             {
-                printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+                ; //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
             }
             else
             {

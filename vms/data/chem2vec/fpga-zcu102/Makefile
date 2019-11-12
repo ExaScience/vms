@@ -8,7 +8,7 @@ include $(TOPDIR)/Makefile.common
 include $(TOPDIR)/Makefile.ompss
 
 MCXX   = aarch64-linux-gnu-fpgacxx
-CFLAGS_ += -DOMPSS_FPGA
+CFLAGS_ += -DOMPSS_FPGA -std=c++11
 
 BUILDDIR ?= $(BOARD)
 BITSTREAM = $(PROGRAM_).bit
