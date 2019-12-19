@@ -1,0 +1,11 @@
+
+Currently Loaded Modules:
+  1) gcc/8.3.0   2) eigen/3.3.7   3) cmake/3.11.1   4) lapack/3.8.0   5) openmpi/4.0.1   6) fftw/3.3.8   7) boost/1.69.0   8) cuda/10.1   9) cudnn/7.6.4
+
+Build
+
+cmake .. -DAF_BUILD_CPU=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/apps/CUDNN/7.6.4 -D
+
+ 
+
+/home/bsc85/bsc85258/epeec/local
