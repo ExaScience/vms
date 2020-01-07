@@ -9,6 +9,8 @@ const int S_iwl = 12;
 
 const float epsilon = 0.5;
 
+#define DT_FLOAT
+
 #if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
 #define DT_FIXED_INT
@@ -25,6 +27,8 @@ const float epsilon = 0.5;
 #define DT_NAME "half"
 #define DT_FLOAT_EXT
 #define DT_HALF_INT
+#else
+#error Need to define DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
 #ifdef DT_FIXED_EXT
