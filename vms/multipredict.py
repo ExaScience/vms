@@ -57,7 +57,7 @@ import unittest
 
 class TestMultiPredict(unittest.TestCase):
     def test_small_model(self):
-        results = multipredict("test_data/sideinfo.mm", "test_data/test.sdm", train_file="test_data/train.mm")
+        results = multipredict("test_data/small/sideinfo.mm", "test_data/small/test.sdm", train_file="test_data/small/train.mm")
         print(results)
         self.assertEqual('foo'.upper(), 'FOO')
 
