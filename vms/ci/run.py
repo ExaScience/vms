@@ -2,6 +2,9 @@
 
 import os
 import re
+import subprocess
+import difflib
+import logging
 import datetime
 
 parameter_space = {
@@ -15,10 +18,33 @@ parameter_space = {
 git_repo = "/home/vanderaa/euroexa/eurosmurff"
 basedir = "/scratch/vms/ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
+logging.basicConfig(level = logging.INFO)
+
+def execute(cmd, modules = None):
+    if modules is not None:
+        modules_str = " ".join(modules)
+        logging.info("Loading modules \"%s\"", modules_str)
+        cmd = "module load " + modules_str + " && " + cmd
+
+    logging.info("$ %s", cmd)
+    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT, executable='/bin/bash')
+
+    logging.info("%s", result.stdout.decode("utf-8"))
+    if result.returncode != 0:
+        logging.error("Command \"%s\" exited with code %d", cmd, result.returncode)
+        raise subprocess.CalledProcessError(result.returncode, cmd)
+    else:
+        logging.info("Command \"%s\" exited with code %d", cmd, result.returncode)
+
+
 def patch_file(fname, pattern, repl):
+    logging.info("patching %s: %s -> %s ", fname, pattern, repl)
+
     with open(fname, "r") as f:
         content = f.read()
         new_content = re.sub(pattern, repl, content)
+       
+    logging.debug("  diff: %s", difflib.ndiff(content, new_content))
         
     with open(fname, "w") as f:
         f.write(new_content)
@@ -31,7 +57,7 @@ class FPGATask:
         # checkout 
         os.makedirs(newdir)
         os.chdir(newdir)
-        os.system("git clone %s repo" % git_repo)
+        execute("git clone %s repo" % git_repo)
         os.chdir("repo/vms/")
 
         # patch
@@ -41,10 +67,16 @@ class FPGATask:
 
         # make data - model - hls
         os.chdir("data/%s" % dataset)
-        os.system("python make.py")
-        os.system("make model")
-        os.system("make hls")
+        execute("python make.py")
+        execute("make model")
+        execute("cd native && make", modules=["ompss"])
+        execute("cd smp-x86 && make")
+        execute("cd smp-arm64 && make", modules=["QEMU",  "petalinux/2016.4", "mcxx-arm64"])
+        execute("make hls", modules = ["Vivado"])
 
 
-FPGATask().run("chem2vec", 128, 25, "half")
+
+
+
+FPGATask().run("chem2vec", 11, 16, "float")
 
