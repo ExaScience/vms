@@ -8,7 +8,7 @@ SRCDIR = $(TOPDIR)/code
 
 FULLSRCFILES  = $(addprefix $(SRCDIR)/,$(SRCFILES))
 FULLHDRFILES  = $(addprefix $(SRCDIR)/,$(HDRFILES))
-FULLMODELFILES = $(addprefix $(SRCDIR )/,$(MODELFILES))
+FULLMODELFILES = $(addprefix $(SRCDIR)/,$(MODELFILES))
 
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
