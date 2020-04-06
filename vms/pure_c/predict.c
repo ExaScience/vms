@@ -1,7 +1,3 @@
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "predict.h"
 
 static void features_loop(
