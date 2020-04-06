@@ -103,5 +103,6 @@ int main(int argc, char *argv[])
     // terra-ops aka 10^12 ops
     double tops = (double)num_repeat * (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
     printf("%.4f tera-ops; %.4f tera-ops/second (%d-bit floating point ops)\n", tops, tops/elapsed, float_size);
+    printf("%.4f giga-ops; %.4f giga-ops/second (%d-bit floating point ops)\n", 1e3 * tops, 1e3 * tops/elapsed, float_size);
     return nerrors;
 }
