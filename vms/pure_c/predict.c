@@ -17,6 +17,7 @@ static void features_loop(
 
 		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
+			#pragma omp simd
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
@@ -38,6 +39,7 @@ static void proteins_loop(
 	{
 		S_type sum = .0F;
 		for (int s = 0; s < num_samples; s++)
+			#pragma omp simd
 			for (int k = 0; k < num_latent; k++)
 			{
 				S_type prod = latents[s][k] * U[s][d][k];
