@@ -39,7 +39,10 @@ void load_model(
 
 void features_loop(
         const F_base features[num_features],
-        L_base latents[num_samples][num_latent])
+        L_base latents[num_samples][num_latent],
+		const M_base M[num_samples][num_latent],
+		const B_base B[num_samples][num_features][num_latent]
+		)
 {
 	for (int d = 0; d < num_features; d++)
 	{
@@ -50,9 +53,9 @@ void features_loop(
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
-				if (d==0) v = M_local[s][k];
+				if (d==0) v = M[s][k];
 				else      v = latents[s][k];
-				L_type prod = feature * B_local[s][d][k];
+				L_type prod = feature * B[s][d][k];
 				latents[s][k] = v + prod;
 			}
 	}
@@ -60,7 +63,9 @@ void features_loop(
 
 void proteins_loop(
 	P_base predictions[num_proteins],
-	L_base latents[num_samples][num_latent])
+	L_base latents[num_samples][num_latent],
+    const U_base U[num_samples][num_proteins][num_latent]
+	)
 {
 	for (int d = 0; d < num_proteins; d++)
 	{
@@ -68,7 +73,7 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = latents[s][k] * U_local[s][d][k];
+				S_type prod = latents[s][k] * U[s][d][k];
 				sum = sum + prod;
 			}
 
@@ -88,8 +93,8 @@ void predict_one_block(
     for (int i=0; i<num_compounds; ++i)
     {
         L_base latents[num_samples][num_latent];
-        features_loop(&features[i*num_features], latents);
-        proteins_loop(&predictions[i*num_proteins], latents);
+        features_loop(&features[i*num_features], latents, M_local, B_local);
+        proteins_loop(&predictions[i*num_proteins], latents, U_local);
     }
 }
 
