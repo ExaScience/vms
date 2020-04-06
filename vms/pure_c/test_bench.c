@@ -86,16 +86,14 @@ int main(int argc, char *argv[])
 
     int nerrors = 0;
 
-    printf("Updating model\n");
-    update_model(U, M, B);
-
+    printf("Prepare input\n");
     prepare_tb_input(num_compounds, tb_input, tb_input_block);
 
     printf("Predicting\n");
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
-        predict_compounds(num_compounds, tb_input_block, tb_output_block);
+        predict_compounds(num_compounds, tb_input_block, tb_output_block, U, M, B);
     }
     double stop = tick();
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);

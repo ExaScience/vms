@@ -24,17 +24,14 @@ typedef float S_type;
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];
 
-typedef F_base F_flat[block_size*num_features];
-typedef P_base P_flat[block_size*num_proteins];
-
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-typedef U_base U_flat[num_samples*num_proteins*num_latent];
-typedef M_base M_flat[num_samples*num_latent];
-typedef B_base B_flat[num_samples*num_features*num_latent];
-
-void update_model(const U_arr U, const M_arr mu, const B_arr B);
-
-void predict_compounds(int num_compounds, F_flx in, P_flx out);
+void predict_compounds(
+		int num_compounds, 
+		      F_base features    [][num_features],
+		      P_base predictions [][num_proteins],
+		const U_base U           [num_samples][num_proteins][num_latent],
+		const M_base M           [num_samples][num_latent],
+		const B_base B           [num_samples][num_features][num_latent]);
