@@ -30,7 +30,7 @@ typedef B_base B_arr[num_samples][num_features][num_latent];
 
 void predict_compounds(
 		int num_compounds, 
-		      F_flx features,
+		const F_flx features,
 		      P_flx predictions,
 		const U_arr U,
 		const M_arr M,

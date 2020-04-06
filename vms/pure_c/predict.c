@@ -53,7 +53,7 @@ static void proteins_loop(
 
 void predict_compounds(
 		int num_compounds, 
-		      F_flx features,
+		const F_flx features,
 		      P_flx predictions,
 		const U_arr U,
 		const M_arr M,
