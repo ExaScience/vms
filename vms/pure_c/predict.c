@@ -3,7 +3,8 @@
 #include <string.h>
 
 #include "predict.h"
-void features_loop(
+
+static void features_loop(
         const F_base features[num_features],
         L_base latents[num_samples][num_latent],
 		const M_base M[num_samples][num_latent],
@@ -27,7 +28,7 @@ void features_loop(
 	}
 }
 
-void proteins_loop(
+static void proteins_loop(
 	P_base predictions[num_proteins],
 	L_base latents[num_samples][num_latent],
     const U_base U[num_samples][num_proteins][num_latent]
