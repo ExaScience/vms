@@ -11,8 +11,8 @@ import xml.etree.cElementTree as cET
 
 parameter_space = {
     "datasets" : [ "chem2vec" ],
-    "num_latents" : [ 2, 8, 16, 32, ],
-    "num_samples" : [ 2, 8, 16, 32, ],
+    "num_latents" : [ 8, 16, 32, ],
+    "num_samples" : [ 8, 16, 32, ],
     "types" : [ "float", "fixed", "mixed", "half", ]
 }
 
@@ -69,18 +69,17 @@ def resource_utilization(name):
 
     ar = { r.tag : int(r.text) for r in area.find('AvailableResources') }
     ur = { r.tag : int(r.text) for r in area.find('Resources') }
-    merged = { t : ( ar[t], ur[r] ) for t in ar.keys() }
-    logging.info("Resource utilization of %d:\n%s", name, merged)
+    merged = { t : ( ar[t], ur[t] ) for t in ar.keys() }
+    logging.info("Resource utilization of %s:\n%s", name, merged)
 
     return merged
 
 def latency_estimation(name):
     report_file = f'hls/solution1/syn/report/{name}_csynth.xml'
     root = cET.parse(report_file).getroot()
-    latency_node = root.find('Average-caseLatency')
+    latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
     latency = int(latency_node.text)
     logging.info("Average latency of %s: %d", name, latency)
-
     return latency
 
 def log_xtasks_config():
