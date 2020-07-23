@@ -204,7 +204,9 @@ void predict_or_update_model(
 	if (update_model)
 	{
 		load_model(U_in, M_in, B_in);
+#ifdef CHECKSUM_MODEL
 		checksum_model(features, predictions, U_local, M_local, B_local);
+#endif
 	} 
         else
 	{
@@ -235,11 +237,13 @@ void update_model(
     predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
 
+#ifdef CHECKSUM_MODEL
 	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
     printf("FPGA checksums U, M, B, F: ");
 	print_checksum(out_block_1);
     printf("CPU  checksums U, M, B, F: ");
 	print_checksum(out_block_2);
+#endif
 }
 
 
