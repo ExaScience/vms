@@ -19,12 +19,11 @@ BITSTREAM_FLAGS=--bitstream-generation --Wf,"--name=$(PROGRAM_),--dir=$(BUILDDIR
 # BSP = /home/vanderaa/local/software/Xilinx/Downloads/xilinx-zcu102-v2016.4-final1.bsp
 # BSP = $(HOME)/euroexa/ompss/ompss_petalinux/xilinx-zcu102-v2016.4-bsc1.bsp
 BSP = $(HOME)/euroexa/ompss/ompss_petalinux/xilinx-zcu102-v2016.4-tva1.bsp
-PETALINUX_CONFIG = $(PETALINUX_BUILD)/config.project
 export PETALINUX_BUILD = $(BUILDDIR)/petalinux
+PETALINUX_CONFIG = $(PETALINUX_BUILD)/config.project
 
 bitstream: $(BITSTREAM)
 
-boot: BOOT.BIN
 
 .PHONY: bitstream boot default
 
@@ -32,6 +31,7 @@ $(PROGRAM_): $(OBJFILES)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $? -o $@ $(LDFLAGS_)
 
 %.o: $(SRCDIR)/%.cpp
+	rm -f *automatic_mcxx.cpp
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(BITSTREAM_FLAGS) -c $^ -o $@
 
 $(BITSTREAM): $(OBJFILES) 
@@ -40,6 +40,10 @@ $(BITSTREAM): $(OBJFILES)
 	cp $(AVDIR)/$(PROGRAM_).xtasks.config .
 	cp $(AVDIR)/$(PROGRAM_).bit .
 	cp $(AVDIR)/$(PROGRAM_).autoVivado.log $(AVDIR)/$(PROGRAM_).autoVivado.bitstream.log
+	cp $(AVDIR)/Vivado/$(PROGRAM_)/$(PROGRAM_).sdk/*.hfd .
+
+boot: BOOT.BIN
+	
 
 BOOT.BIN: $(PETALINUX_CONFIG) $(BITSTREAM)
 	petalinux-config -p $(PETALINUX_BUILD) --oldconfig --get-hw-description $(AVDIR)/Vivado/$(PROGRAM_)/$(PROGRAM_).sdk
