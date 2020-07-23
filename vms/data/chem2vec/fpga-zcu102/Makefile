@@ -31,7 +31,6 @@ $(PROGRAM_): $(OBJFILES)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $? -o $@ $(LDFLAGS_)
 
 %.o: $(SRCDIR)/%.cpp
-	rm -f *automatic_mcxx.cpp
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(BITSTREAM_FLAGS) -c $^ -o $@
 
 $(BITSTREAM): $(OBJFILES) 
@@ -40,7 +39,7 @@ $(BITSTREAM): $(OBJFILES)
 	cp $(AVDIR)/$(PROGRAM_).xtasks.config .
 	cp $(AVDIR)/$(PROGRAM_).bit .
 	cp $(AVDIR)/$(PROGRAM_).autoVivado.log $(AVDIR)/$(PROGRAM_).autoVivado.bitstream.log
-	cp $(AVDIR)/Vivado/$(PROGRAM_)/$(PROGRAM_).sdk/*.hfd .
+	cp $(AVDIR)/Vivado/$(PROGRAM_)/$(PROGRAM_).sdk/*.hdf .
 
 boot: BOOT.BIN
 	
