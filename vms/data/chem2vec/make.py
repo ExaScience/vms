@@ -1,5 +1,5 @@
 import requests
-import os
+import os, shutil
 from hashlib import sha256
 
 def download_file_from_google_drive(id, destination):
@@ -39,6 +39,29 @@ def sha256_from(filename):
 
     return sha
 
+
+cache_dir = os.path.join(os.environ["HOME"], ".cache")
+
+def download_if_needed(id, expected_sha, output):
+    global cache_dir
+
+    if os.path.isfile(output):
+        actual_sha = sha256_from(output)
+        print("Found %s in output directory" % output)
+        assert expected_sha == actual_sha
+        return
+
+    cache_file = os.path.join(cache_dir, expected_sha)
+    if os.path.isfile(cache_file):
+        print("Found %s in cache" % output)
+        shutil.copyfile(cache_file, output)
+    else:
+        print("Downloading %s" % output)
+        download_file_from_google_drive(id, output)
+        actual_sha = sha256_from(output)
+        assert (expected_sha == actual_sha)
+        shutil.copyfile(output, cache_file)
+
 def download():
     urls = [
             ( 
@@ -59,16 +82,7 @@ def download():
     ]
  
     for id, expected_sha, output in urls:
-        if os.path.isfile(output):
-            actual_sha = sha256_from(output)
-            if (expected_sha == actual_sha):
-                print("already have %s" % output)
-                continue
-
-        print("download %s" % output)
-        download_file_from_google_drive(id, output)
-        actual_sha = sha256_from(output)
-        assert (expected_sha == actual_sha)
+        download_if_needed(id, expected_sha, output)
 
 if __name__ == "__main__":
     download()
