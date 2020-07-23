@@ -101,15 +101,22 @@ def run(dataset, num_latent, num_samples, datatype):
 
     except Exception as e:
         logging.error("Failed with %s: %s", type(e), e)
-        pass
+        return False
 
     finally:
         logging.getLogger().removeHandler(file_logger)
 
+    return True
+
 if __name__ == "__main__":
     import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--fail-fast",  action = "store_true")
+    args = parser.parse_args()
     
     for params in itertools.product(*parameter_space.values()):
-        logging.info("Current parameter set: %s", list(zip(parameter_space.keys(), params)))
-        run(*params)
+        success = run(*params)
+        if args.fail_fast and not success:
+            break
     
