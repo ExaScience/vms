@@ -7,11 +7,12 @@ import difflib
 import logging
 import datetime
 import itertools
+import xml.etree.cElementTree as cET
 
 parameter_space = {
     "datasets" : [ "chem2vec" ],
-    "num_latents" : [ 8, 16, 32, ],
-    "num_samples" : [ 8, 16, 32, ],
+    "num_latents" : [ 2, 8, 16, 32, ],
+    "num_samples" : [ 2, 8, 16, 32, ],
     "types" : [ "float", "fixed", "mixed", "half", ]
 }
 
@@ -61,6 +62,30 @@ def patch_file(fname, pattern, repl):
     with open(fname, "w") as f:
         f.write(new_content)
 
+def resource_utilization(name):
+    report_file = f'hls/solution1/syn/report/{name}_csynth.xml'
+    root = cET.parse(report_file).getroot()
+    area = root.find('AreaEstimates')
+
+    ar = { r.tag : int(r.text) for r in area.find('AvailableResources') }
+    ur = { r.tag : int(r.text) for r in area.find('Resources') }
+    merged = { t : ( ar[t], ur[r] ) for t in ar.keys() }
+    logging.info("Resource utilization of %d:\n%s", name, merged)
+
+    return merged
+
+def latency_estimation(name):
+    report_file = f'hls/solution1/syn/report/{name}_csynth.xml'
+    root = cET.parse(report_file).getroot()
+    latency_node = root.find('Average-caseLatency')
+    latency = int(latency_node.text)
+    logging.info("Average latency of %s: %d", name, latency)
+
+    return latency
+
+def log_xtasks_config():
+    with open ("fpga-zcu102/predict.xtasks.config", "r") as f:
+        logging.info("predict.xtasks.config:\n%s", f.read())
 
 def run(dataset, num_latent, num_samples, datatype):
 
@@ -92,8 +117,13 @@ def run(dataset, num_latent, num_samples, datatype):
         execute("make", modules=["ompss"], workdir="native")
         execute("make", modules=["ompss"], workdir="smp-x86")
         execute("make", modules=["QEMU",  "petalinux/2016.4", "mcxx-arm64"], workdir="smp-arm64")
+
         execute("make hls", modules = ["Vivado/2017.4"])
+        resource_utilization("predict_or_update_model")
+        latency_estimation("dataflow_in_loop")
+
         execute("make bitstream", modules = ["autoVivado"], workdir="fpga-zcu102")
+        log_xtasks_config()
     
     except KeyboardInterrupt: 
         logging.info("Caught Ctrl-C, aborting")
