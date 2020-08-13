@@ -2,3 +2,5 @@ build
 dist
 smurfference.egg-info
 *.dSYM
+predict
+*.o
