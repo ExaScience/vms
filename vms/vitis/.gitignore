@@ -1,0 +1,7 @@
+xclbin/
+.Xil
+_x.sw_emu
+emconfig.json
+host
+*.log
+vadd.sw_emu.xclbin.inc
