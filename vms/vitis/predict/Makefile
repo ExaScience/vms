@@ -20,13 +20,13 @@ TARGETS := hw
 TARGET := $(TARGETS)
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
-KERNEL_NAME := vadd
+KERNEL_NAME := predict_or_update_model
 VER ?= host_cpp
 
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET)
 
-BUILD_DIR_vadd = $(BUILD_DIR)/$(KERNEL_NAME)
+BUILD_DIR_predict = $(BUILD_DIR)/$(KERNEL_NAME)
 
 # The C++ Compiler to use: g++
 CXX := g++
@@ -48,8 +48,6 @@ HOST_C_SRCS += src/host.c
 HOST_C_HDRS += src/host.h
 #Host CPP FILE
 HOST_CPP_SRCS += src/host.cpp
-# Host Header FILE
-HOST_CPP_HDRS += src/host.hpp
 
 
 # Enable Profiling
@@ -74,7 +72,7 @@ EMCONFIG_DIR = $(XCLBIN)
 
 
 BINARY_CONTAINERS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
-BINARY_CONTAINER_vadd_OBJS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo
+BINARY_CONTAINER_predict_OBJS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo
 
 CP = cp -rf
 
@@ -87,12 +85,12 @@ all: check-devices $(host_change) $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig Ma
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo: src/vadd.cpp
+$(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo: src/predict.cpp
 	mkdir -p $(XCLBIN)
-	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -c -k $(KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin: $(BINARY_CONTAINER_vadd_OBJS)
+	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_predict) -c -k $(KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin: $(BINARY_CONTAINER_predict_OBJS)
 	mkdir -p $(XCLBIN)
-	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -l $(LDCLFLAGS) -o'$@' $(+)
+	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_predict) -l $(LDCLFLAGS) -o'$@' $(+)
 
 ifeq ($(VER),host_cpp)
 # Building Host
