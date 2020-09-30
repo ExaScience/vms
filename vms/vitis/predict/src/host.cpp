@@ -83,6 +83,7 @@ struct CLData
     template <typename T>
     void addInputArg(const T *ptr, int nelem)
     {
+        std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T) << std::endl;
         OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
         OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
     }
@@ -244,9 +245,9 @@ void update_model(
     cl_data.addInputArg(0);
     cl_data.addInputArg(in_block, block_size*num_features);
     cl_data.addOutputArg(out_block, block_size*num_proteins);
-    cl_data.addInputArg(U_in, num_samples * num_proteins * num_latent);
-    cl_data.addInputArg(M_in, num_samples * num_latent);
-    cl_data.addInputArg(B_in, num_samples * num_features * num_latent);
+    cl_data.addInputArg(U_in, num_samples);
+    cl_data.addInputArg(M_in, num_samples);
+    cl_data.addInputArg(B_in, num_samples);
     cl_data.go();
 
 
