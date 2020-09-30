@@ -28,6 +28,7 @@ void prepare_tb_input(
         for (int p = 0; p < num_features; p++)
             out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
+
 void prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
     const float M_in[num_samples][num_latent],
@@ -156,3 +157,101 @@ int main(int argc, char *argv[])
 
     return nerrors;
 }
+
+#define CL_HPP_CL_1_2_DEFAULT_BUILD
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
+//OCL_CHECK doesn't work if call has templatized function call
+#define OCL_CHECK(error,call)                                       \
+    call;                                                           \
+    if (error != CL_SUCCESS) {                                      \
+      printf("%s:%d Error calling " #call ", error code is: %d\n",  \
+              __FILE__,__LINE__, error);                            \
+      exit(EXIT_FAILURE);                                           \
+    }
+
+#include <CL/cl2.hpp>
+
+std::vector<cl::Device> get_devices(const std::string& vendor_name) {
+
+    size_t i;
+    cl_int err;
+    std::vector<cl::Platform> platforms;
+    OCL_CHECK(err, err = cl::Platform::get(&platforms));
+    cl::Platform platform;
+    for (i  = 0 ; i < platforms.size(); i++){
+        platform = platforms[i];
+        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
+        if (platformName == vendor_name){
+            std::cout << "Found Platform" << std::endl;
+            std::cout << "Platform Name: " << platformName.c_str() << std::endl;
+            break;
+        }
+    }
+    if (i == platforms.size()) {
+        std::cout << "Error: Failed to find Xilinx platform" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+   
+    //Getting ACCELERATOR Devices and selecting 1st such device 
+    std::vector<cl::Device> devices;
+    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
+    return devices;
+}
+
+struct CLData 
+{
+    cl_int err;
+    cl::Device device;
+    cl::Context context;
+    cl::CommandQueue q;
+    cl::Kernel krnl;
+    int nargs;
+
+    CLData(const char *name, const std::vector<char> xclbin)
+    {
+        std::vector<cl::Device> devices = get_devices("Xilinx");
+        devices.resize(1);
+        device = devices[0];
+
+        OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
+        OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+        cl::Program::Binaries bins{{xclbin.data(), xclbin.size()}};
+        OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+        OCL_CHECK(err, krnl = cl::Kernel(program, name, &err));o
+        nargs = 0;
+    }
+
+    template<typename T>
+    void addInputArg(const T* ptr, int nelem)
+    {
+        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, ptr , &err));
+        OCL_CHECK(err, err = krnl.setArg(nargs++, val));
+    }
+
+    template<typename T>
+    void addInputArg(const T val)
+    {
+        OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buf}, 0 /* 0 means from host*/));
+    }
+    
+    template<typename T>
+    void addOutputArg(const T* ptr, int nelem)
+    {
+        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, ptr , &err));
+        OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+        outputArgs.push_back(buf);
+    }
+
+    go()
+    {
+    OCL_CHECK(err, err = q.enqueueTask(krnl_vector_add));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    q.finish();
+}
+
+};
