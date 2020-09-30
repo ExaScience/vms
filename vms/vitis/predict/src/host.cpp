@@ -10,6 +10,113 @@
 
 #include "predict.h"
 #include "vms_tb.h"
+#include "xclbin/predict_or_update_model.sw_emu.inc"
+
+
+#define CL_HPP_CL_1_2_DEFAULT_BUILD
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
+//OCL_CHECK doesn't work if call has templatized function call
+#define OCL_CHECK(error,call)                                       \
+    call;                                                           \
+    if (error != CL_SUCCESS) {                                      \
+      printf("%s:%d Error calling " #call ", error code is: %d\n",  \
+              __FILE__,__LINE__, error);                            \
+      exit(EXIT_FAILURE);                                           \
+    }
+
+#include <CL/cl2.hpp>
+
+std::vector<cl::Device> get_devices(const std::string& vendor_name) {
+
+    size_t i;
+    cl_int err;
+    std::vector<cl::Platform> platforms;
+    OCL_CHECK(err, err = cl::Platform::get(&platforms));
+    cl::Platform platform;
+    for (i  = 0 ; i < platforms.size(); i++){
+        platform = platforms[i];
+        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
+        if (platformName == vendor_name){
+            std::cout << "Found Platform" << std::endl;
+            std::cout << "Platform Name: " << platformName.c_str() << std::endl;
+            break;
+        }
+    }
+    if (i == platforms.size()) {
+        std::cout << "Error: Failed to find platforms that match vendor '" << vendor_name << "'" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+   
+    //Getting ACCELERATOR Devices and selecting 1st such device 
+    std::vector<cl::Device> devices;
+    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
+    return devices;
+}
+
+struct CLData
+{
+    cl_int err;
+    cl::Device device;
+    cl::Context context;
+    cl::CommandQueue q;
+    cl::Kernel krnl;
+    unsigned nargs;
+
+    CLData(const char *name, const unsigned char * xclbin, unsigned int xclbin_len)
+    {
+        std::vector<cl::Device> devices = get_devices("Xilinx");
+        devices.resize(1);
+        device = devices[0];
+
+        OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
+        OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+        cl::Program::Binaries bins{{xclbin, xclbin_len}};
+        OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+        OCL_CHECK(err, krnl = cl::Kernel(program, name, &err));
+        nargs = 0;
+    }
+
+    template <typename T>
+    void addInputArg(const T *ptr, int nelem)
+    {
+        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
+        OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+    }
+
+    template <typename T>
+    void addInputArg(const T val)
+    {
+        OCL_CHECK(err, err = krnl.setArg(nargs++, val));
+    }
+
+    std::vector<cl::Buffer> outputArgs;
+
+    template <typename T>
+    void addOutputArg(const T *ptr, int nelem)
+    {
+        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
+        OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+        outputArgs.push_back(buf);
+    }
+
+    void go()
+    {
+        OCL_CHECK(err, err = q.enqueueTask(krnl));
+        for ( auto & buffer_output : outputArgs)
+            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+        q.finish();
+
+        nargs = 0;
+        outputArgs.clear();
+    }
+};
+
+CLData cl_data("predict_or_update_model", xclbin_predict_or_update_model_sw_emu_xclbin, xclbin_predict_or_update_model_sw_emu_xclbin_len);
+
 
 void print_checksum(P_flat out)
 {
@@ -117,19 +224,6 @@ int check_result(
     return nerrors;
 }
 
-void predict_or_update_model(
-		bool update_model,
-		int num_compounds,
-		const F_flat features,    //[block_size*num_features]
-		      P_flat predictions, //[block_size*num_proteins]
-		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
-		const M_flat M_in,        //[num_samples][num_latent]
-		const B_flat B_in)        //[num_samples][num_features][num_latent]
-{
-
-}
-
-
 void update_model(
     const  U_arr U_in,
     const  M_arr M_in,
@@ -144,10 +238,17 @@ void update_model(
 			c++;
 		}
 
-    P_flat out_block_1;
+    P_flat out_block;
 
-    predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
-#pragma omp taskwait
+    cl_data.addInputArg(true);
+    cl_data.addInputArg(0);
+    cl_data.addInputArg(in_block, block_size*num_features);
+    cl_data.addOutputArg(out_block, block_size*num_proteins);
+    cl_data.addInputArg(U_in, num_samples * num_proteins * num_latent);
+    cl_data.addInputArg(M_in, num_samples * num_latent);
+    cl_data.addInputArg(B_in, num_samples * num_features * num_latent);
+    cl_data.go();
+
 
 #ifdef CHECKSUM_MODEL
     P_flat out_block_2;
@@ -162,28 +263,16 @@ void update_model(
 
 void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 {
-    const U_flat empty_U = {0};
-    const M_flat empty_mu = {0};
-    const B_flat empty_B = {0};
+    assert((num_compounds % block_size) == 0);
 
     int i;
-    for(i=0; i<=num_compounds - block_size; i+=block_size)
+    for(i=0; i<num_compounds; i+=block_size)
     {
-        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
-    }
-
-    // last block left-overs
-    int nc = num_compounds - i;
-    if (nc == 0) {
-#pragma omp taskwait
-    } else {
-		F_flat in_block;
-		P_flat out_block;
-
-		std::memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
-#pragma omp taskwait
-        std::memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
+        cl_data.addInputArg(false);
+        cl_data.addInputArg(block_size);
+        cl_data.addInputArg(&in[i][0], block_size*num_features);
+        cl_data.addOutputArg(&out[i][0], block_size*num_proteins);
+        cl_data.go();
     }
 }
 
@@ -251,101 +340,3 @@ int main(int argc, char *argv[])
     return nerrors;
 }
 
-#define CL_HPP_CL_1_2_DEFAULT_BUILD
-#define CL_HPP_TARGET_OPENCL_VERSION 120
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-
-//OCL_CHECK doesn't work if call has templatized function call
-#define OCL_CHECK(error,call)                                       \
-    call;                                                           \
-    if (error != CL_SUCCESS) {                                      \
-      printf("%s:%d Error calling " #call ", error code is: %d\n",  \
-              __FILE__,__LINE__, error);                            \
-      exit(EXIT_FAILURE);                                           \
-    }
-
-#include <CL/cl2.hpp>
-
-std::vector<cl::Device> get_devices(const std::string& vendor_name) {
-
-    size_t i;
-    cl_int err;
-    std::vector<cl::Platform> platforms;
-    OCL_CHECK(err, err = cl::Platform::get(&platforms));
-    cl::Platform platform;
-    for (i  = 0 ; i < platforms.size(); i++){
-        platform = platforms[i];
-        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
-        if (platformName == vendor_name){
-            std::cout << "Found Platform" << std::endl;
-            std::cout << "Platform Name: " << platformName.c_str() << std::endl;
-            break;
-        }
-    }
-    if (i == platforms.size()) {
-        std::cout << "Error: Failed to find Xilinx platform" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-   
-    //Getting ACCELERATOR Devices and selecting 1st such device 
-    std::vector<cl::Device> devices;
-    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
-    return devices;
-}
-
-struct CLData
-{
-    cl_int err;
-    cl::Device device;
-    cl::Context context;
-    cl::CommandQueue q;
-    cl::Kernel krnl;
-    int nargs;
-
-    CLData(const char *name, const std::vector<char> xclbin)
-    {
-        std::vector<cl::Device> devices = get_devices("Xilinx");
-        devices.resize(1);
-        device = devices[0];
-
-        OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
-        OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-        cl::Program::Binaries bins{{xclbin.data(), xclbin.size()}};
-        OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-        OCL_CHECK(err, krnl = cl::Kernel(program, name, &err));
-        nargs = 0;
-    }
-
-    template <typename T>
-    void addInputArg(const T *ptr, int nelem)
-    {
-        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, ptr, &err));
-        OCL_CHECK(err, err = krnl.setArg(nargs++, ptr));
-    }
-
-    template <typename T>
-    void addInputArg(const T val)
-    {
-        OCL_CHECK(err, err = krnl.setArg(nargs++, val));
-    }
-
-    std::vector<cl::Buffer> outputArgs;
-
-    template <typename T>
-    void addOutputArg(const T *ptr, int nelem)
-    {
-        OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, ptr, &err));
-        OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
-        outputArgs.push_back(buf);
-    }
-
-    void go()
-    {
-        OCL_CHECK(err, err = q.enqueueTask(krnl));
-        for ( auto & buffer_output : outputArgs)
-            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
-        q.finish();
-    }
-};

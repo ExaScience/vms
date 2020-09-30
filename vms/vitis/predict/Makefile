@@ -42,22 +42,12 @@ opencl_LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 CXXFLAGS += $(opencl_CXXFLAGS)
 LDFLAGS += $(opencl_LDFLAGS)
 
-# Host CPP FILE
-HOST_C_SRCS += src/host.c
-# Host Header FILE
-HOST_C_HDRS += src/host.h
 #Host CPP FILE
 HOST_CPP_SRCS += src/host.cpp
-
 
 # Enable Profiling
 REPORT := no
 PROFILE:= yes
-
-
-#timeline_trace is always enabled
-
-
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0
@@ -66,10 +56,8 @@ LDFLAGS += -lrt -lstdc++
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --config design.cfg --save-temps
 
-
 EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)
-
 
 BINARY_CONTAINERS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
 BINARY_CONTAINER_predict_OBJS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo
@@ -84,26 +72,26 @@ all: check-devices $(host_change) $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig Ma
 .PHONY: exe
 exe: $(EXECUTABLE)
 
+KERNEL_BIN = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
+KERNEL_INC = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).inc
+
 # Building kernel
 $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo: src/predict.cpp
 	mkdir -p $(XCLBIN)
 	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_predict) -c -k $(KERNEL_NAME) -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin: $(BINARY_CONTAINER_predict_OBJS)
+
+$(KERNEL_BIN): $(BINARY_CONTAINER_predict_OBJS)
 	mkdir -p $(XCLBIN)
 	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR_predict) -l $(LDCLFLAGS) -o'$@' $(+)
 
-ifeq ($(VER),host_cpp)
-# Building Host
-$(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS)
+$(KERNEL_INC): $(KERNEL_BIN)
+	xxd -i $< $@
+
+$(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) -o '$@' $(LDFLAGS)
-else
-$(EXECUTABLE): $(HOST_C_SRCS) $(HOST_C_HDRS)
-	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_C_SRCS) $(HOST_C_HDRS) -o '$@' $(LDFLAGS)
-endif
 
-emconfig:$(EMCONFIG_DIR)/emconfig.json
+emconfig: $(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
@@ -125,8 +113,6 @@ else
 	 ./$(EXECUTABLE) $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin $(DEVICE)
 endif
 endif
-
-
 
 # Cleaning stuff
 RMDIR = rm -rf
