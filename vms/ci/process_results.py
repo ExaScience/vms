@@ -85,17 +85,26 @@ for k,v in result_data.items():
         continue
 
     delta = v["end_time"] - v["start_time"]
-    hours = int(delta.total_seconds() // 3600)
+    hours = delta.total_seconds() / 3600
     ops = v["num_latent"] * v["num_samples"] * (num_proteins * num_features)
     cycles = v["latency"]
     compounds_per_second = 1e6 * v["frequency"] / cycles
     gops_per_second = (ops / cycles) * (v["frequency"] / 1e3)
     tops_per_second = gops_per_second / 1e3
 
-    print(f"{k}\n  {status} after {hours} hours, {ops} ops in {cycles} cycles")
+    print(f"{k}\n  {status} after {hours:.1f} hours, {ops} ops in {cycles} cycles")
     print(f"  {compounds_per_second:.1f} compounds per second")
-    print(f"  {gops_per_second:.1f} gops/sec")
-    print(f"  {tops_per_second:.1f} tops/sec")
+    if gops_per_second > 1000:
+        print(f"  {tops_per_second:.1f} tops/sec")
+    else:
+        print(f"  {gops_per_second:.1f} gops/sec")
+    print(f"  utilization:", end='')
+    for k,v in v["utilization"].items():
+        if (v[1] == 0):
+            continue
+        percent = 100 * float(v[1]) / float(v[0])
+        print(f" {k}: {percent:.0f}%", end='')
+    print()
 
 
 # chem2vec-008-008-float success after 0 hours
