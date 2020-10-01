@@ -10,8 +10,6 @@
 
 #include "predict.h"
 #include "vms_tb.h"
-#include "xclbin/predict_or_update_model.sw_emu.inc"
-
 
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
 #define CL_HPP_TARGET_OPENCL_VERSION 120
@@ -116,7 +114,7 @@ struct CLData
     }
 };
 
-CLData cl_data("predict_or_update_model", xclbin_predict_or_update_model_sw_emu_xclbin, xclbin_predict_or_update_model_sw_emu_xclbin_len);
+CLData cl_data("predict_or_update_model", KERNEL_VAR, KERNEL_VAR_LEN);
 
 
 void print_checksum(P_flat out)

@@ -19,7 +19,7 @@ help::
 TARGETS := hw
 TARGET := $(TARGETS)
 DEVICE := $(DEVICES)
-XCLBIN := ./xclbin
+XCLBIN := xclbin
 KERNEL_NAME := predict_or_update_model
 VER ?= host_cpp
 
@@ -62,6 +62,7 @@ EMCONFIG_DIR = $(XCLBIN)
 BINARY_CONTAINERS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
 BINARY_CONTAINER_predict_OBJS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo
 
+
 CP = cp -rf
 
 host_change: $(VER)
@@ -74,6 +75,9 @@ exe: $(EXECUTABLE)
 
 KERNEL_BIN = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
 KERNEL_INC = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).inc
+KERNEL_VAR = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
+
+CXXFLAGS += -include $(KERNEL_INC) -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len
 
 # Building kernel
 $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo: src/predict.cpp
