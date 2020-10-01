@@ -26,7 +26,6 @@ parameter_space = {
 
 # git_repo = "git@github.com:euroexa/smurff.git"
 git_repo = "/home/vanderaa/euroexa/eurosmurff"
-basedir = "/scratch/vms/ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
 def execute(cmd, modules = None, workdir = None, log_name = None):
     if log_name is None:
@@ -92,10 +91,14 @@ def log_xtasks_config():
         logging.info("predict.xtasks.config:\n%s", f.read())
 
 def run(basedir, dataset, num_latent, num_samples, datatype):
-    print("Running ...")
-
     # change dir
     newdir = "%s/%s_%d_%d_%s" % (basedir, dataset, num_latent, num_samples, datatype)
+
+    if os.path.isdir(newdir):
+        logging.warning("Skipping dataset=%s num_latent=%d num_samples=%d datatype=%s -- %s already exists" %
+            (dataset, num_latent, num_samples, datatype, newdir))
+        return False
+
     os.makedirs(newdir)
     os.chdir(newdir)
     file_logger = logging.FileHandler('ci.log')
@@ -150,23 +153,36 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--fail-fast",  action = "store_true")
+    parser.add_argument("--basedir", default = None)
     parser.add_argument("--dask", default = None)
+    parser.add_argument("--single", nargs=4, meta="dataset num_latent num_samples data_type" help="Run single point in exploration space")
     args = parser.parse_args()
 
-    os.makedirs(basedir, exist_ok=True)
-    print("basedir: ", basedir)
 
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level = logging.INFO, format = log_format, filename = os.path.join(basedir, 'ci.log'))
     
-    # before running this script, start a cluster with this command:
-    # $ dask-ssh --nthreads 1 --nprocs 12 --hostfile $PBS_NODEFILE 
-    client = distributed.Client(args.dask)
+    if args.basedir:
+        basedir = args.basedir
+    else:
+        basedir = "/scratch/vms/ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
-    xprod = list(itertools.product(*parameter_space.values()))
-    print("space: ", xprod)
+    os.makedirs(basedir, exist_ok=True)
+    print("basedir: ", basedir)
 
-    results = [ client.submit(run, basedir, *params) for params in xprod ]
-    client.gather(results)
-    print("results: ", results)
+    if args.single:
+        dataset, num_latent, num_samples, data_type = args.single
+        num_latent = int(num_latent)
+        num_samples = int(num_samples)
+        run(basedir, dataset, num_latent, num_samples, data_type)
+    else:
+        # $ dask-ssh --nthreads 1 --nprocs 12 --hostfile $PBS_NODEFILE 
+        client = distributed.Client(args.dask)
+
+        xprod = list(itertools.product(*parameter_space.values()))
+        print("space: ", xprod)
+
+        results = [ client.submit(run, basedir, *params) for params in xprod ]
+        client.gather(results)
+        print("results: ", results)
     
