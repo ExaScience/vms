@@ -5,3 +5,4 @@ emconfig.json
 host
 *.log
 vadd.sw_emu.xclbin.inc
+.run
