@@ -8,20 +8,25 @@ import logging
 import datetime
 import itertools
 import xml.etree.cElementTree as cET
+from dask import distributed
+
+# parameter_space = {
+#     "datasets" : [ "chem2vec" ],
+#     "num_latents" : [ 8, 16, 32, ],
+#     "num_samples" : [ 8, 16, 32, ],
+#     "types" : [ "float", "fixed", "mixed", "half", ]
+# }
 
 parameter_space = {
     "datasets" : [ "chem2vec" ],
-    "num_latents" : [ 8, 16, 32, ],
-    "num_samples" : [ 8, 16, 32, ],
-    "types" : [ "float", "fixed", "mixed", "half", ]
+    "num_latents" : [ 16, 32, 48, 64 ],
+    "num_samples" : [ 16, 32, 48, 64 ],
+    "types" : [ "fixed", ]
 }
 
 # git_repo = "git@github.com:euroexa/smurff.git"
 git_repo = "/home/vanderaa/euroexa/eurosmurff"
 basedir = "/scratch/vms/ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
-
-log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level = logging.INFO, format = log_format)
 
 def execute(cmd, modules = None, workdir = None, log_name = None):
     if log_name is None:
@@ -86,15 +91,16 @@ def log_xtasks_config():
     with open ("fpga-zcu102/predict.xtasks.config", "r") as f:
         logging.info("predict.xtasks.config:\n%s", f.read())
 
-def run(dataset, num_latent, num_samples, datatype):
+def run(basedir, dataset, num_latent, num_samples, datatype):
+    print("Running ...")
 
-    # change dir and log to file
+    # change dir
     newdir = "%s/%s_%d_%d_%s" % (basedir, dataset, num_latent, num_samples, datatype)
     os.makedirs(newdir)
     os.chdir(newdir)
     file_logger = logging.FileHandler('ci.log')
     file_logger.setFormatter(logging.Formatter(log_format))
-    file_logger = logging.getLogger().addHandler(file_logger)
+    logging.getLogger().addHandler(file_logger)
 
     try:
         logging.info("Starting dataset=%s num_latent=%d num_samples=%d datatype=%s in %s",
@@ -135,17 +141,32 @@ def run(dataset, num_latent, num_samples, datatype):
     finally:
         logging.getLogger().removeHandler(file_logger)
 
+    print("Done ...")
     return True
 
 if __name__ == "__main__":
+
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--fail-fast",  action = "store_true")
+    parser.add_argument("--dask", default = None)
     args = parser.parse_args()
+
+    os.makedirs(basedir, exist_ok=True)
+    print("basedir: ", basedir)
+
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level = logging.INFO, format = log_format, filename = os.path.join(basedir, 'ci.log'))
     
-    for params in itertools.product(*parameter_space.values()):
-        success = run(*params)
-        if args.fail_fast and not success:
-            break
+    # before running this script, start a cluster with this command:
+    # $ dask-ssh --nthreads 1 --nprocs 12 --hostfile $PBS_NODEFILE 
+    client = distributed.Client(args.dask)
+
+    xprod = list(itertools.product(*parameter_space.values()))
+    print("space: ", xprod)
+
+    results = [ client.submit(run, basedir, *params) for params in xprod ]
+    client.gather(results)
+    print("results: ", results)
     
