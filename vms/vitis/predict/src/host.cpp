@@ -280,7 +280,7 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
-    int num_compounds = 10;
+    int num_blocks = 10;
 
     if (argc > 1 && std::atoi(argv[1]))
     {
@@ -289,20 +289,22 @@ int main(int argc, char *argv[])
 
     if (argc > 2 && std::atoi(argv[2]))
     {
-        num_compounds = std::atoi(argv[2]);
+        num_blocks = std::atoi(argv[2]);
     }
     
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
-    printf("  ncmpd: %d\n", num_compounds);
     printf("  blks:  %d\n", block_size);
+    printf("  nblks: %d\n", num_blocks);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
+    int num_compounds = num_blocks * block_size;
+
     P_base (*tb_output_base)[num_proteins] = new P_base[num_compounds][num_proteins];
-    F_base (*tb_input_base)[num_features] = new F_base[num_compounds][num_features];
+    F_base (*tb_input_base)[num_features]  = new F_base[num_compounds][num_features];
 
     U_base (*Ub)[num_proteins][num_latent] = new U_base[num_samples][num_proteins][num_latent];
     M_base (*Mb)[num_latent]               = new M_base[num_samples][num_latent];
