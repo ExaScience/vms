@@ -11,6 +11,24 @@
 #include "predict.h"
 #include "vms_tb.h"
 
+template <typename T>
+struct aligned_allocator
+{
+  using value_type = T;
+  T* allocate(std::size_t num)
+  {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr,4096,num*sizeof(T)))
+      throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+  }
+  void deallocate(T* p, std::size_t num)
+  {
+    free(p);
+  }
+};
+
+
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
 #define CL_HPP_TARGET_OPENCL_VERSION 120
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
@@ -228,7 +246,12 @@ void update_model(
     const  M_arr M_in,
     const  B_arr B_in)
 {
-    F_flat  in_block;
+    F_base *in_block;
+    P_base *out_block;
+
+    posix_memalign((void**)&out_block, 4096, block_size*num_proteins*sizeof(P_base));
+    posix_memalign((void**)&in_block,  4096, block_size*num_features*sizeof(F_base));
+
 	int c = 0;
 	for (int i=0; i<block_size; i++)
 		for (int j=0; j<num_features; j++)
@@ -237,7 +260,6 @@ void update_model(
 			c++;
 		}
 
-    P_flat out_block;
 
     cl_data.addInputArg(true);
     cl_data.addInputArg(0);
@@ -262,15 +284,17 @@ void update_model(
 
 void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 {
-    assert((num_compounds % block_size) == 0);
+    // round up
+    int num_blocks = (num_compounds + block_size - 1) / block_size;
 
-    int i;
-    for(i=0; i<num_compounds; i+=block_size)
+    for(int c=0; c<block_size*num_blocks; c+=block_size)
     {
+        printf("c: %d\n", c);
+        int num_compounds_left = std::min(block_size, num_compounds - c);
         cl_data.addInputArg(false);
-        cl_data.addInputArg(block_size);
-        cl_data.addInputArg(&in[i][0], block_size*num_features);
-        cl_data.addOutputArg(&out[i][0], block_size*num_proteins);
+        cl_data.addInputArg(num_compounds_left);
+        cl_data.addInputArg(&in[c][0], block_size*num_features);
+        cl_data.addOutputArg(&out[c][0], block_size*num_proteins);
         cl_data.go();
     }
 }
@@ -280,7 +304,7 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
-    int num_blocks = 10;
+    int num_compounds = 10;
 
     if (argc > 1 && std::atoi(argv[1]))
     {
@@ -289,26 +313,36 @@ int main(int argc, char *argv[])
 
     if (argc > 2 && std::atoi(argv[2]))
     {
-        num_blocks = std::atoi(argv[2]);
+        num_compounds = std::atoi(argv[2]);
     }
     
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
     printf("  blks:  %d\n", block_size);
-    printf("  nblks: %d\n", num_blocks);
+    printf("  ncmps: %d\n", num_compounds);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    int num_compounds = num_blocks * block_size;
+    // divide and round up
+    int num_blocks = (num_compounds + block_size - 1) / block_size;
+    int num_compounds_alloc = num_blocks * block_size;
 
-    P_base (*tb_output_base)[num_proteins] = new P_base[num_compounds][num_proteins];
-    F_base (*tb_input_base)[num_features]  = new F_base[num_compounds][num_features];
+    printf("  ncmps rounded up: %d\n", num_compounds_alloc);
 
-    U_base (*Ub)[num_proteins][num_latent] = new U_base[num_samples][num_proteins][num_latent];
-    M_base (*Mb)[num_latent]               = new M_base[num_samples][num_latent];
-    B_base (*Bb)[num_features][num_latent] = new B_base[num_samples][num_features][num_latent];
+    P_base (*tb_output_base)[num_proteins];
+    F_base (*tb_input_base)[num_features];
+
+    U_base (*Ub)[num_proteins][num_latent];
+    M_base (*Mb)[num_latent];
+    B_base (*Bb)[num_features][num_latent];
+
+    posix_memalign((void**)&tb_output_base, 4096, num_compounds_alloc*num_proteins*sizeof(P_base));
+    posix_memalign((void**)&tb_input_base,  4096, num_compounds_alloc*num_features*sizeof(F_base));
+    posix_memalign((void**)&Ub,             4096, num_samples*num_proteins*num_latent*sizeof(U_base));
+    posix_memalign((void**)&Mb,             4096, num_samples*num_latent*sizeof(M_base));
+    posix_memalign((void**)&Bb,             4096, num_samples*num_features*num_latent*sizeof(B_base));
 
     P_base  U_check_tb, M_check_tb, B_check_tb;
 
