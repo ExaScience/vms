@@ -90,6 +90,10 @@ void features_loop(
 	    const F_base features[num_features],
 		L_type latents[num_samples][num_latent])
 {
+	L_type latents_acc[num_samples][num_latent];
+#pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
+
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -98,8 +102,6 @@ void features_loop(
 
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
 		const F_type feature(features[d]);
 		for (int s = 0; s < num_samples; s++)
@@ -107,17 +109,32 @@ void features_loop(
 			{
 				L_type  v;
 				if (d==0) v = M_type(M_local[s][k]);
-				else      v = L_type(latents[s][k]);
+				else      v = L_type(latents_acc[s][k]);
 				L_type prod = feature * B_type(B_local[s][d][k]);
-				latents[s][k] = L_type(v + prod);
+				latents_acc[s][k] = L_type(v + prod);
 			}
 	}
+
+#pragma HLS UNROLL
+	for (int s = 0; s < num_samples; s++)
+		for (int k = 0; k < num_latent; k++)
+				latents[s][k] = latents_acc[s][k];
 }
 
 void proteins_loop(
 	P_base predictions[num_proteins],
 	const L_type latents[num_samples][num_latent])
 {
+	L_type latents_cache[num_samples][num_latent];
+	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
+	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
+
+	#pragma HLS UNROLL
+	for (int s = 0; s < num_samples; s++)
+		for (int k = 0; k < num_latent; k++)
+				latents_cache[s][k] = latents[s][k];
+
+
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 3
@@ -153,8 +170,7 @@ void predict_one_block(
     {
 #pragma HLS DATAFLOW
 		L_type latents[num_samples][num_latent];
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2		
+#pragma HLS STREAM variable = latents depth = 63
 
         features_loop(&features[i*num_features], latents);
         proteins_loop(&predictions[i*num_proteins], latents);
