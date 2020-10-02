@@ -18,13 +18,13 @@ help::
 
 TARGETS := hw
 TARGET := $(TARGETS)
-DEVICE := $(DEVICES)
+DEVICE := xilinx_u200_xdma_201830_2
 XCLBIN := xclbin
 KERNEL_NAME := predict_or_update_model
 VER ?= host_cpp
 
 DSA := $(call device2sandsa, $(DEVICE))
-BUILD_DIR := ./_x.$(TARGET)
+BUILD_DIR := /dev/shm
 
 BUILD_DIR_predict = $(BUILD_DIR)/$(KERNEL_NAME)
 
@@ -68,7 +68,7 @@ CP = cp -rf
 host_change: $(VER)
 
 .PHONY: all clean cleanall docs emconfig
-all: check-devices $(host_change) $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig Makefile
+all: $(host_change) $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig Makefile
 
 .PHONY: exe
 exe: $(EXECUTABLE)
@@ -130,11 +130,6 @@ cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) _x.*
 
-
-check-devices:
-ifndef DEVICE
-	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
-endif
 
 check_xrt:
 ifndef XILINX_XRT
