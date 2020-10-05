@@ -2,6 +2,8 @@
 #define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 #include "predict.h"
+#include <hls_stream.h>
+
 
 static U_base U_local[num_samples][num_proteins][num_latent];
 static M_base M_local[num_samples][num_latent];
@@ -88,7 +90,7 @@ void load_model(
 
 void features_loop(
 	    const F_base features[num_features],
-		L_type latents[num_samples][num_latent])
+		hls::stream<L_type> latents[num_samples][num_latent])
 {
 	L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
@@ -118,12 +120,12 @@ void features_loop(
 #pragma HLS UNROLL
 	for (int s = 0; s < num_samples; s++)
 		for (int k = 0; k < num_latent; k++)
-				latents[s][k] = latents_acc[s][k];
+				latents[s][k] << latents_acc[s][k];
 }
 
 void proteins_loop(
 	P_base predictions[num_proteins],
-	const L_type latents[num_samples][num_latent])
+	hls::stream<L_type> latents[num_samples][num_latent])
 {
 	L_type latents_cache[num_samples][num_latent];
 	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
@@ -132,7 +134,7 @@ void proteins_loop(
 	#pragma HLS UNROLL
 	for (int s = 0; s < num_samples; s++)
 		for (int k = 0; k < num_latent; k++)
-				latents_cache[s][k] = latents[s][k];
+				latents_cache[s][k] = latents[s][k].read();
 
 
 	for (int d = 0; d < num_proteins; d++)
@@ -144,7 +146,7 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = L_type(latents[s][k]) * U_type(U_local[s][d][k]);
+				S_type prod = L_type(latents_cache[s][k]) * U_type(U_local[s][d][k]);
 				sum = sum + prod;
 			}
 
@@ -168,10 +170,9 @@ void predict_one_block(
 {
     for (int i=0; i<num_compounds; ++i)
     {
-#pragma HLS DATAFLOW
-		L_type latents[num_samples][num_latent];
-#pragma HLS STREAM variable = latents depth = 63
+		hls::stream<L_type> latents[num_samples][num_latent];
 
+#pragma HLS DATAFLOW
         features_loop(&features[i*num_features], latents);
         proteins_loop(&predictions[i*num_proteins], latents);
     }
