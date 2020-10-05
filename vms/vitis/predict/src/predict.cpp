@@ -117,9 +117,10 @@ void features_loop(
 			}
 	}
 
-#pragma HLS UNROLL
 	for (int s = 0; s < num_samples; s++)
+#pragma HLS UNROLL
 		for (int k = 0; k < num_latent; k++)
+#pragma HLS UNROLL
 				latents[s][k] << latents_acc[s][k];
 }
 
@@ -131,9 +132,10 @@ void proteins_loop(
 	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
 	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
 
-	#pragma HLS UNROLL
 	for (int s = 0; s < num_samples; s++)
+	#pragma HLS UNROLL
 		for (int k = 0; k < num_latent; k++)
+	#pragma HLS UNROLL
 				latents_cache[s][k] = latents[s][k].read();
 
 
@@ -171,6 +173,7 @@ void predict_one_block(
     for (int i=0; i<num_compounds; ++i)
     {
 		hls::stream<L_type> latents[num_samples][num_latent];
+#pragma HLS STREAM variable = latents depth = 32
 
 #pragma HLS DATAFLOW
         features_loop(&features[i*num_features], latents);

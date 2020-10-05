@@ -21,7 +21,6 @@ TARGET := $(TARGETS)
 DEVICE := xilinx_u200_xdma_201830_2
 XCLBIN := xclbin
 KERNEL_NAME := predict_or_update_model
-VER ?= host_cpp
 
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := /dev/shm
@@ -35,7 +34,7 @@ CXX := g++
 VPP := $(XILINX_VITIS)/bin/v++
 
 # The below are compile flags are passed to the C++ Compiler
-opencl_CXXFLAGS += -g -I./ -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++11
+opencl_CXXFLAGS += -g -I./ -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++17
 # The below are linking flags for C++ Comnpiler
 opencl_LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 
@@ -56,22 +55,20 @@ LDFLAGS += -lrt -lstdc++
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --config design.cfg --save-temps
 
-EXECUTABLE = host
+EXECUTABLES = host_sw_emu host_hw_emu host_hw
+EXECUTABLE = host_$(TARGET)
 EMCONFIG_DIR = $(XCLBIN)
 
 BINARY_CONTAINERS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
 BINARY_CONTAINER_predict_OBJS += $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xo
 
-
 CP = cp -rf
 
-host_change: $(VER)
-
 .PHONY: all clean cleanall docs emconfig
-all: $(host_change) $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig Makefile
+all: $(EXECUTABLES) emconfig Makefile
 
 .PHONY: exe
-exe: $(EXECUTABLE)
+exe: $(EXECUTABLES)
 
 KERNEL_BIN = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
 KERNEL_INC = $(XCLBIN)/$(KERNEL_NAME).$(TARGET).inc
@@ -92,7 +89,6 @@ $(KERNEL_INC): $(KERNEL_BIN)
 	xxd -i $< $@
 
 $(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
-	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig: $(EMCONFIG_DIR)/emconfig.json
@@ -100,42 +96,22 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(VER),host_cpp)
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 #$(DEVICE)
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin
+	 ./$(EXECUTABLE)
 #$(DEVICE)
-endif
-else
-ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin $(DEVICE)
-else
-	 ./$(EXECUTABLE) $(XCLBIN)/$(KERNEL_NAME).$(TARGET).xclbin $(DEVICE)
-endif
 endif
 
 # Cleaning stuff
 RMDIR = rm -rf
 
 clean:
-	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*}
+	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)
 	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
 	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
-
-cleanall: clean
-	-$(RMDIR) $(XCLBIN)
-	-$(RMDIR) _x.*
-
-
-check_xrt:
-ifndef XILINX_XRT
-	$(error XILINX_XRT variable is not set, please set correctly and rerun)
-endif
-
 
 ECHO := @echo
 
