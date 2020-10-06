@@ -42,5 +42,5 @@ clean:
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	ln -sf $(addprefix ../,$(HEADERFILES)) code/
 	ln -sf $(addprefix ../,$(CXXFILES)) code/
-	vivado_hls $(TOPDIR)/codegen/run.tcl
+	vitis_hls $(TOPDIR)/codegen/run.tcl
 

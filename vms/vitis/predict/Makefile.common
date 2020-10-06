@@ -8,7 +8,7 @@ help::
 	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
-	$(ECHO) "  make check
+	$(ECHO) "  make check"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 
@@ -18,7 +18,7 @@ EXECUTABLE := host
 
 DSA := $(call device2sandsa, $(DEVICE))
 
-BUILD_DIR = $(BUILD_DIR)/$(KERNEL_NAME)/$(TARGET)
+BUILD_DIR = /dev/shm/$(KERNEL_NAME)/$(TARGET)
 
 # The C++ Compiler to use: g++
 CXX := g++
@@ -44,8 +44,8 @@ LDFLAGS += -lrt -lstdc++
 CLFLAGS += -t $(TARGET) --config ../design.cfg --save-temps
 CLFLAGS += -g
 
-.PHONY: all clean cleanall docs emconfig kill
-all: $(EXECUTABLE) emconfig Makefile
+.PHONY: all clean cleanall docs kill
+all: $(EXECUTABLE) Makefile
 
 KERNEL_OBJ  = $(KERNEL_NAME).xo
 KERNEL_BIN  = $(KERNEL_NAME).xclbin
@@ -67,11 +67,13 @@ $(KERNEL_INC): $(KERNEL_BIN)
 $(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
 	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) -o $@ $(LDFLAGS)
 
-emconfig: emconfig.json
+xrt.ini: ../xrt.ini
+	ln -s ../xrt.ini
+
 emconfig.json:
 	emconfigutil --platform $(DEVICE) --od .
 
-check: 
+check: emconfig.json xrt.ini $(EXECUTABLE) 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 else
@@ -91,16 +93,9 @@ kill:
 
 ECHO := @echo
 
-#'estimate' for estimate report generation
-#'system' for system report generation
-ifneq ($(REPORT), no)
-CLFLAGS += --report estimate
-CLLDFLAGS += --report system
-endif
-
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
 LDCLFLAGS += --profile_kernel data:all:all:all
-LDCFLAGS += --profile_kernel  stall:all:all:all
-LDCFLAGS += --profile_kernel exec:all:all:all
+LDCLFLAGS += --profile_kernel  stall:all:all:all
+LDCLFLAGS += --profile_kernel exec:all:all:all
 endif

@@ -15,4 +15,4 @@ host
 *.wdb
 *.run_summary
 xsim.dir
-
+*/*/xrt.ini
