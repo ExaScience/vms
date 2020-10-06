@@ -4,5 +4,15 @@ _x.sw_emu
 emconfig.json
 host
 *.log
-vadd.sw_emu.xclbin.inc
+*.inc
+*.xclbin*
+*.xo*
 .run
+*.csv
+*.jou
+*.protoinst
+*.wcfg
+*.wdb
+*.run_summary
+xsim.dir
+
