@@ -1,0 +1,106 @@
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
+DEVICE := xilinx_u200_xdma_201830_2
+KERNEL_NAME := predict_or_update_model
+EXECUTABLE := host
+
+DSA := $(call device2sandsa, $(DEVICE))
+
+BUILD_DIR = $(BUILD_DIR)/$(KERNEL_NAME)/$(TARGET)
+
+# The C++ Compiler to use: g++
+CXX := g++
+
+# The kernel Compiler to use : V++
+VPP := v++
+
+
+#Host CPP FILE
+HOST_CPP_SRCS += ../src/host.cpp
+
+# Enable Profiling
+REPORT := yes
+PROFILE:= yes
+
+# Host compiler global settings
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++17
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++
+
+# Kernel compiler global settings
+CLFLAGS += -t $(TARGET) --config ../design.cfg --save-temps
+CLFLAGS += -g
+
+.PHONY: all clean cleanall docs emconfig kill
+all: $(EXECUTABLE) emconfig Makefile
+
+KERNEL_OBJ  = $(KERNEL_NAME).xo
+KERNEL_BIN  = $(KERNEL_NAME).xclbin
+KERNEL_INC  = $(KERNEL_NAME).inc
+KERNEL_VAR  = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
+
+CXXFLAGS += -include $(KERNEL_INC) -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len
+
+# Building kernel
+$(KERNEL_OBJ): ../src/predict.cpp
+	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -c -k $(KERNEL_NAME) -I$(<D) -o$@ $<
+
+$(KERNEL_BIN): $(KERNEL_OBJ)
+	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -l $(LDCLFLAGS) -o$@ $(+)
+
+$(KERNEL_INC): $(KERNEL_BIN)
+	xxd -i $< $@
+
+$(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
+	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) -o $@ $(LDFLAGS)
+
+emconfig: emconfig.json
+emconfig.json:
+	emconfigutil --platform $(DEVICE) --od .
+
+check: 
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+else
+	./$(EXECUTABLE)
+endif
+
+# Cleaning stuff
+RMDIR = rm -rf
+
+clean:
+	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.inc
+	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
+
+kill:
+	killall xsim xsimk
+
+ECHO := @echo
+
+#'estimate' for estimate report generation
+#'system' for system report generation
+ifneq ($(REPORT), no)
+CLFLAGS += --report estimate
+CLLDFLAGS += --report system
+endif
+
+#Generates profile summary report
+ifeq ($(PROFILE), yes)
+LDCLFLAGS += --profile_kernel data:all:all:all
+LDCFLAGS += --profile_kernel  stall:all:all:all
+LDCFLAGS += --profile_kernel exec:all:all:all
+endif
