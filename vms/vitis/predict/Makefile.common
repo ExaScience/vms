@@ -5,9 +5,6 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall"
-	$(ECHO) "      Command to remove all the generated files."
-	$(ECHO) ""
 	$(ECHO) "  make check"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
@@ -26,12 +23,10 @@ CXX := g++
 # The kernel Compiler to use : V++
 VPP := v++
 
-
 #Host CPP FILE
 HOST_CPP_SRCS += ../src/host.cpp
 
 # Enable Profiling
-REPORT := yes
 PROFILE:= yes
 
 # Host compiler global settings
@@ -87,6 +82,8 @@ clean:
 	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.inc
 	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
 	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
+	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb
+	-$(RMDIR) xrt.ini
 
 kill:
 	killall xsim xsimk
@@ -96,6 +93,6 @@ ECHO := @echo
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
 LDCLFLAGS += --profile_kernel data:all:all:all
-LDCLFLAGS += --profile_kernel  stall:all:all:all
+LDCLFLAGS += --profile_kernel stall:all:all:all
 LDCLFLAGS += --profile_kernel exec:all:all:all
 endif
