@@ -1,6 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 1000;
+static const int block_size = 4*1024; // to make sure blocks are 4K-page aligned
 
 const int L_wl = 32;
 const int L_iwl = 12;
