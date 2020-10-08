@@ -27,7 +27,7 @@ VPP := v++
 HOST_CPP_SRCS += ../src/host.cpp
 
 # Enable Profiling
-PROFILE:= yes
+PROFILE:= no
 
 # Host compiler global settings
 CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++17
