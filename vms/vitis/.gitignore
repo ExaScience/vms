@@ -16,3 +16,5 @@ host
 *.run_summary
 xsim.dir
 */*/xrt.ini
+.ipcache
+reports
