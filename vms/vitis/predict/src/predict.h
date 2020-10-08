@@ -9,7 +9,7 @@ const int S_iwl = 12;
 
 const float epsilon = 0.5;
 
-#define DT_FLOAT
+#define DT_FIXED
 
 #if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
