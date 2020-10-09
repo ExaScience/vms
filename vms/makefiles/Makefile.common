@@ -33,11 +33,6 @@ SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 .PHONY: clean
 
 clean:
-	rm -f *.o $(PROGS_)
-	rm -f $(PROGRAM_)_fp
-	rm -f $(PROGRAM_)_fx
-	rm -f *.cpp *.h
+	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
 	rm -rf zcu102
-	rm -f $(PROGRAM_).xtasks.config 
-	rm -f $(PROGRAM_).bit 
-	rm -f BOOT.BIN
+	rm -f $(PROGRAM_).xtasks.config $(PROGRAM_).bit BOOT.BIN
