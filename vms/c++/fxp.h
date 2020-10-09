@@ -1,11 +1,8 @@
 #pragma once
 
-#include <utility>
-#include <cassert>
 #include <cmath>
+#include <algorithm>
 #include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #include <limits>
 
 template<int N> struct int_type;
@@ -108,8 +105,10 @@ struct fxp
         else 
             val = v.val << (shift - v.shift);
 
+#ifdef DT_CHECK
         float eps = std::max(fxp<otherT, otherIWL>::epsilon(), epsilon());
         check((float)v, eps);
+#endif
     }
 
     template<typename T1, int IWL1, typename T2, int IWL2>
@@ -124,10 +123,12 @@ struct fxp
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
+#ifdef DT_CHECK
         float eps;
         eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
         eps = std::max(eps, epsilon());
         check((float)mul.a * (float)mul.b, eps);
+#endif
     }
 
 
@@ -145,10 +146,12 @@ struct fxp
         if (s > 0) val = val << s;
         else       val = val >> -s;
 
+#ifdef DT_CHECK
         float eps;
         eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
         eps = std::max(eps, epsilon());
         check((float)(add.a) + (float)(add.b), eps);
+#endif
     }
 
     fxp<T, IWL> operator>>(const int s)

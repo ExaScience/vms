@@ -1,7 +1,13 @@
 
 #define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
-#include "predict.fpga.h"
+#include "predict.h"
+#include "stream.h"
+
+
+static U_base U_local[num_samples][num_proteins][num_latent];
+static M_base M_local[num_samples][num_latent];
+static B_base B_local[num_samples][num_features][num_latent];
 
 void checksum_model(const F_flat features,
 					      P_flat out,
@@ -51,23 +57,7 @@ void checksum_model(const F_flat features,
         }
 }
 
-void print_checksum(P_flat out)
-{
-	P_base U_check = out[0];
-	P_base M_check = out[1];
-	P_base B_check = out[2];
-	P_base F_check = out[3];
 
-    printf(CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", U_check, M_check, B_check, F_check);
-
-	for (int c = 0; c < block_size * num_proteins - 3;)
-	{
-		assert(out[c] == U_check); c++;
-		assert(out[c] == M_check); c++;
-		assert(out[c] == B_check); c++;
-		assert(out[c] == F_check); c++;
-	}
-}
 
 void load_model(
 		const U_flat U_in,   //[num_samples][num_proteins][num_latent],
@@ -100,8 +90,12 @@ void load_model(
 
 void features_loop(
 	    const F_base features[num_features],
-		L_type latents[num_samples][num_latent])
+		hls::stream<L_type> latents[num_samples][num_latent])
 {
+	L_type latents_acc[num_samples][num_latent];
+#pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
+
 	for (int d = 0; d < num_features; d++)
 	{
 #pragma HLS PIPELINE II = 1
@@ -110,8 +104,6 @@ void features_loop(
 
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2
 
 		const F_type feature(features[d]);
 		for (int s = 0; s < num_samples; s++)
@@ -119,17 +111,34 @@ void features_loop(
 			{
 				L_type  v;
 				if (d==0) v = M_type(M_local[s][k]);
-				else      v = L_type(latents[s][k]);
+				else      v = L_type(latents_acc[s][k]);
 				L_type prod = feature * B_type(B_local[s][d][k]);
-				latents[s][k] = L_type(v + prod);
+				latents_acc[s][k] = L_type(v + prod);
 			}
 	}
+
+	for (int s = 0; s < num_samples; s++)
+#pragma HLS UNROLL
+		for (int k = 0; k < num_latent; k++)
+#pragma HLS UNROLL
+				latents[s][k] << latents_acc[s][k];
 }
 
 void proteins_loop(
 	P_base predictions[num_proteins],
-	const L_type latents[num_samples][num_latent])
+	hls::stream<L_type> latents[num_samples][num_latent])
 {
+	L_type latents_cache[num_samples][num_latent];
+	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
+	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
+
+	for (int s = 0; s < num_samples; s++)
+	#pragma HLS UNROLL
+		for (int k = 0; k < num_latent; k++)
+	#pragma HLS UNROLL
+				latents_cache[s][k] = latents[s][k].read();
+
+
 	for (int d = 0; d < num_proteins; d++)
 	{
 #pragma HLS PIPELINE II = 3
@@ -139,7 +148,7 @@ void proteins_loop(
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
-				S_type prod = L_type(latents[s][k]) * U_type(U_local[s][d][k]);
+				S_type prod = L_type(latents_cache[s][k]) * U_type(U_local[s][d][k]);
 				sum = sum + prod;
 			}
 
@@ -163,29 +172,15 @@ void predict_one_block(
 {
     for (int i=0; i<num_compounds; ++i)
     {
-#pragma HLS DATAFLOW
-		L_type latents[num_samples][num_latent];
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = latents complete dim = 2		
+		hls::stream<L_type> latents[num_samples][num_latent];
+#pragma HLS STREAM variable = latents depth = 32
 
+#pragma HLS DATAFLOW
         features_loop(&features[i*num_features], latents);
         proteins_loop(&predictions[i*num_proteins], latents);
     }
 }
 
-
-#ifdef OMPSS_FPGA
-#pragma omp target device(fpga) copy_deps localmem()
-#elif defined(OMPSS_SMP)
-#pragma omp target device(smp) copy_deps
-#else
-#endif
-#pragma omp task \
-    in([block_size*num_features]features, \
-       [num_samples*num_proteins*num_latent]U_in,\
-       [num_samples*num_latent]M_in,\
-       [num_samples*num_features*num_latent]B_in) \
-    out([block_size*num_proteins]predictions)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
@@ -195,12 +190,6 @@ void predict_or_update_model(
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
-//#pragma HLS INTERFACE m_axi port=features depth=block_size*num_features
-//#pragma HLS INTERFACE m_axi port=predictions depth=block_size*num_proteins
-//#pragma HLS INTERFACE m_axi port=U_in depth=num_samples*num_proteins*num_latent
-//#pragma HLS INTERFACE m_axi port=M_in depth=num_samples*num_latent
-//#pragma HLS INTERFACE m_axi port=B_in depth=num_samples*num_features*num_latent
-
 	if (update_model)
 	{
 		load_model(U_in, M_in, B_in);
@@ -215,62 +204,4 @@ void predict_or_update_model(
 
 } // end function
 
-
-
-void update_model(
-    const  U_arr U_in,
-    const  M_arr M_in,
-    const  B_arr B_in)
-{
-    F_flat  in_block;
-	int c = 0;
-	for (int i=0; i<block_size; i++)
-		for (int j=0; j<num_features; j++)
-		{
-			in_block[c] = c;
-			c++;
-		}
-
-    P_flat out_block_1;
-    P_flat out_block_2;
-
-    predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
-#pragma omp taskwait
-
-#ifdef CHECKSUM_MODEL
-	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
-    printf("FPGA checksums U, M, B, F: ");
-	print_checksum(out_block_1);
-    printf("CPU  checksums U, M, B, F: ");
-	print_checksum(out_block_2);
-#endif
-}
-
-
-void predict_compounds(int num_compounds, const F_flx in, P_flx out)
-{
-    const U_flat empty_U = {0};
-    const M_flat empty_mu = {0};
-    const B_flat empty_B = {0};
-
-    int i;
-    for(i=0; i<=num_compounds - block_size; i+=block_size)
-    {
-        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
-    }
-
-    // last block left-overs
-    int nc = num_compounds - i;
-    if (nc == 0) {
-#pragma omp taskwait
-    } else {
-		F_flat in_block;
-		P_flat out_block;
-
-		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
-        predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);
-#pragma omp taskwait
-        memcpy(&out[i][0], out_block, nc*num_proteins*sizeof(P_base));
-    }
-}
 

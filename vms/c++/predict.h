@@ -1,6 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 4*1024; // to make sure blocks are 4K-page aligned
+static const int block_size = 1000;
 
 const int L_wl = 32;
 const int L_iwl = 12;
@@ -9,7 +9,7 @@ const int S_iwl = 12;
 
 const float epsilon = 0.5;
 
-#define DT_FLOAT
+#define DT_FIXED
 
 #if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
@@ -114,5 +114,14 @@ typedef M_base M_flat[num_samples*num_latent];
 typedef B_base B_flat[num_samples*num_features*num_latent];
 
 void update_model(const U_arr U, const M_arr mu, const B_arr B);
-
 void predict_compounds(int num_compounds, const F_flx in, P_flx out);
+
+extern "C"
+void predict_or_update_model(
+               bool update_model,
+               int num_compounds,
+               const F_flat features,    //[block_size*num_features]
+                     P_flat predictions, //[block_size*num_proteins]
+               const U_flat U_in,        //[num_samples][num_proteins][num_latent]
+               const M_flat M_in,        //[num_samples][num_latent]
+               const B_flat B_in);       //[num_samples][num_features][num_latent]
