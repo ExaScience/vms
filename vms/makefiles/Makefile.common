@@ -1,6 +1,6 @@
 
 PROGRAM_ = predict
-SRCFILES = predict.cpp test_bench.cpp
+SRCFILES = predict.cpp host.cpp non_ocl.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h
 MODELFILES = vms_const.h vms_tb.h
 
