@@ -211,7 +211,6 @@ main (int argc, char **argv)
     {
         predict_compounds(args.num_compounds, tb_input_base, tb_output_base);
     }
-#pragma omp taskwait
     double stop = tick();
     nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
     double elapsed = stop - start;
