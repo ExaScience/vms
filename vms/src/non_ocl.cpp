@@ -1,12 +1,7 @@
 
 #include "predict.fpga.h"
 
-#ifdef OMPSS_FPGA
-#pragma omp target device(fpga) copy_deps localmem()
-#elif defined(OMPSS_SMP)
-#pragma omp target device(smp) copy_deps
-#else
-#endif
+#pragma omp target device(smp,fpga) copy_deps
 #pragma omp task \
     in([block_size*num_features]features, \
        [num_samples*num_proteins*num_latent]U_in,\
