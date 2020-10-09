@@ -2,7 +2,7 @@
 #define SHOWFLOAT(F) printf("%s = %.4f\n", #F, (float)(F))
 
 #include "predict.h"
-#include <hls_stream.h>
+#include "stream.h"
 
 
 static U_base U_local[num_samples][num_proteins][num_latent];

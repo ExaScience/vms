@@ -168,13 +168,8 @@ main (int argc, char **argv)
      be reflected in arguments. */
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
-    if (argc > 2 && std::atoi(argv[2]))
-    {
-        num_compounds = std::atoi(argv[2]);
-    }
-    
     // divide and round up
-    int num_blocks = (num_compounds + block_size - 1) / block_size;
+    int num_blocks = (args.num_compounds + block_size - 1) / block_size;
     int num_compounds_alloc = num_blocks * block_size;
     
     printf("  dt:    %s\n", DT_NAME);
