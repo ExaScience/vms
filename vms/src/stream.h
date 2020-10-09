@@ -61,6 +61,10 @@
    limitations under the License.
 */
 
+#ifdef __SYNTHESIS__
+#include <hls_stream.h>
+#else
+
 #ifndef X_HLS_STREAM_SIM_H
 #define X_HLS_STREAM_SIM_H
 
@@ -293,3 +297,4 @@ public:
 #endif  // X_HLS_STREAM_SIM_H
 
 
+#endif

@@ -132,9 +132,12 @@ struct CLData
     }
 };
 
+extern unsigned char *KERNEL_VAR;
+extern unsigned int KERNEL_VAR_LEN;
+
 CLData cl_data("predict_or_update_model", KERNEL_VAR, KERNEL_VAR_LEN);
 
-void cl_update_model(
+void update_model(
     const  U_arr U_in,
     const  M_arr M_in,
     const  B_arr B_in)
@@ -175,7 +178,7 @@ void cl_update_model(
 }
 
 
-void cl_predict_compounds(int num_compounds, const F_flx in, P_flx out)
+void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 {
     // round up
     int num_blocks = (num_compounds + block_size - 1) / block_size;

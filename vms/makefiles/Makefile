@@ -14,6 +14,7 @@ LDFLAGS=
 
 INPUT_DATA=test.sdm train.sdm features.ddm
 ROOTFILE=model/root.ini
+OPTIONS=$(TOPDIR)/data/$(DATASET)/options.ini
 
 MODELFILES=code/vms_const.h code/vms_tb.h
 
@@ -23,22 +24,16 @@ model: $(MODELFILES)
 
 CONDA_BIN = $(dir $(CONDA_EXE))
 
-options.ini: $(TOPDIR)/data/$(DATASET)/options.ini
-	ln -s $(TOPDIR)/data/$(DATASET)/options.ini .
-
 $(INPUT_DATA): $(TOPDIR)/data/$(DATASET)/make.py
 	python $<
 
-$(ROOTFILE): $(INPUT_DATA) options.ini
+$(ROOTFILE): $(INPUT_DATA) $(OPTIONS)
 	mkdir -p model
 	source $(CONDA_BIN)/activate smurff-0.14 && \
-		smurff --ini options.ini --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
+		smurff --ini $(OPTIONS) --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
-	echo $(SRCDIR)
-	echo $(CXXFILES)
-	ln -sf $(addprefix ../,$(CXXFILES) $(HEADERFILES)) code/
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python $(TOPDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 

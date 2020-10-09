@@ -83,14 +83,17 @@ def compose_dir(basedir, dataset, num_latent, num_samples, datatype):
     return newdir
 
 def populate_dir(source_dir, build_dir, dataset, num_latent, num_samples, datatype):
-    shutil.copytree(os.path.join(source_dir, "makefiles"), build_dir)
+    makefiles_dir = os.path.abspath(os.path.join(source_dir, "makefiles"))
+    shutil.copytree(makefiles_dir, build_dir, copy_function=os.symlink)
 
     timestamp = datetime.datetime.now()
-    rel_source_dir = os.path.relpath(source_dir, build_dir)
+    abs_source_dir = os.path.abspath(source_dir)
+    abs_build_dir = os.path.abspath(build_dir)
     with open(os.path.join(build_dir, "config.mk"), "w") as config_file:
         config_file.write(
             f"""# generated on {timestamp}
-TOPDIR = {rel_source_dir}
+TOPDIR = {abs_source_dir}
+BUILDDIR = {abs_build_dir}
 DATASET = {dataset}
 NUM_LATENT = {num_latent}
 NUM_SAMPLES = {num_samples}

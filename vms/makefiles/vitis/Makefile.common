@@ -1,5 +1,8 @@
 .PHONY: help
 
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(SELF_DIR)../config.mk
+
 help::
 	$(ECHO) "Makefile Usage:"
 	$(ECHO) "  make clean "
@@ -11,11 +14,11 @@ help::
 
 DEVICE := xilinx_u200_xdma_201830_2
 KERNEL_NAME := predict_or_update_model
-EXECUTABLE := host
+EXECUTABLE := predict
 
 DSA := $(call device2sandsa, $(DEVICE))
 
-BUILD_DIR = /dev/shm/$(KERNEL_NAME)/$(TARGET)
+TEMP_DIR = /dev/shm/$(KERNEL_NAME)/$(TARGET)
 
 # The C++ Compiler to use: g++
 CXX := g++
@@ -24,19 +27,24 @@ CXX := g++
 VPP := v++
 
 #Host CPP FILE
-HOST_CPP_SRCS += ../src/host.cpp
+SRCDIR = $(TOPDIR)/src
+HOST_CPP_SRCS += $(SRCDIR)/host.cpp $(SRCDIR)/ocl.cpp
+KERNEL_CPP_SRCS += $(SRCDIR)/predict.cpp
+MODELDIR=$(BUILDDIR)/code
 
 # Enable Profiling
 PROFILE:= no
 
 # Host compiler global settings
 CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++17
+CXXFLAGS += -I$(MODELDIR)
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --config ../design.cfg --save-temps
+CLFLAGS += -I$(MODELDIR)
 CLFLAGS += -g
 
 .PHONY: all clean cleanall docs kill
@@ -44,23 +52,23 @@ all: $(EXECUTABLE) Makefile
 
 KERNEL_OBJ  = $(KERNEL_NAME).xo
 KERNEL_BIN  = $(KERNEL_NAME).xclbin
-KERNEL_INC  = $(KERNEL_NAME).inc
+KERNEL_INC  = $(KERNEL_NAME).gen.cpp
 KERNEL_VAR  = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
 
-CXXFLAGS += -include $(KERNEL_INC) -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len
+CXXFLAGS += -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len
 
 # Building kernel
-$(KERNEL_OBJ): ../src/predict.cpp
-	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -c -k $(KERNEL_NAME) -I$(<D) -o$@ $<
+$(KERNEL_OBJ): $(KERNEL_CPP_SRCS)
+	$(VPP) $(CLFLAGS) --temp_dir $(TEMP_DIR) -c -k $(KERNEL_NAME) -I. -I$(<D) -o$@ $<
 
 $(KERNEL_BIN): $(KERNEL_OBJ)
-	$(VPP) $(CLFLAGS) --temp_dir $(BUILD_DIR) -l $(LDCLFLAGS) -o$@ $(+)
+	$(VPP) $(CLFLAGS) --temp_dir $(TEMP_DIR) -l $(LDCLFLAGS) -o$@ $(+)
 
 $(KERNEL_INC): $(KERNEL_BIN)
 	xxd -i $< $@
 
 $(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
-	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC) -o $@ $(LDFLAGS)
 
 xrt.ini: ../xrt.ini
 	ln -s ../xrt.ini
