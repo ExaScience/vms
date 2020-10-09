@@ -8,6 +8,8 @@
 #include <chrono>
 #include <iostream>
 
+#include <argp.h>
+
 #include "predict.h"
 #include "vms_tb.h"
 
@@ -116,101 +118,88 @@ int check_result(
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
     return nerrors;
 }
-lign((void**)&in_block,  4096, block_size*num_features*sizeof(F_base));
 
-	int c = 0;
-	for (int i=0; i<block_size; i++)
-		for (int j=0; j<num_features; j++)
-		{
-			in_block[c] = c;
-			c++;
-		}
+/* Program documentation. */
+static char doc[] = "Virtual Molecule Screening.";
 
+/* A description of the arguments we accept. */
+static char args_doc[] = "";
 
-    cl_data.addInputArg(true);
-    cl_data.addInputArg(0);
-    cl_data.addInputArg(in_block, block_size*num_features);
-    cl_data.addOutputArg(out_block, block_size*num_proteins);
-    cl_data.addInputArg(U_in, num_samples);
-    cl_data.addInputArg(M_in, num_samples);
-    cl_data.addInputArg(B_in, num_samples);
-    cl_data.go();
+/* The options we understand. */
+static struct argp_option options[] = {
+  {"num-compounds",  'c', "NUM",      0,  "Number of compounds (10)." },
+  {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
+  { 0 }
+};
 
+/* Used by main to communicate with parse_opt. */
+struct arguments
+{
+  int num_repeat = 1;
+  int num_compounds = 10;
+};
 
-#ifdef CHECKSUM_MODEL
-    P_flat out_block_2;
-	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
-    printf("FPGA checksums U, M, B, F: ");
-	print_checksum(out_block_1);
-    printf("CPU  checksums U, M, B, F: ");
-	print_checksum(out_block_2);
-#endif
+/* Parse a single option. */
+static error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+  /* Get the input argument from argp_parse, which we
+     know is a pointer to our arguments structure. */
+  struct arguments *arguments = (struct arguments *)(state->input);
+
+  switch (key)
+    {
+    case 'r': arguments->num_repeat = std::atoi(arg); break;
+    case 'c': arguments->num_compounds = std::atoi(arg); break;
+    default: return ARGP_ERR_UNKNOWN;
+    }
+  return 0;
 }
 
+/* Our argp parser. */
+static struct argp argp = { options, parse_opt, args_doc, doc };
 
-void predict_compounds(int num_compounds, const F_flx in, P_flx out)
+int
+main (int argc, char **argv)
 {
-    // round up
-    int num_blocks = (num_compounds + block_size - 1) / block_size;
+    struct arguments args;
 
-    for(int c=0; c<block_size*num_blocks; c+=block_size)
-    {
-        printf("c: %d\n", c);
-        int num_compounds_left = std::min(block_size, num_compounds - c);
-        cl_data.addInputArg(false);
-        cl_data.addInputArg(num_compounds_left);
-        cl_data.addInputArg(&in[c][0], block_size*num_features);
-        cl_data.addOutputArg(&out[c][0], block_size*num_proteins);
-        cl_data.go();
-    }
-}
+    /* Parse our arguments; every option seen by parse_opt will
+     be reflected in arguments. */
+    argp_parse(&argp, argc, argv, 0, 0, &args);
 
-int main(int argc, char *argv[])
-{
-    int num_repeat = 1;
-    int num_compounds = 10;
-
-    if (argc > 1 && std::atoi(argv[1]))
-    {
-        num_repeat = std::atoi(argv[1]);
-    }
-
-    if (argc > 2 && std::atoi(argv[2]))
-    {
-        num_compounds = std::atoi(argv[2]);
-    }
-    
     printf("  dt:    %s\n", DT_NAME);
-    printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
-    printf("  blks:  %d\n", block_size);
-    printf("  ncmps: %d\n", num_compounds);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
+    printf("  blks:  %d\n", block_size);
+    printf("  nrep:  %d\n", args.num_repeat);
+    printf("  ncmps: %d\n", args.num_compounds);
+
 
     // divide and round up
-    int num_blocks = (num_compounds + block_size - 1) / block_size;
+    int num_blocks = (args.num_compounds + block_size - 1) / block_size;
     int num_compounds_alloc = num_blocks * block_size;
 
     printf("  ncmps rounded up: %d\n", num_compounds_alloc);
 
-    P_base (*tb_output_base)[num_proteins];
-    F_base (*tb_input_base)[num_features];
+    P_base(*tb_output_base)[num_proteins];
+    F_base(*tb_input_base)[num_features];
 
-    U_base (*Ub)[num_proteins][num_latent];
-    M_base (*Mb)[num_latent];
-    B_base (*Bb)[num_features][num_latent];
+    U_base(*Ub)[num_proteins][num_latent];
+    M_base(*Mb)[num_latent];
+    B_base(*Bb)[num_features][num_latent];
 
-    posix_memalign((void**)&tb_output_base, 4096, num_compounds_alloc*num_proteins*sizeof(P_base));
-    posix_memalign((void**)&tb_input_base,  4096, num_compounds_alloc*num_features*sizeof(F_base));
-    posix_memalign((void**)&Ub,             4096, num_samples*num_proteins*num_latent*sizeof(U_base));
-    posix_memalign((void**)&Mb,             4096, num_samples*num_latent*sizeof(M_base));
-    posix_memalign((void**)&Bb,             4096, num_samples*num_features*num_latent*sizeof(B_base));
+    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * sizeof(P_base));
+    posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));
+    posix_memalign((void **)&Ub, 4096, num_samples * num_proteins * num_latent * sizeof(U_base));
+    posix_memalign((void **)&Mb, 4096, num_samples * num_latent * sizeof(M_base));
+    posix_memalign((void **)&Bb, 4096, num_samples * num_features * num_latent * sizeof(B_base));
 
-    P_base  U_check_tb, M_check_tb, B_check_tb;
+    P_base U_check_tb, M_check_tb, B_check_tb;
 
-    prepare_tb_input(num_compounds, tb_input, tb_input_base);
+    prepare_tb_input(args.num_compounds, tb_input, tb_input_base);
     prepare_model(U, M, B, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
 
     int nerrors = 0;
@@ -220,15 +209,15 @@ int main(int argc, char *argv[])
 
     printf("Predicting\n");
     double start = tick();
-    for(int n=0; n<num_repeat; n++)
+    for (int n = 0; n < args.num_repeat; n++)
     {
-        predict_compounds(num_compounds, tb_input_base, tb_output_base);
+        predict_compounds(args.num_compounds, tb_input_base, tb_output_base);
     }
 #pragma omp taskwait
     double stop = tick();
-    nerrors += check_result(num_compounds, tb_output_base, tb_ref);
-    double elapsed = stop-start;
-    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, num_compounds * num_repeat / elapsed);
+    nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
+    double elapsed = stop - start;
+    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, args.num_compounds * args.num_repeat / elapsed);
 
     delete[] tb_output_base;
     delete[] tb_input_base;
@@ -238,4 +227,3 @@ int main(int argc, char *argv[])
 
     return nerrors;
 }
-
