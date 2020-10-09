@@ -168,6 +168,15 @@ main (int argc, char **argv)
      be reflected in arguments. */
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
+    if (argc > 2 && std::atoi(argv[2]))
+    {
+        num_compounds = std::atoi(argv[2]);
+    }
+    
+    // divide and round up
+    int num_blocks = (num_compounds + block_size - 1) / block_size;
+    int num_compounds_alloc = num_blocks * block_size;
+    
     printf("  dt:    %s\n", DT_NAME);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
@@ -176,13 +185,7 @@ main (int argc, char **argv)
     printf("  blks:  %d\n", block_size);
     printf("  nrep:  %d\n", args.num_repeat);
     printf("  ncmps: %d\n", args.num_compounds);
-
-
-    // divide and round up
-    int num_blocks = (args.num_compounds + block_size - 1) / block_size;
-    int num_compounds_alloc = num_blocks * block_size;
-
-    printf("  ncmps rounded up: %d\n", num_compounds_alloc);
+    printf("  alloc: %d\n", num_compounds_alloc);
 
     P_base(*tb_output_base)[num_proteins];
     F_base(*tb_input_base)[num_features];
