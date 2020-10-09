@@ -118,10 +118,14 @@ void features_loop(
 	}
 
 	for (int s = 0; s < num_samples; s++)
+	{
 #pragma HLS UNROLL
 		for (int k = 0; k < num_latent; k++)
+		{
 #pragma HLS UNROLL
-				latents[s][k] << latents_acc[s][k];
+			latents[s][k] << latents_acc[s][k];
+		}
+	}
 }
 
 void proteins_loop(
@@ -133,11 +137,14 @@ void proteins_loop(
 	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
 
 	for (int s = 0; s < num_samples; s++)
-	#pragma HLS UNROLL
+	{
+#pragma HLS UNROLL
 		for (int k = 0; k < num_latent; k++)
-	#pragma HLS UNROLL
-				latents_cache[s][k] = latents[s][k].read();
-
+		{
+#pragma HLS UNROLL
+			latents_cache[s][k] = latents[s][k].read();
+		}
+	}
 
 	for (int d = 0; d < num_proteins; d++)
 	{
