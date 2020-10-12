@@ -82,8 +82,12 @@ struct CLData
     cl::Kernel krnl;
     unsigned nargs;
 
-    CLData(const char *name, const unsigned char * xclbin, unsigned int xclbin_len)
+    CLData(const char *name, const unsigned char * xclbin, unsigned int xclbin_len,
+        const char *emulation_mode)
     {
+        setenv("XCL_EMULATION_MODE", emulation_mode, 1);
+        printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
+
         std::vector<cl::Device> devices = get_devices("Xilinx");
         devices.resize(1);
         device = devices[0];
@@ -132,10 +136,10 @@ struct CLData
     }
 };
 
-extern unsigned char *KERNEL_VAR;
+extern unsigned char KERNEL_VAR[];
 extern unsigned int KERNEL_VAR_LEN;
 
-CLData cl_data("predict_or_update_model", KERNEL_VAR, KERNEL_VAR_LEN);
+CLData cl_data("predict_or_update_model", KERNEL_VAR, KERNEL_VAR_LEN, EMULATION_MODE);
 
 void update_model(
     const  U_arr U_in,
