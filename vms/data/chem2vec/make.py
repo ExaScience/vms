@@ -67,7 +67,7 @@ def download():
             ( 
                 "1MI2gXqc0-PM77qxReYQrmO1QyAITMBZ0",
                 "f49c480076ee43f5635bd957a07c44a8a06133d10985c683b9260930831eb163",
-                "side_c2v.ddm",
+                "features.ddm",
             ),
             ( 
                 "1OpvOLh0fwFQQRDyp8vYdAGU_CIy9WNCP",
