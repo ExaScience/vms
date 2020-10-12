@@ -1,20 +1,20 @@
-
 PROGRAM_ = predict
 SRCFILES = predict.cpp host.cpp non_ocl.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h
 MODELFILES = vms_const.h vms_tb.h
 
-SRCDIR = $(TOPDIR)/code
+SRCDIR = $(TOPDIR)/src
+MODELDIR = $(BUILDDIR)/code
 
 FULLSRCFILES  = $(addprefix $(SRCDIR)/,$(SRCFILES))
 FULLHDRFILES  = $(addprefix $(SRCDIR)/,$(HDRFILES))
-FULLMODELFILES = $(addprefix $(SRCDIR)/,$(MODELFILES))
+FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
 
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
 
-CFLAGS_      = $(CFLAGS) -O0 -g -I$(SRCDIR) 
+CFLAGS_      = $(CFLAGS) -O0 -g -I$(SRCDIR)  -I$(MODELDIR)
 LDFLAGS_     = $(LDFLAGS)
 
 ifeq ($(XILINX_VIVADO),)

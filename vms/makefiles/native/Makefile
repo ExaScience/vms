@@ -1,4 +1,4 @@
-TOPDIR=..
+include ../config.mk
 
 default: native
 

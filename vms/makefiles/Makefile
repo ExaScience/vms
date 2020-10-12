@@ -20,7 +20,7 @@ MODELFILES=code/vms_const.h code/vms_tb.h
 
 model: $(MODELFILES)
 
-.PHONY: hls clean cleanall model
+.PHONY: hls clean cleanall model native
 
 CONDA_BIN = $(dir $(CONDA_EXE))
 
@@ -30,7 +30,7 @@ $(INPUT_DATA): $(TOPDIR)/data/$(DATASET)/make.py
 $(ROOTFILE): $(INPUT_DATA) $(OPTIONS)
 	mkdir -p model
 	source $(CONDA_BIN)/activate smurff-0.14 && \
-		smurff --ini $(OPTIONS) --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
+		OMP_NUM_THREADS=1 smurff --ini $(OPTIONS) --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
 
 $(MODELFILES): $(ROOTFILE) $(TOPDIR)/codegen/gen_dat.py
 	mkdir -p code 
@@ -52,4 +52,7 @@ hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	ln -sf $(addprefix ../,$(HEADERFILES)) code/
 	ln -sf $(addprefix ../,$(CXXFILES)) code/
 	vitis_hls $(TOPDIR)/codegen/run.tcl
+
+native: $(MODELFILES)
+	$(MAKE) -C native
 
