@@ -103,7 +103,9 @@ struct CLData
     template <typename T>
     void addInputArg(const T *ptr, int nelem)
     {
-        std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T) << std::endl;
+        std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
+                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                  << std::endl;
         OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
         OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
     }
@@ -119,6 +121,9 @@ struct CLData
     template <typename T>
     void addOutputArg(const T *ptr, int nelem)
     {
+        std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
+                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                  << std::endl;
         OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
         OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
         outputArgs.push_back(buf);
