@@ -85,8 +85,11 @@ struct CLData
     CLData(const char *name, const unsigned char * xclbin, unsigned int xclbin_len,
         const char *emulation_mode)
     {
-        setenv("XCL_EMULATION_MODE", emulation_mode, 1);
-        printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
+        if (std::string(emulation_mode) != "hw")
+        {
+            setenv("XCL_EMULATION_MODE", emulation_mode, 1);
+            printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
+        }
 
         std::vector<cl::Device> devices = get_devices("Xilinx");
         devices.resize(1);
