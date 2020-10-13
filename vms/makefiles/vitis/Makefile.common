@@ -3,15 +3,6 @@
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(SELF_DIR)../config.mk
 
-help::
-	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make clean "
-	$(ECHO) "      Command to remove the generated non-hardware files."
-	$(ECHO) ""
-	$(ECHO) "  make check"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) ""
-
 DEVICE := xilinx_u200_xdma_201830_2
 KERNEL_NAME := predict_or_update_model
 EXECUTABLE := predict
@@ -26,11 +17,13 @@ CXX := g++
 # The kernel Compiler to use : V++
 VPP := v++
 
-#Host CPP FILE
+#CPP files
 SRCDIR = $(TOPDIR)/src
-HOST_CPP_SRCS += $(SRCDIR)/host.cpp $(SRCDIR)/ocl.cpp
-KERNEL_CPP_SRCS += $(SRCDIR)/predict.cpp
 MODELDIR=$(BUILDDIR)/code
+HOST_SRCS += $(SRCDIR)/host.cpp $(SRCDIR)/ocl.cpp
+KERNEL_SRCS += $(SRCDIR)/predict.cpp
+KERNEL_HDRS = $(MODELDIR)/vms_const.h $(wildcard $(SRCDIR)/*.h)
+HOST_HDRS = $(MODELDIR)/vms_tb.h
 
 # Enable Profiling
 PROFILE:= no
@@ -58,7 +51,7 @@ KERNEL_VAR  = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
 CXXFLAGS += -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len -DEMULATION_MODE=\"$(TARGET)\"
 
 # Building kernel
-$(KERNEL_OBJ): $(KERNEL_CPP_SRCS)
+$(KERNEL_OBJ): $(KERNEL_SRCS) $(KERNEL_HDRS)
 	$(VPP) $(CLFLAGS) --temp_dir $(TEMP_DIR) -c -k $(KERNEL_NAME) -I. -I$(<D) -o$@ $<
 
 $(KERNEL_BIN): $(KERNEL_OBJ)
@@ -67,8 +60,8 @@ $(KERNEL_BIN): $(KERNEL_OBJ)
 $(KERNEL_INC): $(KERNEL_BIN)
 	xxd -i $< $@
 
-$(EXECUTABLE): $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC)
-	$(CXX) $(CXXFLAGS) $(HOST_CPP_SRCS) $(HOST_CPP_HDRS) $(KERNEL_INC) -o $@ $(LDFLAGS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KERNEL_INC)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) $(KERNEL_INC) -o $@ $(LDFLAGS)
 
 xrt.ini: ../xrt.ini
 	ln -s ../xrt.ini
