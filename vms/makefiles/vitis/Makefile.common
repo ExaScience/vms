@@ -83,7 +83,8 @@ clean:
 	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.inc
 	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
 	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
-	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb
+	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb *.ltx
+	-$(RMDIR) *gen.cpp
 	-$(RMDIR) xrt.ini
 
 kill:
