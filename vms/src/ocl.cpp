@@ -1,53 +1,15 @@
 
-#include <cassert>
-#include <cstdio>
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
-
-#include <chrono>
+#include <thread>
 #include <iostream>
+
+#include "xcl2.hpp"
 
 #include "predict.h"
 #include "vms_tb.h"
 
-template <typename T>
-struct aligned_allocator
-{
-  using value_type = T;
-  T* allocate(std::size_t num)
-  {
-    void* ptr = nullptr;
-    if (posix_memalign(&ptr,4096,num*sizeof(T)))
-      throw std::bad_alloc();
-    return reinterpret_cast<T*>(ptr);
-  }
-  void deallocate(T* p, std::size_t num)
-  {
-    free(p);
-  }
-};
-
-
-#define CL_HPP_CL_1_2_DEFAULT_BUILD
-#define CL_HPP_TARGET_OPENCL_VERSION 120
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-
-//OCL_CHECK doesn't work if call has templatized function call
-#define OCL_CHECK(error,call)                                       \
-    call;                                                           \
-    if (error != CL_SUCCESS) {                                      \
-      printf("%s:%d Error calling " #call ", error code is: %d\n",  \
-              __FILE__,__LINE__, error);                            \
-      exit(EXIT_FAILURE);                                           \
-    }
-
-#include <CL/cl2.hpp>
 
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
-
     size_t i;
     cl_int err;
     std::vector<cl::Platform> platforms;
@@ -75,16 +37,21 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
 
 struct CLData
 {
-    cl_int err;
     cl::Device device;
     cl::Context context;
     cl::CommandQueue q;
     cl::Kernel krnl;
     unsigned nargs;
 
+    std::vector<cl::Buffer> outputArgs;
+    std::vector<cl_stream> inputStreams, outputStreams;
+    std::vector<std::thread> threads;
+
+
     CLData(const char *name, const unsigned char * xclbin, unsigned int xclbin_len,
         const char *emulation_mode)
     {
+        cl_int err;
         if (std::string(emulation_mode) != "hw")
         {
             setenv("XCL_EMULATION_MODE", emulation_mode, 1);
@@ -104,8 +71,65 @@ struct CLData
     }
 
     template <typename T>
+    void addInputStream(const T *ptr, int nelem)
+    {
+        cl_int err;
+        std::cout << " input stream " << nargs << ": " << nelem << " of size " << sizeof(T) 
+                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                  << std::endl;
+        cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
+        ext.param = krnl.get();
+        ext.obj = NULL;
+        ext.flags = nargs;
+
+        // Create write stream for argument
+        cl_stream stream;
+        OCL_CHECK(err, stream = xcl::Stream::createStream(device.get(), XCL_STREAM_READ_ONLY, CL_STREAM, &ext, &err));
+
+        // Initiating the WRITE transfer
+        cl_stream_xfer_req req{0};
+        req.flags = CL_STREAM_EOT;
+        std::string name("input_stream_" + std::to_string(nargs));
+        req.priv_data = (void *)name.c_str();
+
+        // Thread for writing data to input stream independently in case of default blocking transfers.
+        threads.push_back(std::thread(xcl::Stream::writeStream, stream, ptr, nelem * sizeof(T), &req, &err));
+
+        nargs++;
+    }
+
+    template <typename T>
+    void addOutputStream(const T *ptr, int nelem)
+    {
+        cl_int err;
+        std::cout << " output stream " << nargs << ": " << nelem << " of size " << sizeof(T) 
+                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                  << std::endl;
+        cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
+        ext.param = krnl.get();
+        ext.obj = NULL;
+        ext.flags = nargs;
+
+        // Create write stream for argument
+        cl_stream stream;
+        OCL_CHECK(err, stream = xcl::Stream::createStream(device.get(), XCL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &err));
+
+        // Initiating the WRITE transfer
+        cl_stream_xfer_req req{0};
+        req.flags = CL_STREAM_EOT;
+        std::string name("output_stream_" + std::to_string(nargs));
+        req.priv_data = (void *)name.c_str();
+
+        // Thread for writing data to input stream independently in case of default blocking transfers.
+        threads.push_back(std::thread(xcl::Stream::readStream, stream, ptr, nelem * sizeof(T), &req, &err));
+
+        nargs++;
+    }
+
+    template <typename T>
     void addInputArg(const T *ptr, int nelem)
     {
+        cl_int err;
         std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
                   << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                   << std::endl;
@@ -116,14 +140,14 @@ struct CLData
     template <typename T>
     void addInputArg(const T val)
     {
+        cl_int err;
         OCL_CHECK(err, err = krnl.setArg(nargs++, val));
     }
-
-    std::vector<cl::Buffer> outputArgs;
 
     template <typename T>
     void addOutputArg(const T *ptr, int nelem)
     {
+        cl_int err;
         std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
                   << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                   << std::endl;
@@ -134,13 +158,19 @@ struct CLData
 
     void go()
     {
+        cl_int err;
         OCL_CHECK(err, err = q.enqueueTask(krnl));
         for ( auto & buffer_output : outputArgs)
             OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+
+        for (auto &t : threads) t.join();
         q.finish();
 
         nargs = 0;
         outputArgs.clear();
+        inputStreams.clear();
+        outputStreams.clear();
+        threads.clear();
     }
 };
 
