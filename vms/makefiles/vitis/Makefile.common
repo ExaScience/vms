@@ -61,7 +61,7 @@ $(KERNEL_INC): $(KERNEL_BIN)
 	xxd -i $< $@
 
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KERNEL_INC)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) $(KERNEL_INC) -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(KERNEL_INC) -o $@ $(LDFLAGS)
 
 xrt.ini: ../xrt.ini
 	ln -s ../xrt.ini
