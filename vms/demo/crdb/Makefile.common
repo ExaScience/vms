@@ -4,7 +4,7 @@ SRCFILES = predict.cpp test_bench.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h
 MODELFILES = vms_const.h vms_tb.h
 
-SRCDIR = $(TOPDIR)/code
+SRCDIR = $(TOPDIR)/src
 
 FULLSRCFILES  = $(addprefix $(SRCDIR)/,$(SRCFILES))
 FULLHDRFILES  = $(addprefix $(SRCDIR)/,$(HDRFILES))
