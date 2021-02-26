@@ -64,15 +64,15 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
 {
     std::vector<Sample> model;
 
-    auto sample0 = Sample(1, modeldir, devices);
-    size_t nlat  = sample0.U1.rows();
-    size_t nfeat = sample0.F0.cols();
-    size_t nprot = sample0.U1.cols();
-
     printf("Reading model from %s\n", modeldir.c_str());
     printf("  nprot: %lu\n", nprot);
     printf("  nlat:  %lu\n", nlat);
     printf("  nfeat: %lu\n", nfeat);
+
+    auto sample0 = Sample(1, modeldir, devices);
+    size_t nlat  = sample0.U1.rows();
+    size_t nfeat = sample0.F0.cols();
+    size_t nprot = sample0.U1.cols();
 
     for(int s = samples_from; s <= samples_to; s++)
         model.push_back(Sample(s, modeldir, devices));
@@ -254,17 +254,18 @@ int main(int ac, char *av[])
     if (use_eigen) 
     {
         std::cout << "Using Eigen" << std::endl;
+        devices.clear()
     } 
     else
     {
         if (devices.empty())  // use first GPU by default
             devices = {0};
         af::info();
-    }
 
-    std::cout << "Using these devices (cores/GPUs):";
-    for(auto dev : devices) std:: cout << " " << dev;
-    std::cout << std::endl;
+        std::cout << "Using these devices (cores/GPUs):";
+        for(auto dev : devices) std:: cout << " " << dev;
+        std::cout << std::endl;
+    }
 
     auto model = read_model(from, to, modeldir, devices);
 
