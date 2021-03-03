@@ -1,5 +1,6 @@
 #include <omp.h>
 
+#include <cstdio>
 #include <chrono>
 #include <string>
 #include <algorithm>
@@ -64,20 +65,22 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
 {
     std::vector<Sample> model;
 
-    printf("Reading model from %s\n", modeldir.c_str());
-    printf("  nprot: %lu\n", nprot);
-    printf("  nlat:  %lu\n", nlat);
-    printf("  nfeat: %lu\n", nfeat);
+    fprintf(stderr, "Reading model from %s\n", modeldir.c_str());
 
     auto sample0 = Sample(1, modeldir, devices);
     size_t nlat  = sample0.U1.rows();
     size_t nfeat = sample0.F0.cols();
     size_t nprot = sample0.U1.cols();
 
+    fprintf(stderr, "  nprot: %lu\n", nprot);
+    fprintf(stderr, "  nlat:  %lu\n", nlat);
+    fprintf(stderr, "  nfeat: %lu\n", nfeat);
+
+
     for(int s = samples_from; s <= samples_to; s++)
         model.push_back(Sample(s, modeldir, devices));
 
-    printf("  nsmpl: %lu\n", model.size());
+    fprintf(stderr, "  nsmpl: %lu\n", model.size());
 
     return model;
 }
@@ -93,7 +96,7 @@ void eigen_predict_block(MatrixX8 &ret,
     size_t ncomp = row_features.rows();
     size_t nfeat = row_features.cols();
 
-    // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
+    // fprintf(stderr, "%.2f: start block %d; dev %d\n", tick(), block, dev);
     auto bs = std::min(blocksize, ncomp - block);
     auto feat = row_features.block(block, 0, bs, nfeat);
     Eigen::MatrixXf pred = Eigen::MatrixXf::Zero(feat.rows(), nprot);
@@ -108,7 +111,7 @@ void eigen_predict_block(MatrixX8 &ret,
     // final result is in 8bit unsigned
     ret.block(block, 0, bs, nprot) =  (pred / (float)(model.size())).cast<std::uint8_t>();
     
-    //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
+    //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
 void af_predict_block(MatrixX8 &ret,
@@ -130,7 +133,7 @@ void af_predict_block(MatrixX8 &ret,
 
     int dev = omp_get_thread_num();
     af::setDevice(devices[dev]);
-    // printf("%.2f: start block %d; dev %d\n", tick(), block, dev);
+    // fprintf(stderr, "%.2f: start block %d; dev %d\n", tick(), block, dev);
     auto feat = load_block(block);
     auto pred = af::constant(.0, feat.dims(0), nprot);
 
@@ -147,7 +150,7 @@ void af_predict_block(MatrixX8 &ret,
 
     // copy data to host
     out.host(&ret.coeffRef(block, 0));
-    //printf("%.2f: end block %d; dev %d\n", tick(), block, dev);
+    //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
 MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen)
@@ -166,9 +169,9 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 
     MatrixX8 ret(ncomp, nprot);
 
-    printf("Predicting for:\n");
-    printf("  ncomp: %lu\n", ncomp);
-    printf("  bs:    %lu\n", blocksize);
+    fprintf(stderr, "Predicting for:\n");
+    fprintf(stderr, "  ncomp: %lu\n", ncomp);
+    fprintf(stderr, "  bs:    %lu\n", blocksize);
 
     auto timer = af::timer::start();
 
@@ -194,12 +197,12 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
     double elapsed = timer.stop();
     double compounds_per_sec = (double)ncomp / elapsed;
 
-    printf("took: %.2f sec; %.2f compounds/second\n", elapsed, compounds_per_sec);
+    fprintf(stderr, "took: %.2f sec; %.2f compounds/second\n", elapsed, compounds_per_sec);
 
     // terra-ops aka 10^12 ops
     double tops = (double)(model.size()) * (double)ncomp * (double)nlat * (double)(nfeat + nprot) / 1e12;
 
-    printf("%.2f tera-ops; %.2f tera-ops/second (%d-bit floating point ops)\n", tops, tops/elapsed, float_size);
+    fprintf(stderr, "%.2f tera-ops; %.2f tera-ops/second (%d-bit floating point ops)\n", tops, tops/elapsed, float_size);
     
     return ret;
 }
@@ -253,8 +256,8 @@ int main(int ac, char *av[])
 
     if (use_eigen) 
     {
-        std::cout << "Using Eigen" << std::endl;
-        devices.clear()
+        fprintf(stderr, "Using Eigen\n");
+        devices.clear();
     } 
     else
     {
@@ -278,7 +281,7 @@ int main(int ac, char *av[])
     if (!out.empty())
     {
         write_matrix(out, pred.cast<double>());
-        printf("wrote %lu x %lu predictions\n", pred.rows(), pred.cols());
+        fprintf(stderr, "wrote %lu x %lu predictions\n", pred.rows(), pred.cols());
     }
 
     return 0;
