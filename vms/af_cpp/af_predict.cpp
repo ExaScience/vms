@@ -133,7 +133,11 @@ void af_predict_block(
         return as_af(row_features.block(block, 0, bs, nfeat));
     };
 
+#ifdef _OPENMP
     int dev = omp_get_thread_num();
+#else
+    int dev = 0;
+#endif
     af::setDevice(devices[dev]);
     // fprintf(stderr, "%.2f: start block %d; dev %d\n", tick(), block, dev);
     auto feat = load_block(block);
@@ -182,7 +186,16 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 #endif
 
     int ndev = devices.size();
-    if (ndev > 0) omp_set_num_threads(ndev);
+    if (ndev > 0) 
+    {
+#ifdef _OPENMP
+        omp_set_num_threads(ndev);
+#else
+        if (ndev > 1) 
+            fprintf(stderr, "warning: No OpenMP, using only first device\n");
+#endif
+    }
+
 #pragma omp parallel for 
     for(size_t block=0; block<ncomp; block+=blocksize)
     {
@@ -232,11 +245,11 @@ int main(int ac, char *av[])
         ("backend", po::value<std::string>(&backend), "ArrayFire backend to use (cuda, opencl, cpu)")
 
         ("from", po::value<int>(&from), "Process from this sample onwards")
-        ("to", po::value<int>(&to), "Process until this sample")
-        ("repeate", po::value<int>(&repeat), "Repeat this many times, and report fastest")
+        ("to", po::value<int>(&to), "Process until this sample (inclusive)")
+        ("repeat", po::value<int>(&repeat), "Repeat this many times, and report fastest")
         ("modeldir", po::value<std::string>(&modeldir), "Model directory")
         ("features", po::value<std::string>(&features), "Features file")
-        ("block", po::value<int>(&blocksize), "Process this man compounds at a time")
+        ("block", po::value<int>(&blocksize), "Process this many compounds at a time")
         ("out", po::value<std::string>(&out), "Output file")
     ;
 
