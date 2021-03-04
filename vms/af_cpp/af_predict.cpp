@@ -122,7 +122,9 @@ void af_predict_block(
     size_t block,
     size_t blocksize,
     size_t nprot,
-    std::vector<int> devices)
+    std::vector<int> devices,
+    int eval_every
+    )
 {
     size_t ncomp = row_features.rows();
     size_t nfeat = row_features.cols();
@@ -143,12 +145,14 @@ void af_predict_block(
     auto feat = load_block(block);
     auto pred = af::constant(.0, feat.dims(0), nprot);
 
+    int s = 0;
     for (const auto &sample : model)
     {
         auto U0 = af::matmulNT(sample.af_F0[dev], feat);
         auto U0m = af::tile(sample.af_M0[dev], 1, feat.dims(0));
         auto U0c = U0 + U0m;
         pred += af::matmulTN(U0c, sample.af_U1[dev]);
+        s++; if ((s % eval_every) == 0) pred.eval();
     }
 
     // final result is in 8bit unsigned
@@ -159,7 +163,7 @@ void af_predict_block(
     //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
-MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen)
+MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen, int eval_every)
 {
     Eigen::MatrixXd features;
     read_matrix(ffile, features);
@@ -178,6 +182,7 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
     fprintf(stderr, "Predicting for:\n");
     fprintf(stderr, "  ncomp: %lu\n", ncomp);
     fprintf(stderr, "  bs:    %lu\n", blocksize);
+    fprintf(stderr, "  eval:  %d\n", eval_every);
 
     auto timer = af::timer::start();
 
@@ -202,7 +207,7 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
         if (use_eigen)
             eigen_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
         else
-            af_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
+            af_predict_block(ret, model, row_features, block, blocksize, nprot, devices, eval_every);
     }
 
 #ifdef CUDA_PROFILE
@@ -235,6 +240,7 @@ int main(int ac, char *av[])
     std::string features = "features.ddm";
     std::string out;
     bool use_eigen = false;
+    int eval_every = 9999999;
 
     // Declare the supported options.
     po::options_description desc("Options");
@@ -243,6 +249,7 @@ int main(int ac, char *av[])
 
         ("devices", po::value<std::vector<int>>(&devices)->multitoken(), "ArrayFire devices to use")
         ("backend", po::value<std::string>(&backend), "ArrayFire backend to use (cuda, opencl, cpu)")
+        ("eval-every", po::value<int>(&eval_every), "ArrayFire: eval() evert N samples")
 
         ("from", po::value<int>(&from), "Process from this sample onwards")
         ("to", po::value<int>(&to), "Process until this sample (inclusive)")
@@ -290,7 +297,7 @@ int main(int ac, char *av[])
     MatrixX8 pred;
     for(int r=0; r<repeat; r++)
     {
-	    pred = predict(model, features, blocksize, devices, use_eigen);
+	    pred = predict(model, features, blocksize, devices, use_eigen, eval_every);
     }
 
     if (!out.empty())
