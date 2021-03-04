@@ -85,7 +85,8 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
     return model;
 }
 
-void eigen_predict_block(MatrixX8 &ret,
+void eigen_predict_block(
+    Eigen::Map<MatrixX8> ret,
     const std::vector<Sample> &model,
     const Eigen::Map<Eigen::MatrixXf> &row_features,
     size_t block,
@@ -114,7 +115,8 @@ void eigen_predict_block(MatrixX8 &ret,
     //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
-void af_predict_block(MatrixX8 &ret,
+void af_predict_block(
+    Eigen::Map<MatrixX8> &ret,
     const std::vector<Sample> &model,
     const Eigen::Map<Eigen::MatrixXf> &row_features,
     size_t block,
@@ -167,7 +169,7 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
     size_t nfeat = model.at(0).F0.cols();
     size_t nprot = model.at(0).U1.cols();
 
-    MatrixX8 ret(ncomp, nprot);
+    Eigen::Map<MatrixX8> ret(af::pinned<std::uint8_t>(ncomp*nprot), ncomp, nprot);
 
     fprintf(stderr, "Predicting for:\n");
     fprintf(stderr, "  ncomp: %lu\n", ncomp);
