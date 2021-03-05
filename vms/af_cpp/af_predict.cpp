@@ -88,7 +88,7 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
 void eigen_predict_block(
     Eigen::Map<MatrixX8> ret,
     const std::vector<Sample> &model,
-    const Eigen::Map<Eigen::MatrixXf> &row_features,
+    const Eigen::MatrixXf &row_features,
     size_t block,
     size_t blocksize,
     size_t nprot,
@@ -118,7 +118,7 @@ void eigen_predict_block(
 void af_predict_block(
     Eigen::Map<MatrixX8> &ret,
     const std::vector<Sample> &model,
-    const Eigen::Map<Eigen::MatrixXf> &row_features,
+    const Eigen::MatrixXf &row_features,
     size_t block,
     size_t blocksize,
     size_t nprot,
@@ -163,16 +163,16 @@ void af_predict_block(
     //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
-MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen, int eval_every)
+MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen, int eval_every, int limit)
 {
     Eigen::MatrixXd features;
     read_matrix(ffile, features);
 
-    Eigen::Map<Eigen::MatrixXf> row_features(af::pinned<float>(features.nonZeros()), features.rows(), features.cols());
-
-    row_features = features.cast<float>();
+    Eigen::MatrixXf row_features = features.cast<float>();
 
     size_t ncomp = features.rows();
+    if (limit > 0 && ncomp > limit) ncomp = limit;
+
     size_t nlat  = model.at(0).U1.rows();
     size_t nfeat = model.at(0).F0.cols();
     size_t nprot = model.at(0).U1.cols();
@@ -196,7 +196,7 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 #ifdef _OPENMP
         omp_set_num_threads(ndev);
 #else
-        if (ndev > 1) 
+        if (ndev > 1 && !use_eigen) 
             fprintf(stderr, "warning: No OpenMP, using only first device\n");
 #endif
     }
@@ -220,9 +220,11 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
     fprintf(stderr, "took: %.2f sec; %.2f compounds/second\n", elapsed, compounds_per_sec);
 
     // terra-ops aka 10^12 ops
-    double tops = (double)(model.size()) * (double)ncomp * (double)nlat * (double)(nfeat + nprot) / 1e12;
+    double gops = (double)(model.size()) * (double)ncomp * (double)nlat * (double)(nfeat + nprot) / 1e9;
+    double tops = gops / 1e3;
 
     fprintf(stderr, "%.2f tera-ops; %.2f tera-ops/second (%d-bit floating point ops)\n", tops, tops/elapsed, float_size);
+    fprintf(stderr, "%.2f giga-ops; %.2f giga-ops/second (%d-bit floating point ops)\n", gops, gops/elapsed, float_size);
     
     return ret;
 }
@@ -236,6 +238,7 @@ int main(int ac, char *av[])
     int from = 1;
     int to = 100;
     int blocksize = 10000;
+    int compound_limit = -1;
     std::string modeldir = "model/";
     std::string features = "features.ddm";
     std::string out;
@@ -253,6 +256,7 @@ int main(int ac, char *av[])
 
         ("from", po::value<int>(&from), "Process from this sample onwards")
         ("to", po::value<int>(&to), "Process until this sample (inclusive)")
+        ("limit", po::value<int>(&compound_limit), "Process at most this amount of compounds")
         ("repeat", po::value<int>(&repeat), "Repeat this many times, and report fastest")
         ("modeldir", po::value<std::string>(&modeldir), "Model directory")
         ("features", po::value<std::string>(&features), "Features file")
@@ -279,25 +283,24 @@ int main(int ac, char *av[])
     if (use_eigen) 
     {
         fprintf(stderr, "Using Eigen\n");
-        devices.clear();
     } 
     else
     {
-        if (devices.empty())  // use first GPU by default
-            devices = {0};
+        // use first GPU by default
+        if (devices.empty()) devices = {0};
         af::info();
-
-        std::cout << "Using these devices (cores/GPUs):";
-        for(auto dev : devices) std:: cout << " " << dev;
-        std::cout << std::endl;
     }
 
-    auto model = read_model(from, to, modeldir, devices);
+    std::cout << "Using these devices (cores/GPUs):";
+    for(auto dev : devices) std:: cout << " " << dev;
+    std::cout << std::endl;
+
+    auto model = read_model(from, to, modeldir,  use_eigen ? std::vector<int>() : devices);
 
     MatrixX8 pred;
     for(int r=0; r<repeat; r++)
     {
-	    pred = predict(model, features, blocksize, devices, use_eigen, eval_every);
+	    pred = predict(model, features, blocksize, devices, use_eigen, eval_every, compound_limit);
     }
 
     if (!out.empty())
