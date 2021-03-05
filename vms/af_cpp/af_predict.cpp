@@ -196,8 +196,8 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 #ifdef _OPENMP
         omp_set_num_threads(ndev);
 #else
-        if (ndev > 1 && !use_eigen) 
-            fprintf(stderr, "warning: No OpenMP, using only first device\n");
+        if (ndev > 1) 
+            fprintf(stderr, "warning: No OpenMP, using only first device/core\n");
 #endif
     }
 
@@ -283,6 +283,10 @@ int main(int ac, char *av[])
     if (use_eigen) 
     {
         fprintf(stderr, "Using Eigen\n");
+#ifdef _OPENMP
+        int nthrd = omp_get_max_threads();
+        if (devices.empty()) for(int i=0; i<nthrd; i++) devices.push_back(i);
+#endif
     } 
     else
     {
