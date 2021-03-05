@@ -1,0 +1,1225 @@
+
+model name      : AMD EPYC 7402 24-Core Processor
+
+
+Model Cores Threads Base Freq. (GHz) Max. Boost Freq. (GHz) a TDP (W) L3 Cache (MB) DDR Channels Max DDR Freq. (1DPC)c Per-Socket Theoretical Memory Bandwidth (GB/s)
+7402  24    48      2.80             3.35 1                   80      128           8            3200                  204.8
+
+
+
+with intel mkl + ld_preload
+---------------------------
+
+(vms) [vanderaa1@jwlogin07 af_cpp]$ LD_PRELOAD=$PWD/libfakeintel.so srun ./af_predict --backend eigen --block 100 --repeat 2
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 7.79 sec; 122703.62 compounds/second
+6.08 tera-ops; 0.78 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 781.38 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 7.35 sec; 129897.57 compounds/second
+6.08 tera-ops; 0.83 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 827.19 giga-ops/second (32-bit floating point ops)
+
+
+with eigen internal
+-------------------
+
+(base) [vanderaa1@jwlogin07 af_cpp]$ srun ./af_predict --backend eigen --block 100 --repeat 2
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 19.58 sec; 48803.68 compounds/second
+6.08 tera-ops; 0.31 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 310.78 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 19.43 sec; 49175.51 compounds/second
+6.08 tera-ops; 0.31 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 313.15 giga-ops/second (32-bit floating point ops)
+
+
+with intel MKL
+--------------
+
+MKL_CBWR=COMPATIBLE
+MKL_DEBUG_CPU_TYPE=5
+
+(vms) [vanderaa1@jwlogin07 af_cpp]$ srun ./af_predict --backend eigen --block 100 --repeat 2
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 21.51 sec; 44418.59 compounds/second
+6.08 tera-ops; 0.28 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 282.86 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 955386
+  bs:    100
+  eval:  9999999
+took: 21.25 sec; 44968.47 compounds/second
+6.08 tera-ops; 0.29 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 286.36 giga-ops/second (32-bit floating point ops)
+
+
+===========================
+
++ CORES=0
+++ seq 47
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0
+Using Eigen
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 51.53 sec; 1940.47 compounds/second
+0.64 tera-ops; 0.01 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 12.36 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 51.14 sec; 1955.38 compounds/second
+0.64 tera-ops; 0.01 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 12.45 giga-ops/second (32-bit floating point ops)
++ CORES='0 1'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 26.15 sec; 3824.27 compounds/second
+0.64 tera-ops; 0.02 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 24.35 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 25.96 sec; 3851.59 compounds/second
+0.64 tera-ops; 0.02 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 24.53 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 17.73 sec; 5641.73 compounds/second
+0.64 tera-ops; 0.04 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 35.93 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 17.58 sec; 5688.47 compounds/second
+0.64 tera-ops; 0.04 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 36.22 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 13.41 sec; 7455.90 compounds/second
+0.64 tera-ops; 0.05 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 47.48 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 13.43 sec; 7445.64 compounds/second
+0.64 tera-ops; 0.05 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 47.41 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 10.55 sec; 9480.14 compounds/second
+0.64 tera-ops; 0.06 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 60.37 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 10.43 sec; 9585.22 compounds/second
+0.64 tera-ops; 0.06 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 61.04 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 9.11 sec; 10972.90 compounds/second
+0.64 tera-ops; 0.07 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 69.88 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 8.97 sec; 11151.59 compounds/second
+0.64 tera-ops; 0.07 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 71.01 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 8.18 sec; 12219.66 compounds/second
+0.64 tera-ops; 0.08 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 77.81 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 8.07 sec; 12392.52 compounds/second
+0.64 tera-ops; 0.08 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 78.92 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 7.50 sec; 13324.61 compounds/second
+0.64 tera-ops; 0.08 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 84.85 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 7.08 sec; 14117.57 compounds/second
+0.64 tera-ops; 0.09 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 89.90 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 6.63 sec; 15083.08 compounds/second
+0.64 tera-ops; 0.10 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 96.05 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 6.44 sec; 15520.86 compounds/second
+0.64 tera-ops; 0.10 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 98.84 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 6.18 sec; 16183.46 compounds/second
+0.64 tera-ops; 0.10 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 103.06 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.49 sec; 18229.30 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 116.08 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.80 sec; 17227.53 compounds/second
+0.64 tera-ops; 0.11 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 109.70 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.29 sec; 18895.66 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 120.33 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.83 sec; 17161.58 compounds/second
+0.64 tera-ops; 0.11 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 109.28 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.06 sec; 19765.75 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 125.87 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.58 sec; 17935.07 compounds/second
+0.64 tera-ops; 0.11 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 114.21 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.75 sec; 21058.26 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 134.10 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.44 sec; 18377.78 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 117.03 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.61 sec; 21710.33 compounds/second
+0.64 tera-ops; 0.14 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 138.25 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.72 sec; 21164.95 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 134.78 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.14 sec; 19453.95 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 123.88 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.87 sec; 17034.39 compounds/second
+0.64 tera-ops; 0.11 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 108.48 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.98 sec; 16718.07 compounds/second
+0.64 tera-ops; 0.11 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 106.46 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.36 sec; 18648.51 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 118.75 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.97 sec; 20118.14 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 128.11 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.31 sec; 18817.54 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 119.83 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.40 sec; 18507.60 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 117.86 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.23 sec; 19135.37 compounds/second
+0.64 tera-ops; 0.12 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 121.85 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.86 sec; 20567.32 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 130.97 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 5.04 sec; 19845.53 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 126.38 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.85 sec; 20602.21 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 131.19 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.91 sec; 20357.65 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 129.64 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.79 sec; 20891.33 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 133.04 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.99 sec; 20033.19 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 127.57 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.82 sec; 20730.18 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 132.01 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.84 sec; 20652.76 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 131.52 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.87 sec; 20531.33 compounds/second
+0.64 tera-ops; 0.13 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 130.74 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.38 sec; 22826.62 compounds/second
+0.64 tera-ops; 0.15 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 145.36 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.54 sec; 22044.31 compounds/second
+0.64 tera-ops; 0.14 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 140.38 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.73 sec; 26788.92 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 170.59 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.55 sec; 28180.53 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 179.45 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.54 sec; 22037.58 compounds/second
+0.64 tera-ops; 0.14 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 140.34 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.65 sec; 21487.21 compounds/second
+0.64 tera-ops; 0.14 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 136.83 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.09 sec; 24464.12 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 155.79 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.97 sec; 25165.46 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 160.25 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.84 sec; 26049.03 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 165.88 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.91 sec; 25583.31 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 162.91 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.05 sec; 24676.63 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 157.14 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.88 sec; 25758.44 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 164.03 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.63 sec; 27511.97 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 175.20 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.39 sec; 29481.43 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 187.74 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.07 sec; 24550.19 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 156.34 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.74 sec; 26717.59 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 170.14 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.18 sec; 23936.71 compounds/second
+0.64 tera-ops; 0.15 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 152.43 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.64 sec; 27495.90 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 175.09 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.58 sec; 27906.67 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 177.71 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.70 sec; 26999.66 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 171.93 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.07 sec; 32526.90 compounds/second
+0.64 tera-ops; 0.21 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 207.13 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 2.94 sec; 34033.96 compounds/second
+0.64 tera-ops; 0.22 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 216.73 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.78 sec; 26433.80 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 168.33 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.71 sec; 26970.43 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 171.75 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.54 sec; 28262.09 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 179.97 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.25 sec; 30780.48 compounds/second
+0.64 tera-ops; 0.20 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 196.01 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.66 sec; 27285.53 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 173.75 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.48 sec; 28748.45 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 183.07 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.90 sec; 25625.07 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 163.18 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.58 sec; 27924.49 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 177.82 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.47 sec; 28841.31 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 183.66 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.17 sec; 31513.22 compounds/second
+0.64 tera-ops; 0.20 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 200.68 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.46 sec; 28923.98 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 184.19 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.10 sec; 32280.41 compounds/second
+0.64 tera-ops; 0.21 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 205.56 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 4.03 sec; 24792.37 compounds/second
+0.64 tera-ops; 0.16 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 157.88 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 2.91 sec; 34337.63 compounds/second
+0.64 tera-ops; 0.22 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 218.66 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.80 sec; 26284.84 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 167.38 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.40 sec; 29426.57 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 187.39 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.41 sec; 29347.22 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 186.88 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.38 sec; 29599.01 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 188.49 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.44 sec; 29111.84 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 185.38 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.30 sec; 30259.94 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 192.70 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.50 sec; 28595.45 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 182.10 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.45 sec; 29023.37 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 184.82 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+Using Eigen
+Reading model from model/
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.49 sec; 28620.91 compounds/second
+0.64 tera-ops; 0.18 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 182.26 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.43 sec; 29186.99 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 185.86 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46'
++ for C in $(seq 47)
++ srun ./af_predict --backend eigen --block 1000 --limit 100000 --repeat 2 --devices 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46
+Using Eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.70 sec; 27023.06 compounds/second
+0.64 tera-ops; 0.17 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 172.08 giga-ops/second (32-bit floating point ops)
+Predicting for:
+  ncomp: 100000
+  bs:    1000
+  eval:  9999999
+took: 3.31 sec; 30175.93 compounds/second
+0.64 tera-ops; 0.19 tera-ops/second (32-bit floating point ops)
+636.80 giga-ops; 192.16 giga-ops/second (32-bit floating point ops)
++ CORES='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47'
