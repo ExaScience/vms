@@ -1,5 +1,9 @@
 #include <omp.h>
 
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 #include <cstdio>
 #include <chrono>
 #include <string>
@@ -61,6 +65,32 @@ struct Sample
 
 };
 
+static int mpi_world_size;
+static int mpi_world_rank;
+
+#ifdef USE_MPI
+bool mpi_init() 
+{
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_world_rank);
+    return world_rank == 0;
+}
+
+void mpi_finit()
+{
+    MPI_Finalize();
+}
+#else 
+
+bool mpi_init() {
+    mpi_world_size = 1;
+    mpi_world_rank = 0;
+    return true;
+}
+void mpi_finit() {}
+#endif
+
 std::vector<Sample> read_model(int samples_from, int samples_to, std::string modeldir, std::vector<int> devices)
 {
     std::vector<Sample> model;
@@ -83,6 +113,13 @@ std::vector<Sample> read_model(int samples_from, int samples_to, std::string mod
     fprintf(stderr, "  nsmpl: %lu\n", model.size());
 
     return model;
+}
+
+Eigen::MatrixXf read_features(const std::string& ffile)
+{
+    Eigen::MatrixXd features;
+    read_matrix(ffile, features);
+    return features.cast<float>();
 }
 
 void eigen_predict_block(
@@ -163,13 +200,15 @@ void af_predict_block(
     //fprintf(stderr, "%.2f: end block %d; dev %d\n", tick(), block, dev);
 }
 
-MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blocksize, std::vector<int> devices, bool use_eigen, int eval_every, int limit)
+MatrixX8 predict(
+        const std::vector<Sample> &model,
+        const Eigen::MatrixXf &row_features,
+        size_t blocksize,
+        std::vector<int> devices,
+        bool use_eigen,
+        int eval_every,
+        int limit)
 {
-    Eigen::MatrixXd features;
-    read_matrix(ffile, features);
-
-    Eigen::MatrixXf row_features = features.cast<float>();
-
     size_t ncomp = features.rows();
     if (limit > 0 && ncomp > limit) ncomp = limit;
 
@@ -201,8 +240,11 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 #endif
     }
 
+    size_t ncomp_per_rank = ncomp / mpi_world_size;
+    size_t block_start = ncomp_per_rank * mpi_world_rank;
+
 #pragma omp parallel for 
-    for(size_t block=0; block<ncomp; block+=blocksize)
+    for(size_t block=block_start; block<ncomp_per_rank; block+=blocksize)
     {
         if (use_eigen)
             eigen_predict_block(ret, model, row_features, block, blocksize, nprot, devices);
@@ -231,6 +273,12 @@ MatrixX8 predict(const std::vector<Sample> &model, std::string ffile, size_t blo
 
 int main(int ac, char *av[])
 {
+    if !mpi_init()
+    {
+        mpi_predict_slave();
+        return 0;
+    }
+
     std::vector<int> devices;
     std::string backend;
 
@@ -300,6 +348,7 @@ int main(int ac, char *av[])
     std::cout << std::endl;
 
     auto model = read_model(from, to, modeldir,  use_eigen ? std::vector<int>() : devices);
+    auto features = read_features(features_file);
 
     MatrixX8 pred;
     for(int r=0; r<repeat; r++)
