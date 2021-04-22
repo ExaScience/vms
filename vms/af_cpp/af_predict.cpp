@@ -82,6 +82,11 @@ void mpi_finit()
 {
     MPI_Finalize();
 }
+
+void mpi_combine_results(MatrixX8 &ret)
+{
+    MPI_Allreduce(MPI_IN_PLACE, ret.data(), ret.size(), MPI_UNSIGNED_CHAR, MPI_SUM, MPI_COMM_WORLD);
+}
 #else 
 
 void mpi_init() {
@@ -89,6 +94,8 @@ void mpi_init() {
     mpi_world_rank = 0;
 }
 void mpi_finit() {}
+
+void mpi_combine_results(MatrixX8 &) {}
 #endif
 
 std::vector<Sample> read_model(int samples_from, int samples_to, std::string modeldir, std::vector<int> devices)
@@ -221,6 +228,7 @@ MatrixX8 predict(
     size_t nprot = model.at(0).U1.cols();
 
     Eigen::Map<MatrixX8> ret(af::pinned<std::uint8_t>(ncomp*nprot), ncomp, nprot);
+    ret.setZero();
 
     printf( "Predicting for:\n");
     printf( "  ncomp: %lu\n", ncomp);
@@ -363,6 +371,7 @@ int main(int ac, char *av[])
     for(int r=0; r<repeat; r++)
     {
 	    pred = predict(model, features, block_size, devices, use_eigen, eval_every);
+        mpi_combine_results(pred);
     }
 
     if (!out.empty())
