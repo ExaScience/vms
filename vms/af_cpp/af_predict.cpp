@@ -83,6 +83,7 @@ void mpi_finit()
     MPI_Finalize();
 }
 
+template<typename MatrixX8>
 void mpi_combine_results(MatrixX8 &ret)
 {
     MPI_Allreduce(MPI_IN_PLACE, ret.data(), ret.size(), MPI_UNSIGNED_CHAR, MPI_SUM, MPI_COMM_WORLD);
@@ -95,6 +96,7 @@ void mpi_init() {
 }
 void mpi_finit() {}
 
+template<typename MatrixX8>
 void mpi_combine_results(MatrixX8 &) {}
 #endif
 
@@ -272,6 +274,8 @@ MatrixX8 predict(
             af_predict_block(ret, model, features, block, block_size, nprot, devices, eval_every);
     }
 
+    mpi_combine_results(ret);
+
 #ifdef CUDA_PROFILE
     cudaProfilerStop();
 #endif
@@ -371,7 +375,6 @@ int main(int ac, char *av[])
     for(int r=0; r<repeat; r++)
     {
 	    pred = predict(model, features, block_size, devices, use_eigen, eval_every);
-        mpi_combine_results(pred);
     }
 
     if (!out.empty())
