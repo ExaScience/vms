@@ -69,12 +69,13 @@ static int mpi_world_size;
 static int mpi_world_rank;
 
 #ifdef USE_MPI
-bool mpi_init() 
+void mpi_init() 
 {
     MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_world_rank);
-    return world_rank == 0;
+
+    printf("Using mpi (rank %d out of %d)\n", mpi_world_rank, mpi_world_size);
 }
 
 void mpi_finit()
@@ -83,10 +84,9 @@ void mpi_finit()
 }
 #else 
 
-bool mpi_init() {
+void mpi_init() {
     mpi_world_size = 1;
     mpi_world_rank = 0;
-    return true;
 }
 void mpi_finit() {}
 #endif
@@ -225,7 +225,8 @@ MatrixX8 predict(
     printf( "Predicting for:\n");
     printf( "  ncomp: %lu\n", ncomp);
     printf( "  bs:    %lu\n", blocksize);
-    printf( "  eval:  %d\n", eval_every);
+    if (eval_every > 0)
+        printf( "  eval:  %d\n", eval_every);
 
     auto timer = af::timer::start();
 
@@ -244,11 +245,18 @@ MatrixX8 predict(
 #endif
     }
 
-    size_t ncomp_per_rank = ncomp / mpi_world_size;
+    size_t ncomp_per_rank = ncomp / mpi_world_size + 1;
     size_t block_start = ncomp_per_rank * mpi_world_rank;
-
+    size_t block_stop  = std::min(block_start + ncomp_per_rank, ncomp);
+    if (mpi_world_size > 1)
+    {
+        printf( "  mpi_ncomp: %lu\n", ncomp_per_rank);
+        printf( "  mpi_start: %lu\n", block_start);
+        printf( "   mpi_stop: %lu\n", block_stop);
+    }
+ 
 #pragma omp parallel for 
-    for(size_t block=block_start; block<ncomp_per_rank; block+=blocksize)
+    for(size_t block=block_start; block<block_stop; block+=blocksize)
     {
         if (use_eigen)
             eigen_predict_block(ret, model, features, block, blocksize, nprot, devices);
@@ -291,7 +299,7 @@ int main(int ac, char *av[])
     std::string features_file = "features.ddm";
     std::string out;
     bool use_eigen = false;
-    int eval_every = 9999999;
+    int eval_every = -1;
 
     // Declare the supported options.
     po::options_description desc("Options");
@@ -362,6 +370,8 @@ int main(int ac, char *av[])
         write_matrix(out, pred.cast<double>());
         printf( "wrote %lu x %lu predictions\n", pred.rows(), pred.cols());
     }
+
+    mpi_finit();
 
     return 0;
 }
