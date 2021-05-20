@@ -319,7 +319,7 @@ int main(int ac, char *av[])
         ("help", "produce help message")
 
         ("devices", po::value<std::vector<int>>(&devices)->multitoken(), "ArrayFire devices to use")
-        ("backend", po::value<std::string>(&backend), "ArrayFire backend to use (cuda, opencl, cpu)")
+        ("backend", po::value<std::string>(&backend), "ArrayFire/Eigen backend to use (cuda, opencl, cpu, eigen)")
         ("eval-every", po::value<int>(&eval_every), "ArrayFire: eval() evert N samples")
 
         ("from", po::value<int>(&from), "Process from this sample onwards")
