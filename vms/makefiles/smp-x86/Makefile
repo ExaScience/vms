@@ -1,5 +1,3 @@
-TOPDIR=..
-
 default: run
 
 include ../Makefile.common
