@@ -18,9 +18,7 @@ OPTIONS=$(TOPDIR)/data/$(DATASET)/options.ini
 
 MODELFILES=code/vms_const.h code/vms_tb.h
 
-model: $(MODELFILES)
-
-.PHONY: hls clean cleanall model native
+.PHONY: hls clean cleanall model native all
 
 CONDA_BIN = $(dir $(CONDA_EXE))
 
@@ -53,6 +51,11 @@ hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	ln -sf $(addprefix ../,$(CXXFILES)) code/
 	vitis_hls $(TOPDIR)/codegen/run.tcl
 
-native: $(MODELFILES)
+native: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	$(MAKE) -C native
 
+ompss-smp-x86: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
+	module load gcc-7.3.0-gcc-9.3.0-mk2k4ie ompss-19.06-gcc-7.3.0-jseith3 && $(MAKE) -C smp-x86
+
+ompss-smp-arm64: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
+	cd smp-arm64 && euroexacross --home make
