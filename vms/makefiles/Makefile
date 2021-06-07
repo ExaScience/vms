@@ -42,17 +42,13 @@ clean:
 	$(MAKE) -C smp-arm64 clean
 	$(MAKE) -C smp-x86 clean
 
-cleanall: clean
-	rm -f $(INPUT_DATA) options.ini
-
-
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
-	ln -sf $(addprefix ../,$(HEADERFILES)) code/
-	ln -sf $(addprefix ../,$(CXXFILES)) code/
-	vitis_hls $(TOPDIR)/codegen/run.tcl
+	mkdir -p hls/code
+	cp $(MODELFILES) $(HEADERFILES) $(CXXFILES) hls/code/
+	module load Vitis/2020.1 && $(MAKE) -C hls
 
 native: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
-	$(MAKE) -C native
+	module load Vitis/2020.1 && $(MAKE) -C native
 
 ompss-smp-x86: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	module load gcc-7.3.0-gcc-9.3.0-mk2k4ie ompss-19.06-gcc-7.3.0-jseith3 && $(MAKE) -C smp-x86
