@@ -169,6 +169,18 @@ void proteins_loop(
 	} // end proteins
 }
 
+void predict_one_compound(
+    const F_base features[num_features],
+	      P_base predictions[num_proteins]
+)
+{
+	hls::stream<L_type> latents[num_samples][num_latent];
+#pragma HLS STREAM variable = latents depth = 32
+
+#pragma HLS DATAFLOW
+	features_loop(features, latents);
+	proteins_loop(predictions, latents);
+}
 
 void predict_one_block(
 		int num_compounds, // <= block_size
@@ -178,12 +190,10 @@ void predict_one_block(
 {
     for (int i=0; i<num_compounds; ++i)
     {
-		hls::stream<L_type> latents[num_samples][num_latent];
-#pragma HLS STREAM variable = latents depth = 32
-
-#pragma HLS DATAFLOW
-        features_loop(&features[i*num_features], latents);
-        proteins_loop(&predictions[i*num_proteins], latents);
+        predict_one_compound(
+			&features[i*num_features], 
+        	&predictions[i*num_proteins]
+		);
     }
 }
 
