@@ -1,11 +1,13 @@
 
+#include "predict.h"
+
 #include "predict.fpga.h"
 
 #ifdef OMPSS_SMP
 #pragma omp target device(smp) copy_deps
 #endif
 #ifdef OMPSS_FPGA
-#pragma omp target device(smp) copy_deps
+#pragma omp target device(fpga) copy_deps
 #endif
 #pragma omp task \
     in([block_size*num_features]features, \
