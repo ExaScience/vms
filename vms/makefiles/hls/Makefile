@@ -1,7 +1,7 @@
 .PHONY: hls
 
 hls:
-	vitis_hls vitis_hls.tcl
+	vivado_hls vivado_hls.tcl
 
 include ../Makefile.common
 include ../Makefile.ompss
