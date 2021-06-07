@@ -1,6 +1,3 @@
-
-#include "predict.h"
-
 #include "predict.fpga.h"
 
 #ifdef OMPSS_SMP

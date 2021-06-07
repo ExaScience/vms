@@ -3,8 +3,7 @@
 #include <cstring>
 #include <cstring>
 
-
-
+#include "predict.h"
 #include "stream.h"
 
 static U_base U_local[num_samples][num_proteins][num_latent];

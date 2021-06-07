@@ -2,8 +2,8 @@ SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(SELF_DIR)/config.mk
 
 PROGRAM_ = predict
-SRCFILES = predict.cpp host.cpp non_ocl.cpp
-HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h
+SRCFILES = host.cpp non_ocl.cpp
+HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h stream.h
 MODELFILES = vms_const.h vms_tb.h
 
 SRCDIR = $(TOPDIR)/src
