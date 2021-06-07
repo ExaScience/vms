@@ -2,13 +2,23 @@
 
 IMAGE=dockfpga
 
-USER_IDS=(-e BUILDER_UID="$( id -u )" -e BUILDER_GID="$( id -g )" -e BUILDER_USER="$( id -un )" -e BUILDER_GROUP="$( id -gn )")
+USER_IDS=( -e BUILDER_UID="$( id -u )" \
+           -e BUILDER_GID="$( id -g )" \
+           -e BUILDER_USER="$( id -un )" \
+           -e BUILDER_GROUP="$( id -gn )" \
+           -e BUILDER_HOME="$HOME" \
+           )
+
 
 HOST_PWD=$PWD
 [ -L $HOST_PWD ] && HOST_PWD=$(readlink $HOST_PWD)
+WORK=$(git rev-parse --show-toplevel)
+test -z $WORK && WORK=$HOST_PWD
+SUB=$(realpath --relative-to="$WORK" $PWD)
 
-ARGS+=" -v $HOST_PWD:/work"
-ARGS+=" -w $HOST_PWD"
+ARGS+=" -v $HOME:$HOME"
+ARGS+=" -v $WORK:/work"
+ARGS+=" -w /work/$SUB"
 
 #------------------------------------------------------------------------------
 # Now, finally, run the command in a container

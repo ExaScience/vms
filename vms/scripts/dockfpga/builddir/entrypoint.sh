@@ -13,9 +13,8 @@ fi
 # created are owned by that user. Without this they are all owned by root.
 # The dockfpga script sets the BUILDER_UID and BUILDER_GID vars.
 if [[ -n $BUILDER_UID ]] && [[ -n $BUILDER_GID ]]; then
-    export HOME=/home/${BUILDER_USER}
     groupadd -o -g $BUILDER_GID $BUILDER_GROUP 2> /dev/null
-    useradd -o -m -g $BUILDER_GID -u $BUILDER_UID $BUILDER_USER 2> /dev/null
+    useradd -o  -d $BUILDER_HOME -g $BUILDER_GID -u $BUILDER_UID $BUILDER_USER 2> /dev/null
 
     # Enable passwordless sudo capabilities for the user
     chown root:$BUILDER_GID $(which gosu)
