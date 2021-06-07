@@ -45,7 +45,7 @@ clean:
 hls: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
 	mkdir -p hls/code
 	ln -sf $(addprefix ../../,$(MODELFILES)) hls/code/
-	ln -sf $(MODELFILES) $(HEADERFILES) $(CXXFILES) hls/code/
+	ln -sf $(HEADERFILES) $(CXXFILES) hls/code/
 	module load Vitis/2020.1 && $(MAKE) -C hls
 
 native: $(MODELFILES) $(CXXFILES) $(HEADERFILES)
