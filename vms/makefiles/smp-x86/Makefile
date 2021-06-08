@@ -1,7 +1,8 @@
+TOPDIR=..
+
 default: run
 
 include ../Makefile.common
-
 include ../Makefile.ompss
 
 MCXX   = mcxx

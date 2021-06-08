@@ -6,18 +6,20 @@ SRCFILES = host.cpp non_ocl.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h stream.h
 MODELFILES = vms_const.h vms_tb.h
 
-SRCDIR = $(TOPDIR)/src
-MODELDIR = $(BUILDDIR)/code
+CPPDIR = $(SRCDIR)/cpp
+MODELDIR = $(TOPDIR)/code
 
-FULLSRCFILES  = $(addprefix $(SRCDIR)/,$(SRCFILES))
-FULLHDRFILES  = $(addprefix $(SRCDIR)/,$(HDRFILES))
+FULLSRCFILES  = $(addprefix $(CPPDIR)/,$(SRCFILES))
+FULLHDRFILES  = $(addprefix $(CPPDIR)/,$(HDRFILES))
 FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
+
+ALLCODE = $(FULLMODELFILES) $(FULLSRCFILES) $(FULLHDRFILES)
 
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
 
-CFLAGS_      = $(CFLAGS) -O0 -g -I$(SRCDIR)  -I$(MODELDIR)
+CFLAGS_      = $(CFLAGS) -O0 -g -I$(CPPDIR) -I$(MODELDIR)
 LDFLAGS_     = $(LDFLAGS)
 
 ifeq ($(XILINX_VIVADO),)
@@ -35,7 +37,6 @@ SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
 .PHONY: clean
 
-clean:
+cleancommon:
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
-	rm -rf zcu102
 	rm -f $(PROGRAM_).xtasks.config $(PROGRAM_).bit BOOT.BIN

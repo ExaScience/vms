@@ -18,8 +18,8 @@ CXX := g++
 VPP := v++
 
 #CPP files
-SRCDIR = $(TOPDIR)/src
-MODELDIR=$(BUILDDIR)/code
+CPPDIR = $(SRCDIR)/cpp
+MODELDIR=$(TOPDIR)/code
 HOST_SRCS += $(SRCDIR)/host.cpp $(SRCDIR)/ocl.cpp
 KERNEL_SRCS += $(SRCDIR)/predict.cpp
 KERNEL_HDRS = $(MODELDIR)/vms_const.h $(wildcard $(SRCDIR)/*.h)
