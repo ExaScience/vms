@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from os import chdir
@@ -90,7 +90,7 @@ def populate_dir(source_dir, build_dir, dataset, num_latent, num_samples, dataty
     with open(os.path.join(build_dir, "config.mk"), "w") as config_file:
         config_file.write(
             f"""# generated on {timestamp}
-TOPDIR = {abs_source_dir}
+SRCDIR = {abs_source_dir}
 BUILDDIR = {abs_build_dir}
 DATASET = {dataset}
 NUM_LATENT = {num_latent}
