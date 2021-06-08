@@ -28,21 +28,21 @@ $(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/codegen/gen_dat.py
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python3 $(SRCDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
-
 native: $(ALLCODE)
-	module load Vitis/2020.1 && $(MAKE) -C native
+	module load Vitis/2020.1 && cd native && $(MAKE) >make.log 2>&1
 
 ompss-smp-x86: $(ALLCODE)
-	module load gcc-7.3.0-gcc-9.3.0-mk2k4ie ompss-19.06-gcc-7.3.0-jseith3 && $(MAKE) -C smp-x86
+	module load gcc-7.3.0-gcc-9.3.0-mk2k4ie ompss-19.06-gcc-7.3.0-jseith3 && \
+	cd smp-x86 && $(MAKE) >make.log 2>&1
 
 ompss-smp-arm64: $(ALLCODE)
-	cd smp-arm64 && dockfpga -w $(BUILDDIR) make
+	cd smp-arm64 && dockfpga -w $(BUILDDIR) make >make.log 2>&1
 
 hls: $(ALLCODE)
-	module load Vitis/2020.1 && $(MAKE) -C hls
+	module load Vitis/2020.1 && cd hls && $(MAKE) >make.log 2>&1
 
 zcu102: $(ALLCODE)
-	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) make
+	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) make >make.log 2>&1
 
 clean: cleancommon
 	rm -rf model code
