@@ -8,12 +8,19 @@ USER_IDS=( -e BUILDER_UID="$( id -u )" \
            -e BUILDER_GROUP="$( id -gn )" \
            -e BUILDER_HOME="$HOME" \
            )
+        
+# determine /work directory
+GITROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 
+if getopts "w:" options; then
+    WORK=${OPTARG}
+    shift 2
+elif [[ -n ${GITROOT} ]]; then
+    WORK=${GITROOT}
+else
+    WORK=$PWD
+fi
 
-HOST_PWD=$PWD
-[ -L $HOST_PWD ] && HOST_PWD=$(readlink $HOST_PWD)
-WORK=$(git rev-parse --show-toplevel)
-test -z $WORK && WORK=$HOST_PWD
 SUB=$(realpath --relative-to="$WORK" $PWD)
 
 ARGS+=" -v $HOME:$HOME"
