@@ -44,9 +44,13 @@ hls: $(ALLCODE)
 zcu102: $(ALLCODE)
 	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) make >make.log 2>&1
 
-clean: cleancommon
+crdb: $(ALLCODE)
+	cd fpga-crdb && dockfpga -w $(BUILDDIR) make >make.log 2>&1
+
+clean:
 	rm -rf model code
-	$(MAKE) -C fpga-zcu102 clean
-	$(MAKE) -C native clean
-	$(MAKE) -C smp-arm64 clean
-	$(MAKE) -C smp-x86 clean
+	$(MAKE) -C native cleancommon
+	$(MAKE) -C smp-arm64 cleancommon
+	$(MAKE) -C smp-x86 cleancommon
+	$(MAKE) -C fpga-crdb cleancommon
+	$(MAKE) -C fpga-zcu102 cleancommon

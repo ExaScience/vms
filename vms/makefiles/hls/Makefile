@@ -5,9 +5,11 @@ default: hls
 include ../Makefile.common
 include ../Makefile.ompss
 
-.PHONY: hls
-hls:
-	mkdir -p code 
-	ln -sf $(addprefix ../,$(FULLMODELFILES)) code/
-	ln -sf $(FULLHEADERFILES) $(FULLSRCFILES) code/
+.PHONY: hls clean
+
+hls: local
 	vivado_hls vivado_hls.tcl
+
+clean:
+	rm -f $(LOCALCODE)
+	rm -rf hls

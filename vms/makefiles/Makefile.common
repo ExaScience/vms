@@ -5,6 +5,7 @@ PROGRAM_ = predict
 SRCFILES = host.cpp non_ocl.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h stream.h
 MODELFILES = vms_const.h vms_tb.h
+LOCALFILES = $(MODELFILES) $(SRCFILES) $(HDRFILES) 
 
 CPPDIR = $(SRCDIR)/cpp
 MODELDIR = $(TOPDIR)/code
@@ -12,8 +13,11 @@ MODELDIR = $(TOPDIR)/code
 FULLSRCFILES  = $(addprefix $(CPPDIR)/,$(SRCFILES))
 FULLHDRFILES  = $(addprefix $(CPPDIR)/,$(HDRFILES))
 FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
-
 ALLCODE = $(FULLMODELFILES) $(FULLSRCFILES) $(FULLHDRFILES)
+
+.PHONY: local
+local:
+	ln -sf $(ALLCODE) ./
 
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
@@ -35,7 +39,7 @@ endif
 SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
 SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
-.PHONY: clean
+.PHONY: clean 
 
 cleancommon:
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
