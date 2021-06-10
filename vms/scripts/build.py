@@ -90,8 +90,9 @@ def latency_estimation(name):
     return latency
 
 def log_xtasks_config():
-    with open ("fpga-zcu102/predict.xtasks.config", "r") as f:
-        build_logger().info("predict.xtasks.config:\n%s", f.read())
+    config_file, = glob.glob(f'**/*xtasks.config', recursive=True) 
+    with open (config_file, "r") as f:
+        build_logger().info("%s:\n%s", config_file, f.read())
 
 def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype):
     if basedir is None:
@@ -156,6 +157,9 @@ def action_build(dir):
 
     print("Done ...")
     return True
+
+def action_ci(*args):
+    return action_build(action_populate(*args))
 
 if __name__ == "__main__":
 

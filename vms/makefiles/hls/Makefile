@@ -7,7 +7,13 @@ include ../Makefile.ompss
 
 .PHONY: hls clean
 
-hls: local
+KERNELNAME := predict_or_update_model
+IPZIP = hls/solution1/impl/ip/xilinx_com_hls_$(KERNELNAME)_1_0.zip
+
+hls: $(IPZIP)
+
+$(IPZIP):
+	ln -sf $(ALLCODE) .
 	vivado_hls vivado_hls.tcl
 
 clean:

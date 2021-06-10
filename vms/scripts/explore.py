@@ -5,7 +5,7 @@ import logging
 import datetime
 import itertools
 from dask import distributed
-from build import run_ci
+from build import action_ci
 
 # parameter_space = {
 #     "datasets" : [ "chem2vec" ],
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("--single", nargs=4, metavar="dataset num_latent num_samples data_type", help="Run single point in exploration space")
     args = parser.parse_args()
 
-    
+
     if args.basedir:
         basedir = args.basedir
     else:
@@ -49,11 +49,13 @@ if __name__ == "__main__":
     os.makedirs(basedir, exist_ok=True)
     print("basedir: ", basedir)
 
+    logging.basicConfig(format=build.LOGFORMAT, level=logging.INFO, filename=os.path.join(basedir, 'ci.log')) 
+
     if args.single:
         dataset, num_latent, num_samples, data_type = args.single
         num_latent = int(num_latent)
         num_samples = int(num_samples)
-        run_ci(source_dir, basedir, dataset, num_latent, num_samples, data_type)
+        action_ci(source_dir, basedir, dataset, num_latent, num_samples, data_type)
     else:
         # $ dask-ssh --nthreads 1 --nprocs 12 --hostfile $PBS_NODEFILE 
         client = distributed.Client(args.dask)
@@ -61,7 +63,7 @@ if __name__ == "__main__":
         xprod = list(itertools.product(*parameter_space.values()))
         print("space: ", xprod)
 
-        results = [ client.submit(run_ci, source_dir, basedir, *params) for params in xprod ]
+        results = [ client.submit(action_ci, source_dir, basedir, *params) for params in xprod ]
         client.gather(results)
         print("results: ", results)
     

@@ -1,4 +1,4 @@
-default: bitstream
+default: bitstream 
 
 include ../Makefile.common
 include ../Makefile.ompss
@@ -15,19 +15,19 @@ bitstream: $(BITSTREAM)
 .PHONY: bitstream default
 
 $(PROGRAM_): $(OBJFILES)
-	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $? -o $@ $(LDFLAGS_)
 
-%.o: %.cpp local
-	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(BITSTREAM_FLAGS) -c $^ -o $@
+$(PROGRAM_): $(ALLCODE)
+	ln -sf $(ALLCODE) .
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(SRCFILES) -o $@ $(LDFLAGS_)
 
-$(BITSTREAM): local
+$(BITSTREAM): $(ALLCODE)
+	ln -sf $(ALLCODE) .
 	rm -f *mcxx.cpp aarch64-linux-gnu-fpgacxx*cpp
 	mkdir -p $(AVDIR)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCC_FLAGS_D_) $(BITSTREAM_FLAGS) $(SRCFILES) -o $(PROGRAM_) $(LDFLAGS_)
 
 clean:
-	rm -rf code
-	rm -f *.log
+	rm -f *.log $(LOACALFILES)
+	rm -f *mcxx.cpp aarch64-linux-gnu-fpgacxx*cpp
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
 	rm -rf zcu102
-	rm -f $(PROGRAM_).xtasks.config $(PROGRAM_).bit BOOT.BIN
