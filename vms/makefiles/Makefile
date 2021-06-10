@@ -28,6 +28,8 @@ $(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/codegen/gen_dat.py
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python3 $(SRCDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
 
+model: $(FULLMODELFILES)
+
 native: $(ALLCODE)
 	module load Vitis/2020.1 && cd native && $(MAKE) >make.log 2>&1
 
