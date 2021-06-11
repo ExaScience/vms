@@ -82,7 +82,7 @@ def resource_utilization(name):
     return merged
 
 def latency_estimation(name):
-    report_file, = glob.glob(f'**/{name}_csynth.xml', recursive=True)
+    report_file, = glob.glob(f'hls/**/{name}_csynth.xml', recursive=True)
     root = cET.parse(report_file).getroot()
     latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
     latency = int(latency_node.text)
@@ -90,9 +90,10 @@ def latency_estimation(name):
     return latency
 
 def log_xtasks_config():
-    config_file, = glob.glob(f'**/*xtasks.config', recursive=True) 
-    with open (config_file, "r") as f:
-        build_logger().info("%s:\n%s", config_file, f.read())
+    config_files = glob.glob(f'**/*xtasks.config', recursive=True) 
+    for config_file in config_files:
+        with open (config_file, "r") as f:
+            build_logger().info("%s:\n%s", config_file, f.read())
 
 def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype):
     if basedir is None:
@@ -142,6 +143,7 @@ def action_build(dir):
         latency_estimation("predict_one_compound")
 
         execute(f"dockfpga -w {absdir} make bitstream", workdir="fpga-zcu102")
+        execute(f"dockfpga -w {absdir} make bitstream", workdir="fpga-crdb")
         log_xtasks_config()
     
     except KeyboardInterrupt: 
