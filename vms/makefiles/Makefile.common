@@ -15,10 +15,6 @@ FULLHDRFILES  = $(addprefix $(CPPDIR)/,$(HDRFILES))
 FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
 ALLCODE = $(FULLMODELFILES) $(FULLSRCFILES) $(FULLHDRFILES)
 
-.PHONY: local
-local:
-	ln -sf $(ALLCODE) ./
-
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
@@ -43,4 +39,5 @@ SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
 cleancommon:
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
+	rm -f *.out
 	rm -f $(PROGRAM_).xtasks.config $(PROGRAM_).bit BOOT.BIN
