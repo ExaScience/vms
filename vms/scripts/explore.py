@@ -5,7 +5,7 @@ import logging
 import datetime
 import itertools
 from dask import distributed
-from build import action_ci
+from build import action_ci, LOGFORMAT
 
 # parameter_space = {
 #     "datasets" : [ "chem2vec" ],
@@ -21,12 +21,13 @@ parameter_space = {
     "types" : [ "float", "fixed", ]
 }
 
-parameter_space = {
-    "datasets" : [ "chem2vec" ],
-    "num_latents" : [ 4, 8, ],
-    "num_samples" : [ 4 ],
-    "types" : [ "float", ]
-}
+# parameter_space = {
+#     "datasets" : [ "chem2vec" ],
+#     "num_latents" : [ 4, 8, ],
+#     "num_samples" : [ 4 ],
+#     "types" : [ "float", ]
+# }
+
 source_dir = "/home/vanderaa/euroexa/eurosmurff/vms"
 
 if __name__ == "__main__":
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     os.makedirs(basedir, exist_ok=True)
     print("basedir: ", basedir)
 
-    logging.basicConfig(format=build.LOGFORMAT, level=logging.INFO, filename=os.path.join(basedir, 'ci.log')) 
+    logging.basicConfig(format=LOGFORMAT, level=logging.INFO, filename=os.path.join(basedir, 'ci.log')) 
 
     if args.single:
         dataset, num_latent, num_samples, data_type = args.single
