@@ -38,16 +38,16 @@ ompss-smp-x86: $(ALLCODE)
 	cd smp-x86 && $(MAKE) >make.log 2>&1
 
 ompss-smp-arm64: $(ALLCODE)
-	cd smp-arm64 && dockfpga -w $(BUILDDIR) make >make.log 2>&1
+	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 hls: $(ALLCODE)
 	module load Vitis/2020.1 && cd hls && $(MAKE) >make.log 2>&1
 
 zcu102: $(ALLCODE)
-	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) make >make.log 2>&1
+	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 crdb: $(ALLCODE)
-	cd fpga-crdb && dockfpga -w $(BUILDDIR) make >make.log 2>&1
+	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 clean:
 	rm -rf model code
