@@ -5,10 +5,10 @@ MCXX_FLAGS_D_ = --debug -g
 
 PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
 
-run: $(PROGS_)
-	./$(PROGRAM_)-p
-	./$(PROGRAM_)-d
-	./$(PROGRAM_)-i
+run: $(addsuffix .out,$(PROGS_))
+
+%.out: %
+	$(QEMU_CMD) ./$< >$<.out
 
 $(PROGRAM_)-p: $(DEPS)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
