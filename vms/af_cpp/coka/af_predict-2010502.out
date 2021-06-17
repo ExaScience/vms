@@ -1,0 +1,425 @@
+Measuring idle power
+Sleep 1...
+Power: 
+207
+Sleep 1...
+Power: 
+185
+Sleep 1...
+Power: 
+198
+Sleep 1...
+Power: 
+181
+Sleep 1...
+Power: 
+186
+Sleep 1...
+Power: 
+181
+Sleep 1...
+Power: 
+191
+Sleep 1...
+Power: 
+182
+Sleep 1...
+Power: 
+197
+Sleep 1...
+Power: 
+189
+
+Measuring GPU power (cuda)
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.86 sec; 333947.95 compounds/second
+6.08 tera-ops; 2.13 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2126.58 giga-ops/second (32-bit floating point ops)
+Power: 
+376
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.87 sec; 333045.74 compounds/second
+6.08 tera-ops; 2.12 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2120.84 giga-ops/second (32-bit floating point ops)
+Power: 
+339
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.85 sec; 335456.33 compounds/second
+6.08 tera-ops; 2.14 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2136.19 giga-ops/second (32-bit floating point ops)
+Power: 
+376
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.83 sec; 337571.11 compounds/second
+6.08 tera-ops; 2.15 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2149.65 giga-ops/second (32-bit floating point ops)
+Power: 
+376
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.82 sec; 338776.63 compounds/second
+6.08 tera-ops; 2.16 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2157.33 giga-ops/second (32-bit floating point ops)
+Power: 
+453
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.83 sec; 337821.90 compounds/second
+6.08 tera-ops; 2.15 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2151.25 giga-ops/second (32-bit floating point ops)
+Power: 
+435
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.84 sec; 336469.51 compounds/second
+6.08 tera-ops; 2.14 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2142.64 giga-ops/second (32-bit floating point ops)
+Power: 
+397
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.83 sec; 337251.52 compounds/second
+6.08 tera-ops; 2.15 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2147.62 giga-ops/second (32-bit floating point ops)
+Power: 
+379
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.83 sec; 337743.55 compounds/second
+6.08 tera-ops; 2.15 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2150.75 giga-ops/second (32-bit floating point ops)
+Power: 
+389
+ArrayFire v3.7.3 (CUDA, 64-bit Linux, build 59ac7b980)
+Platform: CUDA Runtime 10.2, Driver: 440.33.01
+[0] Tesla V100-PCIE-16GB, 16161 MB, CUDA Compute 7.0
+
+Using this backend:cuda
+Using these devices (cores/GPUs): 0
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 2.84 sec; 336463.71 compounds/second
+6.08 tera-ops; 2.14 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 2142.60 giga-ops/second (32-bit floating point ops)
+Power: 
+373
+
+Measuring CPU power (Eigen/MKL)
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 16.34 sec; 58475.95 compounds/second
+6.08 tera-ops; 0.37 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 372.37 giga-ops/second (32-bit floating point ops)
+Power: 
+415
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.47 sec; 66004.55 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 420.32 giga-ops/second (32-bit floating point ops)
+Power: 
+461
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.44 sec; 66173.71 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 421.39 giga-ops/second (32-bit floating point ops)
+Power: 
+468
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.43 sec; 66217.52 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 421.67 giga-ops/second (32-bit floating point ops)
+Power: 
+468
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.29 sec; 66875.08 compounds/second
+6.08 tera-ops; 0.43 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 425.86 giga-ops/second (32-bit floating point ops)
+Power: 
+470
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.36 sec; 66509.83 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 423.53 giga-ops/second (32-bit floating point ops)
+Power: 
+465
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.41 sec; 66287.87 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 422.12 giga-ops/second (32-bit floating point ops)
+Power: 
+427
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.23 sec; 67152.86 compounds/second
+6.08 tera-ops; 0.43 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 427.63 giga-ops/second (32-bit floating point ops)
+Power: 
+474
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.34 sec; 66618.12 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 424.22 giga-ops/second (32-bit floating point ops)
+Power: 
+465
+Using Eigen
+Using this backend:eigen
+Using these devices (cores/GPUs): 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+Reading model from model/
+  nprot: 526
+  nlat:  64
+  nfeat: 469
+  nsmpl: 100
+Reading features from features.ddm
+--- repeat 0 / 1 ---
+Predicting for:
+  ncomp: 955386
+  bs:    10000
+took: 14.45 sec; 66137.48 compounds/second
+6.08 tera-ops; 0.42 tera-ops/second (32-bit floating point ops)
+6083.90 giga-ops; 421.16 giga-ops/second (32-bit floating point ops)
+Power: 
+471
