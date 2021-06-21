@@ -38,6 +38,7 @@ clean:
 	rm -f $(PROGRAM_)_fx
 	rm -f *.cpp *.h
 	rm -rf zcu102
+	rm -rf euroexa_crdb
 	rm -f $(PROGRAM_).xtasks.config 
 	rm -f $(PROGRAM_).bit 
 	rm -f BOOT.BIN

@@ -1,7 +1,7 @@
-include ../config.mk
-
+TOPDIR=..
 default: native
 
+include ../config.mk
 include ../Makefile.common
 
 native: $(PROGRAM_)

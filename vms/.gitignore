@@ -2,3 +2,4 @@
 **/vms_model.h
 **/vms_tb.h
 build/
+ci_*

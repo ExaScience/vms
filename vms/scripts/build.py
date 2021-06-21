@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 from os import chdir
@@ -72,17 +72,15 @@ def log_xtasks_config():
     with open ("fpga-zcu102/predict.xtasks.config", "r") as f:
         logging.info("predict.xtasks.config:\n%s", f.read())
 
-def compose_dir(basedir, dataset, num_latent, num_samples, datatype):
-    # change dir
-    newdir = os.path.join(basedir, "%s_%d_%d_%s" % (dataset, num_latent, num_samples, datatype))
-
-    if os.path.isdir(newdir):
-        logging.warning("Skipping dataset=%s num_latent=%d num_samples=%d datatype=%s -- %s already exists" %
-            (dataset, num_latent, num_samples, datatype, newdir))
-
-    return newdir
-
 def populate_dir(source_dir, build_dir, dataset, num_latent, num_samples, datatype):
+    if build_dir is None:
+        basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
+        build_dir = os.path.join(basedir, "%s_%d_%d_%s" % (dataset, num_latent, num_samples, datatype))
+
+    if os.path.isdir(build_dir):
+        logging.warning("Not populating %s: already exists", build_dir)
+        return
+
     makefiles_dir = os.path.abspath(os.path.join(source_dir, "makefiles"))
     shutil.copytree(makefiles_dir, build_dir, copy_function=os.symlink)
 
@@ -92,7 +90,7 @@ def populate_dir(source_dir, build_dir, dataset, num_latent, num_samples, dataty
     with open(os.path.join(build_dir, "config.mk"), "w") as config_file:
         config_file.write(
             f"""# generated on {timestamp}
-TOPDIR = {abs_source_dir}
+SRCDIR = {abs_source_dir}
 BUILDDIR = {abs_build_dir}
 DATASET = {dataset}
 NUM_LATENT = {num_latent}
@@ -112,7 +110,7 @@ def build_dir(dir):
         logging.info("Building %s", dir)
 
         execute("make model")
-        execute("make", modules=["ompss"], workdir="native")
+        execute("make", modules=["Vitis/2020.1"], workdir="native")
         execute("make", modules=["ompss"], workdir="smp-x86")
         execute("make", modules=["QEMU",  "petalinux/2016.4", "mcxx-arm64"], workdir="smp-arm64")
 
@@ -152,9 +150,6 @@ if __name__ == "__main__":
 
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level = logging.INFO, format = log_format)
-
-    if args.build_dir is None:
-        args.build_dir = compose_dir('build', args.dataset, args.num_latent, args.num_samples, args.datatype)
 
     populate_dir('.', args.build_dir, args.dataset, args.num_latent, args.num_samples, args.datatype)
 

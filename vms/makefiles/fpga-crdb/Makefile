@@ -1,4 +1,3 @@
-TOPDIR=..
-BOARD=zcu102
+BOARD=euroexa_crdb
 
 include ../Makefile.ait
