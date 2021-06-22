@@ -1,11 +1,12 @@
 .PHONY: help
 
-SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(SELF_DIR)../config.mk
 
 DEVICE := xilinx_u200_xdma_201830_2
 KERNEL_NAME := predict_or_update_model
 EXECUTABLE := predict
+
+.PHONY: all clean cleanall docs kill
+all: $(EXECUTABLE) Makefile
 
 DSA := $(call device2sandsa, $(DEVICE))
 
@@ -18,18 +19,15 @@ CXX := g++
 VPP := v++
 
 #CPP files
-CPPDIR = $(SRCDIR)/cpp
-MODELDIR=$(TOPDIR)/code
-HOST_SRCS += $(SRCDIR)/host.cpp $(SRCDIR)/ocl.cpp
-KERNEL_SRCS += $(SRCDIR)/predict.cpp
-KERNEL_HDRS = $(MODELDIR)/vms_const.h $(wildcard $(SRCDIR)/*.h)
-HOST_HDRS = $(MODELDIR)/vms_tb.h
+HOST_IF = ocl
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(SELF_DIR)/../Makefile.common
 
 # Enable Profiling
 PROFILE:= no
 
 # Host compiler global settings
-CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++17
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++11
 CXXFLAGS += -I$(MODELDIR)
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 CXXFLAGS += -fmessage-length=0
@@ -40,8 +38,6 @@ CLFLAGS += -t $(TARGET) --config ../design.cfg --save-temps
 CLFLAGS += -I$(MODELDIR)
 CLFLAGS += -g
 
-.PHONY: all clean cleanall docs kill
-all: $(EXECUTABLE) Makefile
 
 KERNEL_OBJ  = $(KERNEL_NAME).xo
 KERNEL_BIN  = $(KERNEL_NAME).xclbin
@@ -51,7 +47,7 @@ KERNEL_VAR  = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
 CXXFLAGS += -DKERNEL_VAR=$(KERNEL_VAR) -DKERNEL_VAR_LEN=$(KERNEL_VAR)_len -DEMULATION_MODE=\"$(TARGET)\"
 
 # Building kernel
-$(KERNEL_OBJ): $(KERNEL_SRCS) $(KERNEL_HDRS)
+$(KERNEL_OBJ): $(FULLKERNELFILES) $(FULLHDRFILES)
 	$(VPP) $(CLFLAGS) --temp_dir $(TEMP_DIR) -c -k $(KERNEL_NAME) -I. -I$(<D) -o$@ $<
 
 $(KERNEL_BIN): $(KERNEL_OBJ)
@@ -60,8 +56,8 @@ $(KERNEL_BIN): $(KERNEL_OBJ)
 $(KERNEL_INC): $(KERNEL_BIN)
 	xxd -i $< $@
 
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KERNEL_INC)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(KERNEL_INC) -o $@ $(LDFLAGS)
+$(EXECUTABLE): $(FULLSRCFILES) $(FULLHDRFILES) $(KERNEL_INC)
+	$(CXX) $(CXXFLAGS) $(FULLSRCFILES) $(KERNEL_INC) -o $@ $(LDFLAGS)
 
 xrt.ini: ../xrt.ini
 	ln -s ../xrt.ini

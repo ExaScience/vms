@@ -31,7 +31,7 @@ $(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/codegen/gen_dat.py
 model: $(FULLMODELFILES)
 
 native: $(ALLCODE)
-	module load Vitis/2020.1 && cd native && $(MAKE) >make.log 2>&1
+	module load Vitis/2020.2 && cd native && $(MAKE) >make.log 2>&1
 
 ompss-smp-x86: $(ALLCODE)
 	module load gcc-7.3.0-gcc-9.3.0-mk2k4ie ompss-19.06-gcc-7.3.0-jseith3 && \
@@ -41,7 +41,7 @@ ompss-smp-arm64: $(ALLCODE)
 	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 hls: $(ALLCODE)
-	module load Vitis/2020.1 && cd hls && $(MAKE) >make.log 2>&1
+	module load Vitis/2020.2 && cd hls && $(MAKE) >make.log 2>&1
 
 zcu102: $(ALLCODE)
 	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
