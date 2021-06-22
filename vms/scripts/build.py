@@ -82,12 +82,12 @@ def resource_utilization(name):
     return merged
 
 def latency_estimation(name):
-    report_file, = glob.glob(f'hls/**/{name}_csynth.xml', recursive=True)
-    root = cET.parse(report_file).getroot()
-    latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
-    latency = int(latency_node.text)
-    build_logger().info("Average latency of %s: %d", name, latency)
-    return latency
+    report_files = glob.glob(f'**/{name}_csynth.xml', recursive=True)
+    for report_file in report_files:
+        root = cET.parse(report_file).getroot()
+        latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
+        latency = int(latency_node.text)
+        build_logger().info("Average latency of %s: %d (file %s)", name, latency, report_file)
 
 def log_xtasks_config():
     config_files = glob.glob(f'**/*xtasks.config', recursive=True) 
@@ -134,16 +134,17 @@ def action_build(dir):
         build_logger().info("Building %s", dir)
 
         execute("make model")
-        execute("make", modules=["Vitis/2020.1"], workdir="native")
+        execute("make", modules=["Vitis/2020.2"], workdir="native")
         execute("make", modules=["gcc-7.3.0-gcc-9.3.0-mk2k4ie" ,"ompss-19.06-gcc-7.3.0-jseith3"], workdir="smp-x86")
         execute(f"dockfpga -w {absdir} make", workdir="smp-arm64")
 
-        execute("make hls", modules = ["Vitis/2020.1"])
+        execute("make hls", modules = ["Vitis/2020.2"])
         resource_utilization("predict_or_update_model")
         latency_estimation("predict_one_compound")
 
-        execute(f"dockfpga -w {absdir} make bitstream", workdir="fpga-zcu102")
         execute(f"dockfpga -w {absdir} make bitstream", workdir="fpga-crdb")
+        resource_utilization("predict_or_update_model")
+        latency_estimation("predict_one_compound")
         log_xtasks_config()
     
     except KeyboardInterrupt: 
