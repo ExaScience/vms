@@ -5,7 +5,7 @@
 
 #include "xcl2.hpp"
 
-#include "predict.fpga.h"
+#include "predict.h"
 #include "vms_tb.h"
 
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
