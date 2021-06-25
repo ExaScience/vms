@@ -14,8 +14,8 @@ hls: $(IPZIP)
 
 $(IPZIP):
 	ln -sf $(ALLCODE) .
-	vivado_hls vivado_hls.tcl
+	vitis_hls vitis_hls.tcl
 
 clean:
-	rm -f $(LOCALCODE)
+	rm -f $(LOCALFILES)
 	rm -rf hls
