@@ -134,11 +134,11 @@ def action_build(dir):
         build_logger().info("Building %s", dir)
 
         execute("make model")
-        execute("make", modules=["Vitis/2020.2"], workdir="native")
-        execute("make", modules=["gcc-7.3.0-gcc-9.3.0-mk2k4ie" ,"ompss-19.06-gcc-7.3.0-jseith3"], workdir="smp-x86")
+        execute("make", modules=["Vitis/2020.1"], workdir="native")
+        execute("make", modules=["GCC/7.3.0" ,"ompss/19.06"], workdir="smp-x86")
         execute(f"dockfpga -w {absdir} make", workdir="smp-arm64")
 
-        execute("make hls", modules = ["Vitis/2020.2"])
+        execute("make hls", modules = ["Vitis/2020.1"])
         resource_utilization("predict_or_update_model")
         latency_estimation("predict_one_compound")
 
@@ -169,6 +169,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+
+    srcdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+    parser.add_argument("--srcdir", type=str, metavar="DIR", default = srcdir, help="Source directory")
     parser.add_argument("--builddir", type=str, metavar="DIR", default = None, help="Actual build directory")
     parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
     parser.add_argument("--dataset", type=str, default="chem2vec", choices=["chem2vec", "random", ], help="Dataset to use")
@@ -183,7 +186,7 @@ if __name__ == "__main__":
         logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 
     if args.builddir is None:
-        builddir = action_populate('.', args.basedir, args.dataset, args.num_latent, args.num_samples, args.datatype)
+        builddir = action_populate(args.srcdir, args.basedir, args.dataset, args.num_latent, args.num_samples, args.datatype)
     else:
         builddir = args.builddir
 
