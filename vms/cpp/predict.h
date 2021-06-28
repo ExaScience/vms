@@ -1,6 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 64;
+static const int block_size = 1024;
 
 const int L_wl = 32;
 const int L_iwl = 12;
