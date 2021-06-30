@@ -10,5 +10,5 @@ set_part {xcvu9p-fsgd2104-2-i} -tool vivado
 create_clock -period 5 -name default
 csim_design -compiler clang
 csynth_design
-cosim_design
+cosim_design -enable_dataflow_profiling
 export_design -rtl verilog -format ip_catalog
