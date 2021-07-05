@@ -1,7 +1,6 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <cstring>
 
 #include "predict.h"
 #include "stream.h"
@@ -90,26 +89,31 @@ void load_model(
 }
 
 void input_loop(
-    hls::stream<F_base>& features_stream,
-    const F_base features[num_features])
+    int num_compounds,
+    hls::stream<F_base> &features_stream,
+    const F_base features[block_size][num_features])
 {
-	for (int d = 0; d < num_features; d++)
-	{
+	for (int i = 0; i < num_compounds; ++i)
+		for (int d = 0; d < num_features; d++)
+		{
 #pragma HLS PIPELINE II = 1
-		features_stream << features[d];
-	}
+			features_stream << features[i][d];
+		}
 }
 
 void features_loop(
+    int num_compounds,
     hls::stream<F_base>& features,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
-	L_type latents_acc[num_samples][num_latent];
+	for (int i = 0; i < num_compounds; ++i)
+	{
+		L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
 
-	for (int d = 0; d < num_features; d++)
-	{
+		for (int d = 0; d < num_features; d++)
+		{
 #pragma HLS PIPELINE II = 1
 #pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
 #pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
@@ -117,101 +121,89 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
 
-		const F_type feature = features.read();
-		for (int s = 0; s < num_samples; s++)
-			for (int k = 0; k < num_latent; k++)
-			{
-				L_type  v;
-				if (d==0) v = M_type(M_local[s][k]);
-				else      v = L_type(latents_acc[s][k]);
-				L_type prod = feature * B_type(B_local[s][d][k]);
-				latents_acc[s][k] = L_type(v + prod);
-			}
-	}
+			const F_type feature = features.read();
+			for (int s = 0; s < num_samples; s++)
+				for (int k = 0; k < num_latent; k++)
+				{
+					L_type v;
+					if (d == 0)
+						v = M_type(M_local[s][k]);
+					else
+						v = L_type(latents_acc[s][k]);
+					L_type prod = feature * B_type(B_local[s][d][k]);
+					latents_acc[s][k] = L_type(v + prod);
+				}
+		}
 
-	for (int s = 0; s < num_samples; s++)
-	{
-#pragma HLS UNROLL
-		for (int k = 0; k < num_latent; k++)
+		for (int s = 0; s < num_samples; s++)
 		{
 #pragma HLS UNROLL
-			latents[s][k] << latents_acc[s][k];
+			for (int k = 0; k < num_latent; k++)
+			{
+#pragma HLS UNROLL
+				latents[s][k] << latents_acc[s][k];
+			}
 		}
 	}
 }
 
 void proteins_loop(
-	hls::stream<P_base>& predictions,
-	hls::stream<L_type> latents[num_samples][num_latent])
+    int num_compounds,
+    hls::stream<P_base> &predictions,
+    hls::stream<L_type> latents[num_samples][num_latent])
 {
-	L_type latents_cache[num_samples][num_latent];
-	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
-	#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
-
-	for (int s = 0; s < num_samples; s++)
+	for (int i = 0; i < num_compounds; ++i)
 	{
-#pragma HLS UNROLL
-		for (int k = 0; k < num_latent; k++)
+		L_type latents_cache[num_samples][num_latent];
+#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
+
+		for (int s = 0; s < num_samples; s++)
 		{
 #pragma HLS UNROLL
-			latents_cache[s][k] = latents[s][k].read();
+			for (int k = 0; k < num_latent; k++)
+			{
+#pragma HLS UNROLL
+				latents_cache[s][k] = latents[s][k].read();
+			}
 		}
-	}
 
-	for (int d = 0; d < num_proteins; d++)
-	{
+		for (int d = 0; d < num_proteins; d++)
+		{
 #pragma HLS PIPELINE II = 3
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
-		S_type sum(.0F);
-		for (int s = 0; s < num_samples; s++)
-			for (int k = 0; k < num_latent; k++)
-			{
-				S_type prod = L_type(latents_cache[s][k]) * U_type(U_local[s][d][k]);
-				sum = sum + prod;
-			}
+			S_type sum(.0F);
+			for (int s = 0; s < num_samples; s++)
+				for (int k = 0; k < num_latent; k++)
+				{
+					S_type prod = L_type(latents_cache[s][k]) * U_type(U_local[s][d][k]);
+					sum = sum + prod;
+				}
 
-		P_type aggr(
+			P_type aggr(
 #if defined(DT_FLOAT) || defined(DT_HALF)
-			sum / num_samples
+			    sum / num_samples
 #else
-			sum >> log_num_samples
+			    sum >> log_num_samples
 #endif
 			);
-		predictions  << P_base(aggr);
-	} // end proteins
-}
-
-void output_loop(
-	P_base predictions[num_proteins],
-	hls::stream<P_base>& predictions_stream)
-{
-	for (int d = 0; d < num_proteins; d++)
-	{
-#pragma HLS PIPELINE II = 1
-		predictions[d] = predictions_stream.read();
+			predictions << P_base(aggr);
+		} // end proteins
 	}
 }
 
-void predict_one_compound(
-    const F_base features[num_features],
-    P_base predictions[num_proteins])
+void output_loop(
+    int num_compounds,
+    P_base predictions[block_size][num_proteins],
+    hls::stream<P_base> &predictions_stream)
 {
-	hls::stream<L_type> latents[num_samples][num_latent];
-        hls::stream<F_base> features_stream;
-    	hls::stream<P_base> predictions_stream;
-#pragma HLS STREAM variable = latents depth = 32
-#pragma HLS STREAM variable = features_stream depth = 2
-#pragma HLS STREAM variable = predictions_stream depth = 2
-
-#pragma HLS STABLE variable=U_local
-#pragma HLS STABLE variable=M_local
-#pragma HLS STABLE variable=B_local
-#pragma HLS DATAFLOW
-	input_loop(features_stream, features);
-	features_loop(features_stream, latents);
-	proteins_loop(predictions_stream, latents);
-	output_loop(predictions, predictions_stream);
+	for (int i = 0; i < num_compounds; ++i)
+		for (int d = 0; d < num_proteins; d++)
+		{
+#pragma HLS PIPELINE II = 1
+			predictions[i][d] = predictions_stream.read();
+		}
 }
 
 void predict_one_block(
@@ -220,10 +212,21 @@ void predict_one_block(
 		      P_base predictions[block_size][num_proteins]
 )
 {
-	for (int i = 0; i < num_compounds; ++i)
-	{
-		predict_one_compound(features[i], predictions[i]);
-	}
+	hls::stream<L_type> latents[num_samples][num_latent];
+	hls::stream<F_base> features_stream;
+	hls::stream<P_base> predictions_stream;
+#pragma HLS STREAM variable = latents depth = 32
+#pragma HLS STREAM variable = features_stream depth = 32
+#pragma HLS STREAM variable = predictions_stream depth = 32
+
+#pragma HLS STABLE variable = U_local
+#pragma HLS STABLE variable = M_local
+#pragma HLS STABLE variable = B_local
+#pragma HLS DATAFLOW
+	input_loop(num_compounds, features_stream, features);
+	features_loop(num_compounds, features_stream, latents);
+	proteins_loop(num_compounds, predictions_stream, latents);
+	output_loop(num_compounds, predictions, predictions_stream);
 }
 
 void predict_or_update_model(
