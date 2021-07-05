@@ -12,7 +12,7 @@ IPZIP = hls/solution1/impl/ip/xilinx_com_hls_$(KERNELNAME)_1_0.zip
 
 hls: $(IPZIP)
 
-$(IPZIP):
+$(IPZIP): $(LOCALFILES)
 	ln -sf $(ALLCODE) .
 	vitis_hls vitis_hls.tcl
 
