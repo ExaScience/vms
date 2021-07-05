@@ -3,6 +3,7 @@ set_top predict_or_update_model
 add_files non_ocl.cpp  -cflags "-std=c++11"
 add_files -tb host.cpp -cflags "-std=c++11"
 open_solution "solution1" -flow_target vivado
+config_interface -m_axi_alignment_byte_size=64 -m_axi_max_widen_bitwidth=512
 # zcu102
 # set_part {xczu9eg-ffvb1156-1l-i}
 # crdb
