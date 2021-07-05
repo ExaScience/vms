@@ -7,16 +7,16 @@
 #pragma omp target device(fpga) copy_deps
 #endif
 #pragma omp task \
-    in([block_size*num_features]features, \
+    in([block_size]features, \
        [num_samples*num_proteins*num_latent]U_in,\
        [num_samples*num_latent]M_in,\
        [num_samples*num_features*num_latent]B_in) \
-    out([block_size*num_proteins]predictions)
+    out([block_size]predictions)
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_flat features,    //[block_size*num_features]
-		      P_flat predictions, //[block_size*num_proteins]
+		const F_arr features,    //[block_size][num_features]
+		      P_arr predictions, //[block_size][num_proteins]
 		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in);        //[num_samples][num_features][num_latent]
@@ -26,17 +26,17 @@ void update_model(
     const  M_arr M_in,
     const  B_arr B_in)
 {
-    F_flat  in_block;
+    F_arr  in_block;
 	int c = 0;
 	for (int i=0; i<block_size; i++)
 		for (int j=0; j<num_features; j++)
 		{
-			in_block[c] = c;
+			in_block[i][j] = c;
 			c++;
 		}
 
-    P_flat out_block_1;
-    P_flat out_block_2;
+    P_arr out_block_1;
+    P_arr out_block_2;
 
     predict_or_update_model(true, 0, in_block, out_block_1, &U_in[0][0][0], &M_in[0][0], &B_in[0][0][0]);
 #pragma omp taskwait
@@ -59,7 +59,7 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
     int i;
     for(i=0; i<=num_compounds - block_size; i+=block_size)
     {
-        predict_or_update_model(false, block_size, &in[i][0], &out[i][0], empty_U, empty_mu, empty_B);
+        predict_or_update_model(false, block_size, in, out, empty_U, empty_mu, empty_B);
     }
 
     // last block left-overs
@@ -67,8 +67,8 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
     if (nc == 0) {
 #pragma omp taskwait
     } else {
-		F_flat in_block;
-		P_flat out_block;
+		F_arr in_block;
+		P_arr out_block;
 
 		memcpy(in_block, &in[i][0], nc*num_features*sizeof(F_base));
         predict_or_update_model(false, nc, in_block, out_block, empty_U, empty_mu, empty_B);

@@ -10,11 +10,11 @@ static U_base U_local[num_samples][num_proteins][num_latent];
 static M_base M_local[num_samples][num_latent];
 static B_base B_local[num_samples][num_features][num_latent];
 
-void checksum_model(const F_flat features,
-					      P_flat out,
-					const U_arr U,
-					const M_arr M,
-					const B_arr B)
+void checksum_model(const F_arr features,
+		    P_arr out,
+		    const U_arr U,
+		    const M_arr M,
+		    const B_arr B)
 {
 	P_base U_check;
 	P_base M_check;
@@ -44,16 +44,16 @@ void checksum_model(const F_flat features,
             int c = 0;
             for (int i = 0; i < block_size; i++)
                 for (int j = 0; j < num_features; j++)
-                    CRC_ADD(F_check, features[c++]);
+                    CRC_ADD(F_check, features[i][j]);
         }
 
         {
-            for (int c = 0; c < block_size * num_proteins - 3;)
+            for (int c = 0; c < num_proteins - 3;)
             {
-                out[c++] = U_check;
-                out[c++] = M_check;
-                out[c++] = B_check;
-                out[c++] = F_check;
+                out[0][c++] = U_check;
+                out[0][c++] = M_check;
+                out[0][c++] = B_check;
+                out[0][c++] = F_check;
             }
         }
 }
@@ -89,9 +89,20 @@ void load_model(
 #endif
 }
 
+void input_loop(
+    hls::stream<F_base>& features_stream,
+    const F_base features[num_features])
+{
+	for (int d = 0; d < num_features; d++)
+	{
+#pragma HLS PIPELINE II = 1
+		features_stream << features[d];
+	}
+}
+
 void features_loop(
-	    const F_base features[num_features],
-		hls::stream<L_type> latents[num_samples][num_latent])
+    hls::stream<F_base>& features,
+    hls::stream<L_type> latents[num_samples][num_latent])
 {
 	L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
@@ -106,7 +117,7 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
 
-		const F_type feature(features[d]);
+		const F_type feature = features.read();
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
 			{
@@ -130,7 +141,7 @@ void features_loop(
 }
 
 void proteins_loop(
-	P_base predictions[num_proteins],
+	hls::stream<P_base>& predictions,
 	hls::stream<L_type> latents[num_samples][num_latent])
 {
 	L_type latents_cache[num_samples][num_latent];
@@ -167,47 +178,69 @@ void proteins_loop(
 			sum >> log_num_samples
 #endif
 			);
-		predictions[d] = P_base(aggr);
+		predictions  << P_base(aggr);
 	} // end proteins
+}
+
+void output_loop(
+	P_base predictions[num_proteins],
+	hls::stream<P_base>& predictions_stream)
+{
+	for (int d = 0; d < num_proteins; d++)
+	{
+#pragma HLS PIPELINE II = 1
+		predictions[d] = predictions_stream.read();
+	}
 }
 
 void predict_one_compound(
     const F_base features[num_features],
-	      P_base predictions[num_proteins]
-)
+    P_base predictions[num_proteins])
 {
 	hls::stream<L_type> latents[num_samples][num_latent];
+        hls::stream<F_base> features_stream;
+    	hls::stream<P_base> predictions_stream;
 #pragma HLS STREAM variable = latents depth = 32
+#pragma HLS STREAM variable = features_stream depth = 2
+#pragma HLS STREAM variable = predictions_stream depth = 2
 
+#pragma HLS STABLE variable=U_local
+#pragma HLS STABLE variable=M_local
+#pragma HLS STABLE variable=B_local
 #pragma HLS DATAFLOW
-	features_loop(features, latents);
-	proteins_loop(predictions, latents);
+	input_loop(features_stream, features);
+	features_loop(features_stream, latents);
+	proteins_loop(predictions_stream, latents);
+	output_loop(predictions, predictions_stream);
 }
 
 void predict_one_block(
 		int num_compounds, // <= block_size
-		const F_flat features,   //[block_size*num_features],
-		      P_flat predictions //[block_size*num_proteins]
+		const F_base features[block_size][num_features],
+		      P_base predictions[block_size][num_proteins]
 )
 {
-    for (int i=0; i<num_compounds; ++i)
-    {
-        predict_one_compound(
-			&features[i*num_features], 
-        	&predictions[i*num_proteins]
-		);
-    }
+	for (int i = 0; i < num_compounds; ++i)
+	{
+		predict_one_compound(features[i], predictions[i]);
+	}
 }
 
 void predict_or_update_model(
 		bool update_model,
 		int num_compounds,
-		const F_flat features,    //[block_size*num_features]
-		      P_flat predictions, //[block_size*num_proteins]
+		const F_arr features,    //[block_size*num_features]
+		      P_arr predictions, //[block_size*num_proteins]
 		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
+#pragma HLS INTERFACE m_axi port=features offset=slave bundle=gmem1
+#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem2
+
+#pragma HLS DATA_PACK variable=features
+#pragma HLS DATA_PACK variable=predictions
+
 	if (update_model)
 	{
 		load_model(U_in, M_in, B_in);

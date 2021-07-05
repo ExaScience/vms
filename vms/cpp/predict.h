@@ -1,6 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 1024;
+static const int block_size = 4096; // align to page size
 
 const int L_wl = 32;
 const int L_iwl = 12;
@@ -102,8 +102,8 @@ typedef float S_type;
 typedef F_base F_flx[][num_features];
 typedef P_base P_flx[][num_proteins];
 
-typedef F_base F_flat[block_size*num_features];
-typedef P_base P_flat[block_size*num_proteins];
+typedef F_base F_arr[block_size][num_features];
+typedef P_base P_arr[block_size][num_proteins];
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
@@ -120,8 +120,8 @@ extern "C"
 void predict_or_update_model(
                bool update_model,
                int num_compounds,
-               const F_flat features,    //[block_size*num_features]
-                     P_flat predictions, //[block_size*num_proteins]
+               const F_arr features,     //[block_size*num_features]
+                     P_arr predictions,  //[block_size*num_proteins]
                const U_flat U_in,        //[num_samples][num_proteins][num_latent]
                const M_flat M_in,        //[num_samples][num_latent]
                const B_flat B_in);       //[num_samples][num_features][num_latent]
