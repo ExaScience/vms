@@ -24,7 +24,7 @@ OBJFILES := ${SRCFILES:.cpp=.o}
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
 
-CFLAGS_      = $(CFLAGS) -O0 -g -I$(CPPDIR) -I$(MODELDIR)
+CFLAGS_      = $(CFLAGS) -Wno-shift-count-negative -O0 -g -I$(CPPDIR) -I$(MODELDIR) 
 LDFLAGS_     = $(LDFLAGS)
 
 ifeq ($(XILINX_VIVADO),)
