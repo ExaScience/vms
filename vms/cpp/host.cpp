@@ -129,6 +129,7 @@ static char args_doc[] = "";
 static struct argp_option options[] = {
   {"num-compounds",  'c', "NUM",      0,  "Number of compounds (10)." },
   {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
+  {"no-check",       'n',     0,      0,  "Do not check for errors." },
   { 0 }
 };
 
@@ -137,6 +138,7 @@ struct arguments
 {
   int num_repeat = 1;
   int num_compounds = 10;
+  bool check = true;
 };
 
 /* Parse a single option. */
@@ -151,6 +153,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     {
     case 'r': arguments->num_repeat = std::atoi(arg); break;
     case 'c': arguments->num_compounds = std::atoi(arg); break;
+    case 'n': arguments->check = false; break;
     default: return ARGP_ERR_UNKNOWN;
     }
   return 0;
@@ -212,7 +215,9 @@ main (int argc, char **argv)
         predict_compounds(args.num_compounds, tb_input_base, tb_output_base);
     }
     double stop = tick();
-    nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
+    if (args.check)
+        nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
+
     double elapsed = stop - start;
     printf("took %.2f sec; %.2f compounds/sec\n", elapsed, args.num_compounds * args.num_repeat / elapsed);
 
