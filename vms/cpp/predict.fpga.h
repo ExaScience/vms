@@ -97,6 +97,7 @@ void input_loop(
 #pragma HLS loop_tripcount min = block_size max = block_size
 		for (int d = 0; d < num_features; d++)
 		{
+#pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
 			features_stream << features[i][d];
 		}
@@ -205,6 +206,7 @@ void output_loop(
 #pragma HLS loop_tripcount min = block_size max = block_size
 		for (int d = 0; d < num_proteins; d++)
 		{
+#pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
 			predictions[i][d] = predictions_stream.read();
 		}
