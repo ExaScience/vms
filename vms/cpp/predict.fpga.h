@@ -94,6 +94,7 @@ void input_loop(
     const F_base features[block_size][num_features])
 {
 	for (int i = 0; i < num_compounds; ++i)
+	{
 #pragma HLS loop_tripcount min = block_size max = block_size
 		for (int d = 0; d < num_features; d++)
 		{
@@ -101,6 +102,7 @@ void input_loop(
 #pragma HLS PIPELINE II = 1
 			features_stream << features[i][d];
 		}
+	}
 }
 
 void features_loop(
@@ -109,8 +111,8 @@ void features_loop(
     hls::stream<L_type> latents[num_samples][num_latent])
 {
 	for (int i = 0; i < num_compounds; ++i)
-#pragma HLS loop_tripcount min = block_size max = block_size
 	{
+#pragma HLS loop_tripcount min = block_size max = block_size
 		L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
@@ -156,8 +158,8 @@ void proteins_loop(
     hls::stream<L_type> latents[num_samples][num_latent])
 {
 	for (int i = 0; i < num_compounds; ++i)
-#pragma HLS loop_tripcount min = block_size max = block_size
 	{
+#pragma HLS loop_tripcount min = block_size max = block_size
 		L_type latents_cache[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
@@ -203,6 +205,7 @@ void output_loop(
     hls::stream<P_base> &predictions_stream)
 {
 	for (int i = 0; i < num_compounds; ++i)
+	{
 #pragma HLS loop_tripcount min = block_size max = block_size
 		for (int d = 0; d < num_proteins; d++)
 		{
@@ -210,6 +213,7 @@ void output_loop(
 #pragma HLS PIPELINE II = 1
 			predictions[i][d] = predictions_stream.read();
 		}
+	}
 }
 
 void predict_one_block(
