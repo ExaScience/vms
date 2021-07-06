@@ -14,3 +14,5 @@ CFLAGS_ += -fsanitize=address -std=c++11
 
 $(PROGRAM_): $(DEPS)
 	        $(CXX) $(CFLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+clean: cleancommon

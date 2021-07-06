@@ -40,9 +40,10 @@ endif
 SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
 SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
-.PHONY: clean 
+.PHONY: clean cleancommon
 
 cleancommon:
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
 	rm -f *.out
 	rm -f $(PROGRAM_).xtasks.config $(PROGRAM_).bit BOOT.BIN
+	rm -f *.log
