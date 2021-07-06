@@ -244,15 +244,11 @@ void predict_or_update_model(
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
-#pragma HLS INTERFACE m_axi port=features offset=slave bundle=gmem1 \
-		depth=block_size*num_features*sizeof(F_base) \
-		num_read_outstanding=2 \
-		max_read_burst_length=16
+#pragma HLS INTERFACE m_axi port=features offset=slave bundle=gmem1
+#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem2
 
-#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem2 \
-		depth=block_size*num_proteins*sizeof(P_base) \
-		num_write_outstanding=2 \
-		max_write_burst_length=16
+#pragma HLS DATA_PACK variable=features
+#pragma HLS DATA_PACK variable=predictions
 
 	if (update_model)
 	{
