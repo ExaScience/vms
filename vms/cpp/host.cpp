@@ -227,6 +227,5 @@ main (int argc, char **argv)
     free(Mb);
     free(Bb);
 
-    //return nerrors;
-    return 0;
+    return nerrors;
 }
