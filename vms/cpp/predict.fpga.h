@@ -222,9 +222,9 @@ void predict_one_block(
 		      P_base predictions[block_size][num_proteins]
 )
 {
-	hls::stream<L_type> latents[num_samples][num_latent];
-	hls::stream<F_base> features_stream;
-	hls::stream<P_base> predictions_stream;
+	static hls::stream<L_type> latents[num_samples][num_latent];
+	static hls::stream<F_base> features_stream;
+	static hls::stream<P_base> predictions_stream;
 #pragma HLS STREAM variable = latents depth = 32
 #pragma HLS STREAM variable = features_stream depth = 32
 #pragma HLS STREAM variable = predictions_stream depth = 32
@@ -248,11 +248,13 @@ void predict_or_update_model(
 		const M_flat M_in,        //[num_samples][num_latent]
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
+#ifndef OMPSS_FPGA
 #pragma HLS INTERFACE m_axi port=features offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem2
 
 #pragma HLS DATA_PACK variable=features
 #pragma HLS DATA_PACK variable=predictions
+#endif
 
 	if (update_model)
 	{
