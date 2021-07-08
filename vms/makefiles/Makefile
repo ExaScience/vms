@@ -11,7 +11,7 @@ INPUT_DATA=test.sdm train.sdm features.ddm
 ROOTFILE=model/root.ini
 OPTIONS=$(SRCDIR)/data/$(DATASET)/options.ini
 
-.PHONY: hls clean cleanall model native all
+.PHONY: hls clean cleanall model native all opencl
 
 CONDA_BIN = $(dir $(CONDA_EXE))
 
@@ -49,7 +49,7 @@ crdb: $(ALLCODE)
 	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 opencl: $(ALLCODE)
-	$(MAKE) -C opencl
+	module load Vitis/2020.2 && $(MAKE) -C opencl
 
 clean:
 	rm -rf model code
