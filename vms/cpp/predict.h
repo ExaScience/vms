@@ -9,8 +9,6 @@ const int S_iwl = 12;
 
 const float epsilon = 0.5;
 
-#define DT_FIXED
-
 #if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
 #define DT_FIXED_INT
@@ -47,6 +45,8 @@ typedef int_type<S_wl>::T S_base;
 #define CRC_ADD(crc, value) (crc) ^= (value)
 #define CRC_FMT "0x%04x"
 
+const bool dt_fixed = true;
+
 #else // DT_FLOAT_EXT
 
 typedef float U_base;
@@ -58,6 +58,8 @@ typedef float P_base;
 #define CRC_INIT(crc) (crc) = .5
 #define CRC_ADD(crc, value) (crc) += (value)
 #define CRC_FMT "%.2f"
+
+const bool dt_fixed = false;
 
 #endif
 

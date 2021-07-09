@@ -26,7 +26,7 @@ $(ROOTFILE): $(INPUT_DATA) $(OPTIONS)
 $(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/codegen/gen_dat.py
 	mkdir -p code 
 	source $(CONDA_BIN)/activate smurff-0.14 && \
-	    python3 $(SRCDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code
+	    python3 $(SRCDIR)/codegen/gen_dat.py --root $(ROOTFILE) --output code --datatype $(DATATYPE)
 
 model: $(FULLMODELFILES)
 
