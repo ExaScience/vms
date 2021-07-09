@@ -136,7 +136,7 @@ static struct argp_option options[] = {
 /* Used by main to communicate with parse_opt. */
 struct arguments
 {
-  int num_repeat = 1;
+  int num_repeat = 2;
   int num_compounds = 10;
   bool check = num_samples >= 16 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
 };
