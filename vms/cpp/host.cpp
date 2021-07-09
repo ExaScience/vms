@@ -138,7 +138,7 @@ struct arguments
 {
   int num_repeat = 1;
   int num_compounds = 10;
-  bool check = true;
+  bool check = num_samples >= 16 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
 };
 
 /* Parse a single option. */
@@ -219,8 +219,17 @@ main (int argc, char **argv)
         nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
 
     double elapsed = stop - start;
-    printf("took %.2f sec; %.2f compounds/sec\n", elapsed, args.num_compounds * args.num_repeat / elapsed);
+    double compounds_per_sec = (double)args.num_compounds * args.num_repeat / elapsed;
 
+    printf( "took: %.2f sec; %.2f compounds/second\n", elapsed, compounds_per_sec);
+
+    // terra-ops aka 10^12 ops
+    double gops = (double)args.num_repeat * (double)num_samples * (double)args.num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e9;
+    double tops = gops / 1e3;
+
+    printf( "%.2f tera-ops; %.2f tera-ops/second\n", tops, tops/elapsed);
+    printf( "%.2f giga-ops; %.2f giga-ops/second\n", gops, gops/elapsed);
+    
     free(tb_output_base);
     free(tb_input_base);
     free(Ub);
