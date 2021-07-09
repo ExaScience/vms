@@ -8,6 +8,8 @@
 #include "predict.h"
 #include "vms_tb.h"
 
+static const bool verbose = false;
+
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
     size_t i;
     cl_int err;
@@ -18,8 +20,11 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
         platform = platforms[i];
         OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
         if (platformName == vendor_name){
-            std::cout << "Found Platform" << std::endl;
-            std::cout << "Platform Name: " << platformName.c_str() << std::endl;
+            if (verbose)
+            {
+                std::cout << "Found Platform" << std::endl;
+                std::cout << "Platform Name: " << platformName.c_str() << std::endl;
+            }
             break;
         }
     }
@@ -54,7 +59,7 @@ struct CLData
         if (std::string(emulation_mode) != "hw")
         {
             setenv("XCL_EMULATION_MODE", emulation_mode, 1);
-            printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
+            if (verbose) printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
         }
 
         std::vector<cl::Device> devices = get_devices("Xilinx");
@@ -73,9 +78,12 @@ struct CLData
     void addInputStream(const T *ptr, int nelem)
     {
         cl_int err;
-        std::cout << " input stream " << nargs << ": " << nelem << " of size " << sizeof(T) 
-                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                  << std::endl;
+        if (verbose)
+        {
+            std::cout << " input stream " << nargs << ": " << nelem << " of size " << sizeof(T)
+                      << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                      << std::endl;
+        }
         cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
         ext.param = krnl.get();
         ext.obj = NULL;
@@ -101,9 +109,13 @@ struct CLData
     void addOutputStream(const T *ptr, int nelem)
     {
         cl_int err;
-        std::cout << " output stream " << nargs << ": " << nelem << " of size " << sizeof(T) 
-                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                  << std::endl;
+        if (verbose)
+        {
+            std::cout << " output stream " << nargs << ": " << nelem << " of size " << sizeof(T)
+                      << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                      << std::endl;
+        }
+
         cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
         ext.param = krnl.get();
         ext.obj = NULL;
@@ -129,9 +141,12 @@ struct CLData
     void addInputArg(const T *ptr, int nelem)
     {
         cl_int err;
-        std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
-                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                  << std::endl;
+        if (verbose)
+        {
+            std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T)
+                      << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                      << std::endl;
+        }
         OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
         OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
     }
@@ -147,9 +162,12 @@ struct CLData
     void addOutputArg(const T *ptr, int nelem)
     {
         cl_int err;
-        std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T) 
-                  << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                  << std::endl;
+        if (verbose)
+        {
+            std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T)
+                      << " (" << (sizeof(T) * nelem) / 1024 << "K)"
+                      << std::endl;
+        }
         OCL_CHECK(err, cl::Buffer buf(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void*)ptr, &err));
         OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
         outputArgs.push_back(buf);
@@ -226,7 +244,7 @@ void predict_compounds(int num_compounds, const F_flx in, P_flx out)
 
     for(int c=0; c<block_size*num_blocks; c+=block_size)
     {
-        printf("c: %d\n", c);
+        if (verbose) printf("c: %d\n", c);
         int num_compounds_left = std::min(block_size, num_compounds - c);
         cl_data.addInputArg(false);
         cl_data.addInputArg(num_compounds_left);
