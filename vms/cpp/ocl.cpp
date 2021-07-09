@@ -194,7 +194,7 @@ struct CLData
 extern unsigned char KERNEL_VAR[];
 extern unsigned int KERNEL_VAR_LEN;
 
-CLData cl_data("predict_or_update_model", KERNEL_VAR, KERNEL_VAR_LEN, EMULATION_MODE);
+CLData cl_data("predict_or_update_model", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
 
 void update_model(
     const  U_arr U_in,
