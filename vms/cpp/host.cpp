@@ -229,6 +229,16 @@ main (int argc, char **argv)
 
     printf( "%.2f tera-ops; %.2f tera-ops/second\n", tops, tops/elapsed);
     printf( "%.2f giga-ops; %.2f giga-ops/second\n", gops, gops/elapsed);
+
+    int num_kernel_executions = ceil((args.num_compounds * args.num_repeat) / double(block_size));
+    double kernel_ms = 1e3 * elapsed / num_kernel_executions;
+    printf( "%d kernel executions of  %.2f ms each (avg)\n", num_kernel_executions, kernel_ms);
+
+    double clock_ns = 2.0; // assuming a clock of 500Mhz
+    int cycles_per_kernel_execution =  kernel_ms * 1e6 / clock_ns;
+    int cycles_per_compound = cycles_per_kernel_execution / block_size;
+    printf( "%d cycles per kernel executions\n", cycles_per_kernel_execution);
+    printf( "%d cycles per compound\n", cycles_per_compound);
     
     free(tb_output_base);
     free(tb_input_base);
