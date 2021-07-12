@@ -138,7 +138,7 @@ struct arguments
 {
   int num_repeat = 2;
   int num_compounds = 10;
-  bool check = num_samples >= 16 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
+  bool check = num_samples >= 4 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
 };
 
 /* Parse a single option. */
@@ -217,6 +217,8 @@ main (int argc, char **argv)
     double stop = tick();
     if (args.check)
         nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
+    else
+        printf( "Error checking skipped\n");
 
     double elapsed = stop - start;
     double compounds_per_sec = (double)args.num_compounds * args.num_repeat / elapsed;
