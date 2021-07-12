@@ -110,12 +110,13 @@ void features_loop(
     hls::stream<F_base>& features,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
-	for (int i = 0; i < num_compounds; ++i)
-	{
-#pragma HLS loop_tripcount min = block_size max = block_size
 		L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
+
+	for (int i = 0; i < num_compounds; ++i)
+	{
+#pragma HLS loop_tripcount min = block_size max = block_size
 
 		for (int d = 0; d < num_features; d++)
 		{
@@ -131,22 +132,14 @@ void features_loop(
 				for (int k = 0; k < num_latent; k++)
 				{
 					L_type v;
-					if (d == 0)
-						v = M_type(M_local[s][k]);
-					else
-						v = L_type(latents_acc[s][k]);
+					// first iteration of d-loop
+					if (d == 0) v = M_type(M_local[s][k]);
+					else        v = L_type(latents_acc[s][k]);
+
 					L_type prod = feature * B_type(B_local[s][d][k]);
 					latents_acc[s][k] = L_type(v + prod);
-				}
-		}
 
-		for (int s = 0; s < num_samples; s++)
-		{
-#pragma HLS UNROLL
-			for (int k = 0; k < num_latent; k++)
-			{
-#pragma HLS UNROLL
-				latents[s][k] << latents_acc[s][k];
+					if (d == num_features-1) latents[s][k] << latents_acc[s][k];
 			}
 		}
 	}
@@ -157,32 +150,25 @@ void proteins_loop(
     hls::stream<P_base> &predictions,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
-	for (int i = 0; i < num_compounds; ++i)
-	{
-#pragma HLS loop_tripcount min = block_size max = block_size
 		L_type latents_cache[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
 
-		for (int s = 0; s < num_samples; s++)
+	for (int i = 0; i < num_compounds; ++i)
 		{
-#pragma HLS UNROLL
-			for (int k = 0; k < num_latent; k++)
-			{
-#pragma HLS UNROLL
-				latents_cache[s][k] = latents[s][k].read();
-			}
-		}
+#pragma HLS loop_tripcount min = block_size max = block_size
 
 		for (int d = 0; d < num_proteins; d++)
 		{
-#pragma HLS PIPELINE II = 3
+#pragma HLS PIPELINE
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 			S_type sum(.0F);
+
 			for (int s = 0; s < num_samples; s++)
 				for (int k = 0; k < num_latent; k++)
 				{
+					if (d==0) latents_cache[s][k] = latents[s][k].read();
 					S_type prod = L_type(latents_cache[s][k]) * U_type(U_local[s][d][k]);
 					sum = sum + prod;
 				}
