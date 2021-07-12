@@ -71,9 +71,9 @@ struct fxp
     }
 
 
+#ifdef DT_CHECK
     void check(float ref, float eps = -1.) const
     {
-#ifdef DT_CHECK
         float cur = (float)(*this);
         float diff = std::abs(cur - ref);
         if (eps == -1.) eps = epsilon();
@@ -91,11 +91,19 @@ struct fxp
                       << ", diff/eps: " << diff/eps << ")" << std::endl;
             //abort();
         }
-#endif
     }
+#else
+    void check(float, float = -1.) const {}
+#endif
 
     fxp(float v) : val(v*(1L<<shift)) { check(v); } 
+
+#ifdef DT_CHECK
     fxp(T v = (T)0xdead) : val(v) { } 
+#else
+    fxp(T v) : val(v) { } 
+    fxp() : val() {} 
+#endif
 
     template<typename otherT, int otherIWL>
     fxp(fxp<otherT, otherIWL> v)
