@@ -88,20 +88,20 @@ void load_model(
 #endif
 }
 
+
 void input_loop(
     int num_compounds,
     hls::stream<F_base> &features_stream,
     const F_base features[block_size][num_features])
 {
-	for (int i = 0; i < num_compounds; ++i)
+	const F_base *features_flat = &features[0][0];
+	const int total = num_compounds * num_features;
+	for (int i = 0; i < total; i ++)
 	{
-#pragma HLS loop_tripcount min = block_size max = block_size
-		for (int d = 0; d < num_features; d++)
-		{
-#pragma HLS LOOP_FLATTEN
-#pragma HLS PIPELINE II = 1
-			features_stream << features[i][d];
-		}
+#pragma HLS loop_tripcount min = num_features*block_size \
+			   max = num_features*block_size
+#pragma HLS PIPELINE
+			features_stream << features_flat[i];
 	}
 }
 
@@ -110,7 +110,7 @@ void features_loop(
     hls::stream<F_base>& features,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
-		L_type latents_acc[num_samples][num_latent];
+	L_type latents_acc[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
 
@@ -140,7 +140,7 @@ void features_loop(
 					latents_acc[s][k] = L_type(v + prod);
 
 					if (d == num_features-1) latents[s][k] << latents_acc[s][k];
-			}
+				}
 		}
 	}
 }
@@ -150,17 +150,17 @@ void proteins_loop(
     hls::stream<P_base> &predictions,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
-		L_type latents_cache[num_samples][num_latent];
+	L_type latents_cache[num_samples][num_latent];
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
 
 	for (int i = 0; i < num_compounds; ++i)
-		{
+	{
 #pragma HLS loop_tripcount min = block_size max = block_size
 
 		for (int d = 0; d < num_proteins; d++)
 		{
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=4
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
 			S_type sum(.0F);
@@ -208,16 +208,17 @@ void predict_one_block(
 		      P_base predictions[block_size][num_proteins]
 )
 {
-	static hls::stream<L_type> latents[num_samples][num_latent];
-	static hls::stream<F_base> features_stream;
-	static hls::stream<P_base> predictions_stream;
-#pragma HLS STREAM variable = latents depth = 32
-#pragma HLS STREAM variable = features_stream depth = 32
-#pragma HLS STREAM variable = predictions_stream depth = 32
+	hls::stream<L_type> latents[num_samples][num_latent];
+	hls::stream<F_base> features_stream;
+	hls::stream<P_base> predictions_stream;
+#pragma HLS STREAM variable = latents depth = 16
+#pragma HLS STREAM variable = features_stream depth = 16
+#pragma HLS STREAM variable = predictions_stream depth = 16
 
 #pragma HLS STABLE variable = U_local
 #pragma HLS STABLE variable = M_local
 #pragma HLS STABLE variable = B_local
+#pragma HLS STABLE variable = num_compounds
 #pragma HLS DATAFLOW
 	input_loop(num_compounds, features_stream, features);
 	features_loop(num_compounds, features_stream, latents);
@@ -235,11 +236,8 @@ void predict_or_update_model(
 		const B_flat B_in)        //[num_samples][num_features][num_latent]
 {
 #ifndef OMPSS_FPGA
-#pragma HLS INTERFACE m_axi port=features offset=slave bundle=gmem1
-#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem2
-
-#pragma HLS DATA_PACK variable=features
-#pragma HLS DATA_PACK variable=predictions
+#pragma HLS INTERFACE m_axi port=features offset=slave bundle=features_in max_widen_bitwidth=512
+#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=predictions_out max_widen_bitwidth=512
 #endif
 
 	if (update_model)
