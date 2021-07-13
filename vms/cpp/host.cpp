@@ -137,7 +137,7 @@ static struct argp_option options[] = {
 struct arguments
 {
   int num_repeat = 2;
-  int num_compounds = 10;
+  int num_compounds = 100;
   bool check = num_samples >= 4 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
 };
 
