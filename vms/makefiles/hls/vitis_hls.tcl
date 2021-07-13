@@ -8,6 +8,7 @@ open_solution "solution1" -flow_target vivado
 # crdb
 set_part {xcvu9p-fsgd2104-2-i} 
 create_clock -period 5 -name default
+config_interface -m_axi_alignment_byte_size 64 -m_axi_max_widen_bitwidth 512
 csim_design
 csynth_design
 cosim_design -enable_dataflow_profiling
