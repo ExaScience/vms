@@ -130,6 +130,7 @@ static struct argp_option options[] = {
   {"num-compounds",  'c', "NUM",      0,  "Number of compounds (10)." },
   {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
   {"no-check",       'n',     0,      0,  "Do not check for errors." },
+  {"check",          'd',     0,      0,  "Do check for errors." },
   { 0 }
 };
 
@@ -138,7 +139,7 @@ struct arguments
 {
   int num_repeat = 2;
   int num_compounds = 100;
-  bool check = num_samples >= 4 || !dt_fixed; // below 16 samples fixed-point checking if unreliable
+  bool check = false;
 };
 
 /* Parse a single option. */
@@ -154,6 +155,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'r': arguments->num_repeat = std::atoi(arg); break;
     case 'c': arguments->num_compounds = std::atoi(arg); break;
     case 'n': arguments->check = false; break;
+    case 'd': arguments->check = true; break;
     default: return ARGP_ERR_UNKNOWN;
     }
   return 0;
