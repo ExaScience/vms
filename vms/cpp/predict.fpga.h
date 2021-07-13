@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include <ap_int.h>
+
 #include "predict.h"
 #include "stream.h"
 
@@ -89,19 +91,44 @@ void load_model(
 }
 
 
+const int vec_size = 512;
+const int el_size = sizeof(F_base) * 8;
+const int vec_len = vec_size / el_size;
+typedef ap_int<vec_size> F_vec;
+
 void input_loop(
     int num_compounds,
     hls::stream<F_base> &features_stream,
     const F_base features[block_size][num_features])
 {
-	const F_base *features_flat = &features[0][0];
+	const F_base *features_flat = (F_base *)&features[0][0];
 	const int total = num_compounds * num_features;
-	for (int i = 0; i < total; i ++)
+	const int num_vec_reads = total / vec_len;
+	printf(" total = %d\n", total);
+	printf(" num_vec_reads = %d\n", num_vec_reads);
+	printf(" num_vec_reads * vec_len = %d\n", num_vec_reads*vec_len);
+	for (int v = 0; v < num_vec_reads; v++)
 	{
-#pragma HLS loop_tripcount min = num_features*block_size \
-			   max = num_features*block_size
+#pragma HLS loop_tripcount min = num_vec_reads max = num_vec_reads
 #pragma HLS PIPELINE
-			features_stream << features_flat[i];
+		const int i = v * vec_len;
+		F_vec features_vec = *(F_vec *)(&features_flat[i]);
+		for (int j = 0; j < vec_size; j+=el_size)
+		{
+			F_base feature = features_vec(j+el_size-1, j);
+			int pos = i+(j/el_size);
+			printf("%d: %d <-> %d\n", pos, feature, features_flat[pos]);
+			features_stream << features_vec(j+el_size-1, j);
+		}
+	}
+
+	// left-overs
+	for (int i = num_vec_reads * vec_len; i < total; i++)
+	{
+#pragma HLS loop_tripcount min = 0 max = vec_len
+#pragma HLS PIPELINE
+		printf("%d: %d\n", i, features_flat[i]);
+		features_stream << features_flat[i];
 	}
 }
 
