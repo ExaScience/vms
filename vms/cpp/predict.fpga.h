@@ -104,20 +104,16 @@ void input_loop(
 	const F_base *features_flat = (F_base *)&features[0][0];
 	const int total = num_compounds * num_features;
 	const int num_vec_reads = total / vec_len;
-	printf(" total = %d\n", total);
-	printf(" num_vec_reads = %d\n", num_vec_reads);
-	printf(" num_vec_reads * vec_len = %d\n", num_vec_reads*vec_len);
 	for (int v = 0; v < num_vec_reads; v++)
 	{
-#pragma HLS loop_tripcount min = num_vec_reads max = num_vec_reads
-#pragma HLS PIPELINE
+#pragma HLS loop_tripcount min = block_size*num_features/vec_len max = block_size*num_features/vec_len
+#pragma HLS PIPELINE II = vec_len
 		const int i = v * vec_len;
 		F_vec features_vec = *(F_vec *)(&features_flat[i]);
 		for (int j = 0; j < vec_size; j+=el_size)
 		{
 			F_base feature = features_vec(j+el_size-1, j);
 			int pos = i+(j/el_size);
-			printf("%d: %d <-> %d\n", pos, feature, features_flat[pos]);
 			features_stream << features_vec(j+el_size-1, j);
 		}
 	}
@@ -127,7 +123,6 @@ void input_loop(
 	{
 #pragma HLS loop_tripcount min = 0 max = vec_len
 #pragma HLS PIPELINE
-		printf("%d: %d\n", i, features_flat[i]);
 		features_stream << features_flat[i];
 	}
 }
