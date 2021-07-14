@@ -41,9 +41,10 @@ void load_model(
 
 
 const int vec_size = 512;
-const int el_size = sizeof(F_base) * 8;
-const int vec_len = vec_size / el_size;
-typedef std::array<F_base, vec_len> F_vec;
+
+const int F_el_size = sizeof(F_base) * 8;
+const int F_vec_len = vec_size / F_el_size;
+typedef std::array<F_base, F_vec_len> F_vec;
 
 void input_loop(
     int num_compounds,
@@ -52,15 +53,15 @@ void input_loop(
 {
 	const F_base *features_flat = (F_base *)&features[0][0];
 	const int total = num_compounds * num_features;
-	const int num_vec_reads = total / vec_len;
+	const int num_vec_reads = total / F_vec_len;
 	int i;
-	for (i = 0; i < total; i+=vec_len)
+	for (i = 0; i < total; i+=F_vec_len)
 	{
-#pragma HLS loop_tripcount min = block_size*num_features/vec_len max = block_size*num_features/vec_len
-#pragma HLS PIPELINE II = vec_len
-		// safe to read vec_len elements here, since features-array is padded to be 4096bytes aligned
+#pragma HLS loop_tripcount min = block_size*num_features/F_vec_len max = block_size*num_features/F_vec_len
+#pragma HLS PIPELINE II = F_vec_len
+		// safe to read F_vec_len elements here, since features-array is padded to be 4096bytes aligned
 		F_vec features_vec = *(F_vec *)(&features_flat[i]);
-		for (int j = 0; j < vec_len; j++)
+		for (int j = 0; j < F_vec_len; j++)
 			if (i+j < total)
 				features_stream << features_vec[j];
 	}
@@ -106,9 +107,10 @@ void features_loop(
 	}
 }
 
+
 void proteins_loop(
     int num_compounds,
-    hls::stream<P_base> &predictions,
+    hls::stream<P_vec> &predictions,
     hls::stream<L_type> latents[num_samples][num_latent])
 {
 	L_type latents_cache[num_samples][num_latent];
@@ -124,9 +126,13 @@ void proteins_loop(
 #pragma HLS PIPELINE II=4
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
-			S_type sum = S_type();
+
+			P_vec pred;
 
 			for (int s = 0; s < num_samples; s++)
+			{
+				S_type sum = S_type();
+
 				for (int k = 0; k < num_latent; k++)
 				{
 					if (d==0) latents_cache[s][k] = latents[s][k].read();
@@ -134,22 +140,19 @@ void proteins_loop(
 					sum = sum + prod;
 				}
 
-			P_type aggr(
-#if defined(DT_FLOAT) || defined(DT_HALF)
-			    sum / num_samples
-#else
-			    sum >> log_num_samples
-#endif
-			);
-			predictions << P_base(aggr);
+				pred[s] = P_type(sum);
+			}
+
+			predictions << pred;
+
 		} // end proteins
 	}
 }
 
 void output_loop(
     int num_compounds,
-    P_base predictions[block_size][num_proteins],
-    hls::stream<P_base> &predictions_stream)
+    P_arr predictions,
+    hls::stream<P_vec> &predictions_stream)
 {
 	for (int i = 0; i < num_compounds; ++i)
 	{
@@ -162,6 +165,31 @@ void output_loop(
 		}
 	}
 }
+
+
+void predict_dataflow(
+		int num_compounds,
+		const F_arr features,    //[block_size*num_features]
+		      P_arr predictions) //[block_size*num_proteins]
+{
+	hls::stream<L_type> latents[num_samples][num_latent];
+	hls::stream<F_base> features_stream;
+	hls::stream<P_vec> predictions_stream;
+#pragma HLS STREAM variable = latents depth = 16
+#pragma HLS STREAM variable = features_stream depth = 16
+#pragma HLS STREAM variable = predictions_stream depth = 16
+
+#pragma HLS STABLE variable = U_local
+#pragma HLS STABLE variable = M_local
+#pragma HLS STABLE variable = B_local
+#pragma HLS STABLE variable = num_compounds
+#pragma HLS DATAFLOW
+	input_loop(num_compounds, features_stream, features);
+	features_loop(num_compounds, features_stream, latents);
+	proteins_loop(num_compounds, predictions_stream, latents);
+	output_loop(num_compounds, predictions, predictions_stream);
+
+} // end function
 
 void predict_one_block(
 		int new_model_no,
@@ -178,24 +206,7 @@ void predict_one_block(
 #endif
 
 	load_model(new_model_no, U_in, M_in, B_in);
-
-	hls::stream<L_type> latents[num_samples][num_latent];
-	hls::stream<F_base> features_stream;
-	hls::stream<P_base> predictions_stream;
-#pragma HLS STREAM variable = latents depth = 16
-#pragma HLS STREAM variable = features_stream depth = 16
-#pragma HLS STREAM variable = predictions_stream depth = 16
-
-#pragma HLS STABLE variable = U_local
-#pragma HLS STABLE variable = M_local
-#pragma HLS STABLE variable = B_local
-#pragma HLS STABLE variable = num_compounds
-#pragma HLS DATAFLOW
-	input_loop(num_compounds, features_stream, features);
-	features_loop(num_compounds, features_stream, latents);
-	proteins_loop(num_compounds, predictions_stream, latents);
-	output_loop(num_compounds, predictions, predictions_stream);
-
+	predict_dataflow(num_compounds, features, predictions);
 } // end function
 
 

@@ -13,24 +13,6 @@
 #include "predict.h"
 #include "vms_tb.h"
 
-void print_checksum(P_arr out)
-{
-	P_base U_check = out[0][0];
-	P_base M_check = out[0][1];
-	P_base B_check = out[0][2];
-	P_base F_check = out[0][3];
-
-    printf(CRC_FMT ", " CRC_FMT ", " CRC_FMT ", " CRC_FMT  "\n", U_check, M_check, B_check, F_check);
-
-	for (int c = 0; c < num_proteins - 3;)
-	{
-		assert(out[0][c] == U_check); c++;
-		assert(out[0][c] == M_check); c++;
-		assert(out[0][c] == B_check); c++;
-		assert(out[0][c] == F_check); c++;
-	}
-}
-
 #ifdef DT_OBSERVED_FLOAT
 const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
@@ -58,36 +40,26 @@ void prepare_model(
     const float B_in[num_samples][num_features][num_latent],
     U_base U_out[num_samples][num_proteins][num_latent],
     M_base M_out[num_samples][num_latent],
-    B_base B_out[num_samples][num_features][num_latent],
-    P_base &U_check,
-    P_base &M_check,
-    P_base &B_check
+    B_base B_out[num_samples][num_features][num_latent]
     )
 {
-	CRC_INIT(U_check);
-	CRC_INIT(M_check);
-	CRC_INIT(B_check);
-
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
             {
                 U_out[i][j][k] = U_base(U_type(U_in[i][j][k]));
-                CRC_ADD(U_check, U_out[i][j][k]);
             }
 
         for (int j = 0; j < num_latent; j++)
         {
             M_out[i][j] = M_base(M_type(M_in[i][j]));
-            CRC_ADD(M_check, M_out[i][j]);
         }
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
             {
                 B_out[i][j][k] = B_base(B_type(B_in[i][j][k]));
-                CRC_ADD(B_check, B_out[i][j][k]);
             }
     }
 }
@@ -95,14 +67,19 @@ void prepare_model(
 
 int check_result(
     int num_compounds,
-    const P_base out[][num_proteins],
+    const P_vec out[][num_proteins],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
         {
-            float o = P_type(out[c][p]);
+
+            // compute average predictions accross samples
+            S_type sum = S_type();
+            for (int s = 0; s < num_samples; s++) sum = sum + P_type(out[c][p][s]);
+            float o = (float)sum / (float)num_samples;
+
             float r = ref[c % tb_num_compounds][p];
             if (std::abs(o - r) < epsilon)
             {
@@ -187,22 +164,20 @@ main (int argc, char **argv)
     printf("  ncmps: %d\n", args.num_compounds);
     printf("  alloc: %d\n", num_compounds_alloc);
 
-    P_base(*tb_output_base)[num_proteins];
+    P_vec(*tb_output_base)[num_proteins];
     F_base(*tb_input_base)[num_features];
     U_base(*Ub)[num_proteins][num_latent];
     M_base(*Mb)[num_latent];
     B_base(*Bb)[num_features][num_latent];
 
-    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * sizeof(P_base));
+    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * sizeof(P_vec));
     posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));
     posix_memalign((void **)&Ub, 4096, num_samples * num_proteins * num_latent * sizeof(U_base));
     posix_memalign((void **)&Mb, 4096, num_samples * num_latent * sizeof(M_base));
     posix_memalign((void **)&Bb, 4096, num_samples * num_features * num_latent * sizeof(B_base));
 
-    P_base U_check_tb, M_check_tb, B_check_tb;
-
     prepare_tb_input(args.num_compounds, tb_input, tb_input_base);
-    prepare_model(U, M, B, Ub, Mb, Bb, U_check_tb, M_check_tb, B_check_tb);
+    prepare_model(U, M, B, Ub, Mb, Bb);
 
     int nerrors = 0;
 

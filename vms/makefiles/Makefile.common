@@ -1,6 +1,14 @@
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(SELF_DIR)/config.mk
 
+ifndef HOST_IF
+	$(error HOST_IF is not set)
+endif
+
+ifndef TOPDIR
+	$(error TOPDIR is not set)
+endif
+
 PROGRAM_ = predict
 SRCFILES = main.cpp $(HOST_IF).cpp
 KERNELFILES = predict.cpp

@@ -1,4 +1,7 @@
+#include <array>
+
 #include "vms_const.h"
+
 
 static const int block_size = 4096; // align to page size
 
@@ -7,7 +10,7 @@ const int L_iwl = 12;
 const int S_wl = 32;
 const int S_iwl = 12;
 
-const float epsilon = 0.5;
+const float epsilon = 1.0F;
 
 #if defined(DT_FIXED)
 #define DT_NAME "fxp<T,I>"
@@ -101,22 +104,32 @@ typedef float S_type;
 #error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
+typedef std::array<P_base, num_samples> P_vec;
+
 typedef F_base F_flx[][num_features];
-typedef P_base P_flx[][num_proteins];
+typedef P_vec  P_flx[][num_proteins];
 
 typedef F_base F_arr[block_size][num_features];
-typedef P_base P_arr[block_size][num_proteins];
+typedef P_vec P_arr[block_size][num_proteins];
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-
 extern "C"
+void predict_one_block(
+		int new_model_no,
+		int num_compounds,
+		const F_arr features,    //[block_size][num_features]
+		      P_arr predictions, //[block_size][num_proteins]
+		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+		const M_arr M_in,        //[num_samples][num_latent]
+		const B_arr B_in);       //[num_samples][num_features][num_latent]
+
 void predict_compounds(
                int num_compounds,
-               const F_arr features,     //[block_size*num_features]
-                     P_arr predictions,  //[block_size*num_proteins]
+               const F_flx features,     //[block_size*num_features]
+                     P_flx predictions,  //[block_size*num_proteins]
                const U_arr U_in,        //[num_samples][num_proteins][num_latent]
                const M_arr M_in,        //[num_samples][num_latent]
                const B_arr B_in);       //[num_samples][num_features][num_latent]

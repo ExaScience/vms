@@ -2,6 +2,8 @@ TOPDIR=..
 
 default: native
 
+HOST_IF = ompss
+
 include ../config.mk
 include ../Makefile.common
 

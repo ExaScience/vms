@@ -196,50 +196,34 @@ extern unsigned int KERNEL_VAR_LEN;
 
 CLData cl_data("predict_one_block", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
 
-void update_model(
-    const  U_arr U_in,
-    const  M_arr M_in,
-    const  B_arr B_in)
+void predict_compounds(
+               int num_compounds,
+               const F_flx features,     //[block_size*num_features]
+                     P_flx predictions,  //[block_size*num_proteins]
+               const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+               const M_arr M_in,        //[num_samples][num_latent]
+               const B_arr B_in)        //[num_samples][num_features][num_latent]
 {
-    F_base *in_block;
-    P_base *out_block;
+    static int model_no = 0;
 
-    posix_memalign((void**)&out_block, 4096, block_size*num_proteins*sizeof(P_base));
-    posix_memalign((void**)&in_block,  4096, block_size*num_features*sizeof(F_base));
-
-	int c = 0;
-	for (int i=0; i<block_size; i++)
-		for (int j=0; j<num_features; j++)
-		{
-			in_block[c] = c;
-			c++;
-		}
-
-
-    cl_data.addInputArg(true);
-    cl_data.addInputArg(0);
-    cl_data.addInputArg(in_block, block_size*num_features);
-    cl_data.addOutputArg(out_block, block_size*num_proteins);
-    cl_data.addInputArg(U_in, num_samples);
-    cl_data.addInputArg(M_in, num_samples);
-    cl_data.addInputArg(B_in, num_samples);
-    cl_data.go();
-}
-
-
-void predict_compounds(int num_compounds, const F_flx in, P_flx out)
-{
     // round up
     int num_blocks = (num_compounds + block_size - 1) / block_size;
+
 
     for(int c=0; c<block_size*num_blocks; c+=block_size)
     {
         if (verbose) printf("c: %d\n", c);
         int num_compounds_left = std::min(block_size, num_compounds - c);
-        cl_data.addInputArg(false);
+        cl_data.addInputArg(model_no);
         cl_data.addInputArg(num_compounds_left);
-        cl_data.addInputArg(&in[c][0], block_size*num_features);
-        cl_data.addOutputArg(&out[c][0], block_size*num_proteins);
+        cl_data.addInputArg(&features[c][0], block_size*num_features);
+        cl_data.addOutputArg(&predictions[c][0], block_size*num_proteins);
+        cl_data.addInputArg(U_in, num_samples);
+        cl_data.addInputArg(M_in, num_samples);
+        cl_data.addInputArg(B_in, num_samples);
+        cl_data.go();
         cl_data.go();
     }
+
+    model_no++;
 }
