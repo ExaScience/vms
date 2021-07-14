@@ -234,7 +234,7 @@ main (int argc, char **argv)
     printf( "%.2f tera-ops; %.2f tera-ops/second\n", tops, tops/elapsed);
     printf( "%.2f giga-ops; %.2f giga-ops/second\n", gops, gops/elapsed);
 
-    int num_kernel_executions = ceil((args.num_compounds * args.num_repeat) / double(block_size));
+    int num_kernel_executions = ceil((args.num_compounds) / double(block_size)) * args.num_repeat;
     double kernel_ms = 1e3 * elapsed / num_kernel_executions;
     printf( "%d kernel executions of  %.2f ms each (avg)\n", num_kernel_executions, kernel_ms);
 
