@@ -1,7 +1,7 @@
 open_project -reset hls
 set_top predict_or_update_model
 add_files non_ocl.cpp  -cflags "-std=c++11"
-add_files -tb host.cpp -cflags "-std=c++11"
+add_files -tb main.cpp -cflags "-std=c++11"
 open_solution "solution1" -flow_target vivado
 # zcu102
 # set_part {xczu9eg-ffvb1156-1l-i}

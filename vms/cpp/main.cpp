@@ -139,7 +139,7 @@ struct arguments
 {
   int num_repeat = 2;
   int num_compounds = 100;
-  bool check = false;
+  bool check = true;
 };
 
 /* Parse a single option. */

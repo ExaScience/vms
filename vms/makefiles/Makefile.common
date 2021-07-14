@@ -4,7 +4,7 @@ include $(SELF_DIR)/config.mk
 HOST_IF ?= non_ocl
 
 PROGRAM_ = predict
-SRCFILES = host.cpp $(HOST_IF).cpp
+SRCFILES = main.cpp $(HOST_IF).cpp
 KERNELFILES = predict.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h stream.h
 MODELFILES = vms_const.h vms_tb.h
