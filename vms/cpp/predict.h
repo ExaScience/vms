@@ -111,19 +111,12 @@ typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-typedef U_base U_flat[num_samples*num_proteins*num_latent];
-typedef M_base M_flat[num_samples*num_latent];
-typedef B_base B_flat[num_samples*num_features*num_latent];
-
-void update_model(const U_arr U, const M_arr mu, const B_arr B);
-void predict_compounds(int num_compounds, const F_flx in, P_flx out);
 
 extern "C"
-void predict_or_update_model(
-               bool update_model,
+void predict_compounds(
                int num_compounds,
                const F_arr features,     //[block_size*num_features]
                      P_arr predictions,  //[block_size*num_proteins]
-               const U_flat U_in,        //[num_samples][num_proteins][num_latent]
-               const M_flat M_in,        //[num_samples][num_latent]
-               const B_flat B_in);       //[num_samples][num_features][num_latent]
+               const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+               const M_arr M_in,        //[num_samples][num_latent]
+               const B_arr B_in);       //[num_samples][num_features][num_latent]

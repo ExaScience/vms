@@ -189,7 +189,6 @@ main (int argc, char **argv)
 
     P_base(*tb_output_base)[num_proteins];
     F_base(*tb_input_base)[num_features];
-
     U_base(*Ub)[num_proteins][num_latent];
     M_base(*Mb)[num_latent];
     B_base(*Bb)[num_features][num_latent];
@@ -207,14 +206,11 @@ main (int argc, char **argv)
 
     int nerrors = 0;
 
-    printf("Updating model\n");
-    update_model(Ub, Mb, Bb);
-
     printf("Predicting\n");
     double start = tick();
     for (int n = 0; n < args.num_repeat; n++)
     {
-        predict_compounds(args.num_compounds, tb_input_base, tb_output_base);
+        predict_compounds(args.num_compounds, tb_input_base, tb_output_base, Ub, Mb, Bb);
     }
     double stop = tick();
     if (args.check)

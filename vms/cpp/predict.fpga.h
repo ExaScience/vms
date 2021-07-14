@@ -11,83 +11,32 @@ static U_base U_local[num_samples][num_proteins][num_latent];
 static M_base M_local[num_samples][num_latent];
 static B_base B_local[num_samples][num_features][num_latent];
 
-void checksum_model(const F_arr features,
-		    P_arr out,
-		    const U_arr U,
-		    const M_arr M,
-		    const B_arr B)
-{
-	P_base U_check;
-	P_base M_check;
-	P_base B_check;
-	P_base F_check;
-
-	CRC_INIT(U_check);
-	CRC_INIT(M_check);
-	CRC_INIT(B_check);
-	CRC_INIT(F_check);
-
-        for (int i = 0; i < num_samples; i++)
-        {
-            for (int j = 0; j < num_proteins; j++)
-                for (int k = 0; k < num_latent; k++)
-                    CRC_ADD(U_check, U[i][j][k]);
-
-            for (int j = 0; j < num_latent; j++)
-                CRC_ADD(M_check, M[i][j]);
-
-            for (int j = 0; j < num_features; j++)
-                for (int k = 0; k < num_latent; k++)
-                    CRC_ADD(B_check, B[i][j][k]);
-        }
-
-        {
-            int c = 0;
-            for (int i = 0; i < block_size; i++)
-                for (int j = 0; j < num_features; j++)
-                    CRC_ADD(F_check, features[i][j]);
-        }
-
-        {
-            for (int c = 0; c < num_proteins - 3;)
-            {
-                out[0][c++] = U_check;
-                out[0][c++] = M_check;
-                out[0][c++] = B_check;
-                out[0][c++] = F_check;
-            }
-        }
-}
-
-
 
 void load_model(
-		const U_flat U_in,   //[num_samples][num_proteins][num_latent],
-		const M_flat M_in, //[num_samples][num_latent],
-		const B_flat B_in)   //[num_samples][num_features][num_latent])
+		const int new_model_no,
+		const U_arr U_in,   //[num_samples][num_proteins][num_latent],
+		const M_arr M_in, //[num_samples][num_latent],
+		const B_arr B_in)   //[num_samples][num_features][num_latent])
 	{
-#ifdef USE_MEMCPY
-	std::memcpy(M_local, M_in, sizeof(M_local));
-	std::memcpy(U_local, U_in, sizeof(U_local));
-	std::memcpy(B_local, B_in, sizeof(B_local));
-#else
-	int f = 0;
-	int g = 0;
-	int h = 0;
+	static int    cur_model_no = -1;
+
+	if (new_model_no == cur_model_no) return;
+
+	cur_model_no = new_model_no;
+
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
-                U_local[i][j][k] = U_in[f++];
+                U_local[i][j][k] = U_in[i][j][k];
 
         for (int j = 0; j < num_latent; j++)
-           M_local[i][j] = M_in[g++];
+           M_local[i][j] = M_in[i][j];
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
-                B_local[i][j][k] = B_in[h++];
+                B_local[i][j][k] = B_in[i][j][k];
     }
-#endif
 }
 
 
@@ -215,11 +164,21 @@ void output_loop(
 }
 
 void predict_one_block(
-		int num_compounds, // <= block_size
-		const F_base features[block_size][num_features],
-		      P_base predictions[block_size][num_proteins]
-)
+		int new_model_no,
+		int num_compounds,
+		const F_arr features,    //[block_size*num_features]
+		      P_arr predictions, //[block_size*num_proteins]
+		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
+		const M_arr M_in,        //[num_samples][num_latent]
+		const B_arr B_in)        //[num_samples][num_features][num_latent]
 {
+#ifndef OMPSS_FPGA
+#pragma HLS INTERFACE m_axi port=features offset=slave bundle=features_in max_widen_bitwidth=512
+#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=predictions_out max_widen_bitwidth=512
+#endif
+
+	load_model(new_model_no, U_in, M_in, B_in);
+
 	hls::stream<L_type> latents[num_samples][num_latent];
 	hls::stream<F_base> features_stream;
 	hls::stream<P_base> predictions_stream;
@@ -236,33 +195,6 @@ void predict_one_block(
 	features_loop(num_compounds, features_stream, latents);
 	proteins_loop(num_compounds, predictions_stream, latents);
 	output_loop(num_compounds, predictions, predictions_stream);
-}
-
-void predict_or_update_model(
-		bool update_model,
-		int num_compounds,
-		const F_arr features,    //[block_size*num_features]
-		      P_arr predictions, //[block_size*num_proteins]
-		const U_flat U_in,        //[num_samples][num_proteins][num_latent]
-		const M_flat M_in,        //[num_samples][num_latent]
-		const B_flat B_in)        //[num_samples][num_features][num_latent]
-{
-#ifndef OMPSS_FPGA
-#pragma HLS INTERFACE m_axi port=features offset=slave bundle=features_in max_widen_bitwidth=512
-#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=predictions_out max_widen_bitwidth=512
-#endif
-
-	if (update_model)
-	{
-		load_model(U_in, M_in, B_in);
-#ifdef CHECKSUM_MODEL
-		checksum_model(features, predictions, U_local, M_local, B_local);
-#endif
-	} 
-        else
-	{
-		predict_one_block(num_compounds, features, predictions);
-	}
 
 } // end function
 

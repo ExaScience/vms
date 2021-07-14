@@ -139,11 +139,11 @@ def action_build(dir):
         execute(f"dockfpga -w {absdir} make", workdir="smp-arm64")
 
         execute("make hls", modules = ["Vitis/2020.1"])
-        resource_utilization("predict_or_update_model")
+        resource_utilization("predict_one_block")
         latency_estimation("predict_one_compound")
 
         execute(f"dockfpga -w {absdir} make bitstream", workdir="fpga-crdb")
-        resource_utilization("predict_or_update_model")
+        resource_utilization("predict_one_block")
         latency_estimation("predict_one_compound")
         log_xtasks_config()
     

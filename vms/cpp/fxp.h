@@ -50,7 +50,7 @@ struct fxp
     static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
-    static constexpr float fudge_factor = 128.0F;
+    static constexpr float fudge_factor = 256.0F;
     static float epsilon()
     {
         float eps = (fudge_factor / (float)(1L << shift));

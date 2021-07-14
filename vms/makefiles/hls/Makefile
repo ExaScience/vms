@@ -7,7 +7,7 @@ include ../Makefile.ompss
 
 .PHONY: hls clean
 
-KERNELNAME := predict_or_update_model
+KERNELNAME := predict_one_block
 IPZIP = hls/solution1/impl/ip/xilinx_com_hls_$(KERNELNAME)_1_0.zip
 
 hls: $(IPZIP)

@@ -194,7 +194,7 @@ struct CLData
 extern unsigned char KERNEL_VAR[];
 extern unsigned int KERNEL_VAR_LEN;
 
-CLData cl_data("predict_or_update_model", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
+CLData cl_data("predict_one_block", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
 
 void update_model(
     const  U_arr U_in,
@@ -224,16 +224,6 @@ void update_model(
     cl_data.addInputArg(M_in, num_samples);
     cl_data.addInputArg(B_in, num_samples);
     cl_data.go();
-
-
-#ifdef CHECKSUM_MODEL
-    P_flat out_block_2;
-	checksum_model(in_block, out_block_2, U_in, M_in, B_in);
-    printf("FPGA checksums U, M, B, F: ");
-	print_checksum(out_block_1);
-    printf("CPU  checksums U, M, B, F: ");
-	print_checksum(out_block_2);
-#endif
 }
 
 
