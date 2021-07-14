@@ -87,7 +87,7 @@ typedef float S_type;
 
 #elif defined(DT_HALF_INT)
 
-#include “hls_half.h”
+#include "hls_half.h"
 
 typedef half U_type;
 typedef half M_type;
