@@ -1,8 +1,8 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <array>
 
-#include <hls_vector.h>
 
 #include "predict.h"
 #include "stream.h"
@@ -94,7 +94,7 @@ void load_model(
 const int vec_size = 512;
 const int el_size = sizeof(F_base) * 8;
 const int vec_len = vec_size / el_size;
-typedef hls::vector<F_base, vec_len> F_vec;
+typedef std::array<F_base, vec_len> F_vec;
 
 void input_loop(
     int num_compounds,
