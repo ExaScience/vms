@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <limits>
+#include <iostream>
 
 template<int N> struct int_type;
 template<> struct int_type< 8> { typedef signed char T; };
@@ -49,10 +50,11 @@ struct fxp
     static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
+    static constexpr float fudge_factor = 128.0F;
     static float epsilon()
     {
-        float eps = (256.F / (float)(1L << shift));
-        eps = std::max(eps, 256.F * std::numeric_limits<float>::epsilon());
+        float eps = (fudge_factor / (float)(1L << shift));
+        eps = std::max(eps, fudge_factor * std::numeric_limits<float>::epsilon());
         //std::cerr << "fxp<" << wl << "," << iwl << ">" << " (eps: " << eps << ")" << std::endl;
         return eps;
     }
@@ -97,21 +99,23 @@ struct fxp
 #endif
 
     fxp(float v) : val(v*(1L<<shift)) { check(v); } 
-
-#ifdef DT_CHECK
-    fxp(T v = (T)0xdead) : val(v) { } 
-#else
     fxp(T v) : val(v) { } 
     fxp() : val() {} 
-#endif
 
     template<typename otherT, int otherIWL>
     fxp(fxp<otherT, otherIWL> v)
     {
-        if (v.shift > shift) 
-            val = v.val >> (v.shift - shift);
-        else 
-            val = v.val << (shift - v.shift);
+        constexpr int s = v.shift - shift;
+        if (wl >= v.wl) // assign + shift
+        {
+            val = v.val; // extend
+            if (s > 0) val = val >> s;
+            else       val = val << (-s);
+        } else { // shift + assign
+            if (s > 0) val = v.val >> s;
+            else       val = v.val << (-s);
+        }
+
 
 #ifdef DT_CHECK
         float eps = std::max(fxp<otherT, otherIWL>::epsilon(), epsilon());
@@ -172,5 +176,6 @@ struct fxp
         printf("%s\n val = %.8f (%d)\n", name, (float)*this, val);
         printf(" wl = %d\n", wl);
         printf(" iwl = %d\n", iwl);
+        printf(" shift = %d\n", shift);
     }
 };
