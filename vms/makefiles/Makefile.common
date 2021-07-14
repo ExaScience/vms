@@ -1,8 +1,6 @@
 SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(SELF_DIR)/config.mk
 
-HOST_IF ?= non_ocl
-
 PROGRAM_ = predict
 SRCFILES = main.cpp $(HOST_IF).cpp
 KERNELFILES = predict.cpp
