@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include <ap_int.h>
+#include <hls_vector.h>
 
 #include "predict.h"
 #include "stream.h"
@@ -94,7 +94,7 @@ void load_model(
 const int vec_size = 512;
 const int el_size = sizeof(F_base) * 8;
 const int vec_len = vec_size / el_size;
-typedef ap_int<vec_size> F_vec;
+typedef hls::vector<F_base, vec_len> F_vec;
 
 void input_loop(
     int num_compounds,
@@ -104,26 +104,16 @@ void input_loop(
 	const F_base *features_flat = (F_base *)&features[0][0];
 	const int total = num_compounds * num_features;
 	const int num_vec_reads = total / vec_len;
-	for (int v = 0; v < num_vec_reads; v++)
+	int i;
+	for (i = 0; i < total; i+=vec_len)
 	{
 #pragma HLS loop_tripcount min = block_size*num_features/vec_len max = block_size*num_features/vec_len
 #pragma HLS PIPELINE II = vec_len
-		const int i = v * vec_len;
+		// safe to read vec_len elements here, since features-array is padded to be 4096bytes aligned
 		F_vec features_vec = *(F_vec *)(&features_flat[i]);
-		for (int j = 0; j < vec_size; j+=el_size)
-		{
-			F_base feature = features_vec(j+el_size-1, j);
-			int pos = i+(j/el_size);
-			features_stream << features_vec(j+el_size-1, j);
-		}
-	}
-
-	// left-overs
-	for (int i = num_vec_reads * vec_len; i < total; i++)
-	{
-#pragma HLS loop_tripcount min = 0 max = vec_len
-#pragma HLS PIPELINE
-		features_stream << features_flat[i];
+		for (int j = 0; j < vec_len; j++)
+			if (i+j < total)
+				features_stream << features_vec[j];
 	}
 }
 
@@ -185,7 +175,7 @@ void proteins_loop(
 #pragma HLS PIPELINE II=4
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
-			S_type sum(.0F);
+			S_type sum = S_type();
 
 			for (int s = 0; s < num_samples; s++)
 				for (int k = 0; k < num_latent; k++)
