@@ -18,6 +18,8 @@ const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
 
+int verbose = 0;
+
 double tick() {
     auto now = std::chrono::system_clock::now().time_since_epoch();
     double ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
@@ -108,6 +110,7 @@ static struct argp_option options[] = {
   {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
   {"no-check",       'n',     0,      0,  "Do not check for errors." },
   {"check",          'd',     0,      0,  "Do check for errors." },
+  {"verbose",        'v',     0,      0,  "Verbose messages" },
   { 0 }
 };
 
@@ -133,6 +136,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'c': arguments->num_compounds = std::atoi(arg); break;
     case 'n': arguments->check = false; break;
     case 'd': arguments->check = true; break;
+    case 'v': verbose++; break;
     default: return ARGP_ERR_UNKNOWN;
     }
   return 0;

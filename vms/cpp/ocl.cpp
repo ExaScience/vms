@@ -8,8 +8,6 @@
 #include "predict.h"
 #include "vms_tb.h"
 
-static const bool verbose = false;
-
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
     size_t i;
     cl_int err;

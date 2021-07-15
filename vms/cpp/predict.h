@@ -2,6 +2,7 @@
 
 #include "vms_const.h"
 
+extern int verbose;
 
 static const int block_size = 4096; // align to page size
 
