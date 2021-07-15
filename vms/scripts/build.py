@@ -99,7 +99,7 @@ def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, dataty
     if basedir is None:
         basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
-    builddir = os.path.join(basedir, "%s_%d_%d_%s" % (dataset, num_latent, num_samples, datatype))
+    builddir = os.path.join(basedir, "%s_%dl_%ds_%s" % (dataset, num_latent, num_samples, datatype))
 
     if os.path.isdir(builddir):
         logging.warning("Not populating %s: already exists", builddir)
