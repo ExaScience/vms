@@ -220,7 +220,6 @@ void predict_compounds(
         cl_data.addInputArg(M_in, num_samples);
         cl_data.addInputArg(B_in, num_samples);
         cl_data.go();
-        cl_data.go();
     }
 
     model_no++;
