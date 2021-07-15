@@ -74,12 +74,11 @@ endif
 RMDIR = rm -rf
 
 clean:
-	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.inc
+	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.xclbin.o *.inc
 	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
 	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
 	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb *.ltx
-	-$(RMDIR) *gen.cpp
-	-$(RMDIR) xrt.ini
+	-$(RMDIR) xrt.ini dsa.xml ext_metadata.json
 
 kill:
 	killall xsim xsimk
