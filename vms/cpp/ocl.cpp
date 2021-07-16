@@ -2,6 +2,7 @@
 #include <cmath>
 #include <thread>
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 
 #include "xcl2.hpp"
@@ -36,18 +37,20 @@ struct Kernel
 {
     CLData &cl_data;
     cl::Kernel krnl;
+    const int input_bank, output_bank;
 
     //-- keep track of kernel executions
     struct Exec
     {
         unsigned nargs = 0;
         std::vector<cl::Buffer> inputArgs, outputArgs;
+        std::vector<cl_mem_ext_ptr_t> inputExt, outputExt;
         std::vector<cl::Event> inputWait, outputWait, krnlWait;
     };
 
     std::vector<Exec> execs;
 
-    Kernel(CLData &c);
+    Kernel(CLData &c, int i, int o);
 
     template <typename T>
     void addInputArg(const T *ptr, int nelem);
@@ -72,7 +75,9 @@ struct Kernel
 
 struct CLData
 {
-    const int num_kernels = 2;
+    const static int num_kernels = 5;
+    const int input_banks[num_kernels] = { 0, 0, 1, 3, 3 };
+    const int output_banks[num_kernels] = { 0, 0, 2, 3, 3 };
     int cur_kernel;
 
     cl::Device device;
@@ -101,7 +106,7 @@ struct CLData
         cl::Program::Binaries bins{{xclbin, xclbin_len}};
         program = cl::Program(context, { device }, bins);
 
-        for(int i=0; i<num_kernels; ++i) kernels.push_back(Kernel(*this));
+        for(int i=0; i<num_kernels; ++i) kernels.push_back(Kernel(*this, input_banks[i], output_banks[i]));
         cur_kernel = -1;
     }
 
@@ -117,8 +122,10 @@ struct CLData
 };
 
 
-Kernel::Kernel(CLData &c)
-    : cl_data(c), krnl(cl::Kernel(cl_data.program, cl_data.function_name))
+Kernel::Kernel(CLData &c, int i, int o)
+    : cl_data(c),
+      krnl(cl::Kernel(cl_data.program, cl_data.function_name)),
+      input_bank(i), output_bank(o)
 {
     new_exec();
 }
@@ -139,9 +146,17 @@ void Kernel::addInputArg(const T *ptr, int nelem)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
-    cl::Buffer buf(context(), CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr);
+
+    cur_exec().inputExt.push_back({});
+    auto &ext = cur_exec().inputExt.back();
+    ext.flags = input_bank | XCL_MEM_TOPOLOGY; // DDR[1]
+    ext.param = 0;
+    ext.obj   = (void *)ptr; 
+
+    cl::Buffer buf(context(), CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, &ext);
     krnl.setArg(cur_exec().nargs++, buf);
     q().enqueueMigrateMemObjects({buf}, 0, 0, &inputDone); 
+
     cur_exec().inputWait.push_back(inputDone);
     cur_exec().inputArgs.push_back(buf);
 }
@@ -161,7 +176,14 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
-    cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void *)ptr);
+
+    cur_exec().outputExt.push_back({});
+    auto &ext = cur_exec().outputExt.back();
+    ext.flags = output_bank | XCL_MEM_TOPOLOGY; // DDR[1]
+    ext.param = 0;
+    ext.obj   = (void *)ptr;     
+
+    cl::Buffer buf(cl_data.context, CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, &ext);
     krnl.setArg(cur_exec().nargs++, buf);
     cur_exec().outputArgs.push_back(buf);
 }
