@@ -2,43 +2,32 @@
 #include <cmath>
 #include <thread>
 #include <iostream>
+#include <stdexcept>
 
 #include "xcl2.hpp"
-
 #include "predict.h"
 #include "vms_tb.h"
 
-std::vector<cl::Device> get_devices(const std::string &vendor_name)
+cl::Device get_first_device(const std::string &vendor_name = "Xilinx")
 {
-    size_t i;
-    cl_int err;
     std::vector<cl::Platform> platforms;
-    OCL_CHECK(err, err = cl::Platform::get(&platforms));
-    cl::Platform platform;
-    for (i = 0; i < platforms.size(); i++)
-    {
-        platform = platforms[i];
-        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
-        if (platformName == vendor_name)
-        {
-            if (verbose)
-            {
-                std::cout << "Found Platform" << std::endl;
-                std::cout << "Platform Name: " << platformName.c_str() << std::endl;
-            }
-            break;
-        }
-    }
-    if (i == platforms.size())
-    {
-        std::cout << "Error: Failed to find platforms that match vendor '" << vendor_name << "'" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    cl::Platform::get(&platforms);
+    auto it = std::find_if(platforms.begin(), platforms.end(), [&vendor_name](cl::Platform &p) {
+        return p.getInfo<CL_PLATFORM_NAME>() == vendor_name; 
+    });
+
+    if (it == platforms.end())
+        throw std::runtime_error("Failed to find platforms that match vendor '" + vendor_name + "'");
+    cl::Platform platform = *it;
 
     //Getting ACCELERATOR Devices and selecting 1st such device
     std::vector<cl::Device> devices;
-    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
-    return devices;
+    platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
+
+    if (devices.size() == 0)
+        throw std::runtime_error("Failed to find any devices in platform '" + vendor_name + "'");
+
+    return devices.at(0);
 }
 
 struct CLData;
@@ -50,17 +39,9 @@ struct Kernel
     CLData &cl_data;
     cl::Kernel krnl;
 
-    std::vector<cl::Buffer> outputArgs;
-    std::vector<cl_stream> inputStreams, outputStreams;
-    std::vector<std::thread> threads; 
+    std::vector<cl::Buffer> inputArgs, outputArgs;
 
     Kernel(CLData &c);
-
-    template <typename T>
-    void addInputStream(const T *ptr, int nelem);
-
-    template <typename T>
-    void addOutputStream(const T *ptr, int nelem);
 
     template <typename T>
     void addInputArg(const T *ptr, int nelem);
@@ -96,21 +77,17 @@ struct CLData
         const char *emulation_mode
     ) : function_name(function_name)
     {
-        cl_int err;
         if (std::string(emulation_mode) != "hw")
         {
             setenv("XCL_EMULATION_MODE", emulation_mode, 1);
             if (verbose) printf("XCL_EMULATION_MODE=%s\n", emulation_mode);
         }
 
-        std::vector<cl::Device> devices = get_devices("Xilinx");
-        devices.resize(1);
-        device = devices[0];
-
-        OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
-        OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+        device = get_first_device();
+        context = cl::Context(device);
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE /*| CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE*/);
         cl::Program::Binaries bins{{xclbin, xclbin_len}};
-        OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
+        program = cl::Program(context, { device }, bins);
 
         for(int i=0; i<num_kernels; ++i) kernels.push_back(Kernel(*this));
         cur_kernel = -1;
@@ -131,92 +108,27 @@ struct CLData
 Kernel::Kernel(CLData &c)
     : nargs(0), state(IDLE), cl_data(c)
 {
-    cl_int err;
-    OCL_CHECK(err, krnl = cl::Kernel(cl_data.program, cl_data.function_name, &err));
-}
-
-template <typename T>
-void Kernel::addInputStream(const T *ptr, int nelem)
-{
-    cl_int err;
-    if (verbose)
-    {
-        std::cout << " input stream " << nargs << ": " << nelem << " of size " << sizeof(T)
-                    << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                    << std::endl;
-    }
-    cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
-    ext.param = krnl.get();
-    ext.obj = NULL;
-    ext.flags = nargs;
-
-    // Create write stream for argument
-    cl_stream stream;
-    OCL_CHECK(err, stream = xcl::Stream::createStream(cl_data.device.get(), XCL_STREAM_READ_ONLY, CL_STREAM, &ext, &err));
-
-    // Initiating the WRITE transfer
-    cl_stream_xfer_req req{0};
-    req.flags = CL_STREAM_EOT;
-    std::string name("input_stream_" + std::to_string(nargs));
-    req.priv_data = (void *)name.c_str();
-
-    // Thread for writing data to input stream independently in case of default blocking transfers.
-    threads.push_back(std::thread(xcl::Stream::writeStream, stream, ptr, nelem * sizeof(T), &req, &err));
-
-    nargs++;
-}
-
-template <typename T>
-void Kernel::addOutputStream(const T *ptr, int nelem)
-{
-    cl_int err;
-    if (verbose)
-    {
-        std::cout << " output stream " << nargs << ": " << nelem << " of size " << sizeof(T)
-                    << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                    << std::endl;
-    }
-
-    cl_mem_ext_ptr_t ext; // extra Xilinx-specific OpenCL parameters
-    ext.param = krnl.get();
-    ext.obj = NULL;
-    ext.flags = nargs;
-
-    // Create write stream for argument
-    cl_stream stream;
-    OCL_CHECK(err, stream = xcl::Stream::createStream(cl_data.device.get(), XCL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &err));
-
-    // Initiating the WRITE transfer
-    cl_stream_xfer_req req{0};
-    req.flags = CL_STREAM_EOT;
-    std::string name("output_stream_" + std::to_string(nargs));
-    req.priv_data = (void *)name.c_str();
-
-    // Thread for writing data to input stream independently in case of default blocking transfers.
-    threads.push_back(std::thread(xcl::Stream::readStream, stream, ptr, nelem * sizeof(T), &req, &err));
-
-    nargs++;
+    krnl = cl::Kernel(cl_data.program, cl_data.function_name);
 }
 
 template <typename T>
 void Kernel::addInputArg(const T *ptr, int nelem)
 {
-    cl_int err;
     if (verbose)
     {
         std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
-    OCL_CHECK(err, cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr, &err));
-    OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+    cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr);
+    krnl.setArg(nargs++, buf);
+    inputArgs.push_back(buf);
 }
 
 template <typename T>
 void Kernel::addInputArg(const T val)
 {
-    cl_int err;
-    OCL_CHECK(err, err = krnl.setArg(nargs++, val));
+    krnl.setArg(nargs++, val);
 }
 
 template <typename T>
@@ -229,8 +141,8 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
-    OCL_CHECK(err, cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void *)ptr, &err));
-    OCL_CHECK(err, err = krnl.setArg(nargs++, buf));
+    cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void *)ptr);
+    err = krnl.setArg(nargs++, buf);
     outputArgs.push_back(buf);
 }
 
@@ -238,8 +150,10 @@ void Kernel::go()
 {
     if (state == RUNNING) finish();
 
-    cl_int err;
-    OCL_CHECK(err, err = cl_data.q.enqueueTask(krnl));
+    for (auto &buffer_input : inputArgs)
+        cl_data.q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means host -> device */);
+
+    cl_data.q.enqueueTask(krnl);
     state = RUNNING;
 
     finish();
@@ -254,14 +168,11 @@ void Kernel::finish()
     for (auto &buffer_output : outputArgs)
         OCL_CHECK(err, err = cl_data.q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
 
-    for (auto &t : threads) t.join();
     cl_data.q.finish();
 
     nargs = 0;
+    inputArgs.clear();
     outputArgs.clear();
-    inputStreams.clear();
-    outputStreams.clear();
-    threads.clear();
 
     state = IDLE;
 }
