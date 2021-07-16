@@ -34,13 +34,18 @@ struct CLData;
 
 struct Kernel
 {
-    unsigned nargs;
-    enum { IDLE, RUNNING } state;
     CLData &cl_data;
     cl::Kernel krnl;
 
-    std::vector<cl::Buffer> inputArgs, outputArgs;
-	std::vector<cl::Event> inputWait, outputWait, krnlWait;
+    //-- keep track of kernel executions
+    struct Exec
+    {
+        unsigned nargs = 0;
+        std::vector<cl::Buffer> inputArgs, outputArgs;
+        std::vector<cl::Event> inputWait, outputWait, krnlWait;
+    };
+
+    std::vector<Exec> execs;
 
     Kernel(CLData &c);
 
@@ -58,13 +63,16 @@ struct Kernel
 
     cl::CommandQueue &q() const;
     cl::Context &context() const;
+
+    Exec &cur_exec();
+    Exec &new_exec();
 };
 
 
 
 struct CLData
 {
-    const int num_kernels = 1;
+    const int num_kernels = 2;
     int cur_kernel;
 
     cl::Device device;
@@ -110,13 +118,16 @@ struct CLData
 
 
 Kernel::Kernel(CLData &c)
-    : nargs(0), state(IDLE), cl_data(c)
+    : cl_data(c), krnl(cl::Kernel(cl_data.program, cl_data.function_name))
 {
-    krnl = cl::Kernel(cl_data.program, cl_data.function_name);
+    new_exec();
 }
 
 cl::CommandQueue &Kernel::q() const { return cl_data.q; }
 cl::Context &Kernel::context() const { return cl_data.context; }
+
+Kernel::Exec &Kernel::cur_exec() { return execs.back(); }
+Kernel::Exec &Kernel::new_exec() { execs.push_back({}); return cur_exec(); }
 
 template <typename T>
 void Kernel::addInputArg(const T *ptr, int nelem)
@@ -124,21 +135,21 @@ void Kernel::addInputArg(const T *ptr, int nelem)
     cl::Event inputDone;
     if (verbose)
     {
-        std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T)
+        std::cout << " input arg " << cur_exec().nargs << ": " << nelem << " of size " << sizeof(T)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
     cl::Buffer buf(context(), CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr);
-    krnl.setArg(nargs++, buf);
+    krnl.setArg(cur_exec().nargs++, buf);
     q().enqueueMigrateMemObjects({buf}, 0, 0, &inputDone); 
-    inputWait.push_back(inputDone);
-    inputArgs.push_back(buf);
+    cur_exec().inputWait.push_back(inputDone);
+    cur_exec().inputArgs.push_back(buf);
 }
 
 template <typename T>
 void Kernel::addInputArg(const T val)
 {
-    krnl.setArg(nargs++, val);
+    krnl.setArg(cur_exec().nargs++, val);
 }
 
 template <typename T>
@@ -146,48 +157,35 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
 {
     if (verbose)
     {
-        std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T)
+        std::cout << " output arg " << cur_exec().nargs << ": " << nelem << " of size " << sizeof(T)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
     cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void *)ptr);
-    krnl.setArg(nargs++, buf);
-    outputArgs.push_back(buf);
+    krnl.setArg(cur_exec().nargs++, buf);
+    cur_exec().outputArgs.push_back(buf);
 }
 
 void Kernel::go()
 {
     cl::Event krnlDone;
+    cl_data.q.enqueueTask(krnl, &cur_exec().inputWait, &krnlDone);
+    cur_exec().krnlWait.push_back(krnlDone);
 
-    if (state == RUNNING) finish();
-
-    cl_data.q.enqueueTask(krnl, &inputWait, &krnlDone);
-    krnlWait.push_back(krnlDone);
-
-    for (auto &buffer_output : outputArgs)
+    for (auto &buffer_output : cur_exec().outputArgs)
     {
         cl::Event outputDone;
-        q().enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &krnlWait, &outputDone);
-        outputWait.push_back(outputDone);
+        q().enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &cur_exec().krnlWait, &outputDone);
+        cur_exec().outputWait.push_back(outputDone);
     }
 
-    state = RUNNING;
+    new_exec();
 }
 
 void Kernel::finish()
 {
-    if (state == IDLE) return;
-
-    cl_data.q.finish();
-
-    nargs = 0;
-    inputArgs.clear();
-    inputWait.clear();
-    krnlWait.clear();
-    outputArgs.clear();
-    outputWait.clear();
-
-    state = IDLE;
+    for (auto &e : execs) 
+        cl::Event::waitForEvents(e.outputWait);
 }
 
 
