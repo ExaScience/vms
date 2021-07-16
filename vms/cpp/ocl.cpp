@@ -141,11 +141,7 @@ void Kernel::addInputArg(const T *ptr, int nelem)
 {
     cl::Event inputDone;
     if (verbose)
-    {
-        std::cout << " input arg " << cur_exec().nargs << ": " << nelem << " of size " << sizeof(T)
-                    << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                    << std::endl;
-    }
+        printf("  input arg %d: %d of size %ld (%luK)\n",  cur_exec().nargs, nelem, sizeof(T), (sizeof(T) * nelem) / 1024);
 
     cur_exec().inputExt.push_back({});
     auto &ext = cur_exec().inputExt.back();
@@ -171,11 +167,7 @@ template <typename T>
 void Kernel::addOutputArg(const T *ptr, int nelem)
 {
     if (verbose)
-    {
-        std::cout << " output arg " << cur_exec().nargs << ": " << nelem << " of size " << sizeof(T)
-                    << " (" << (sizeof(T) * nelem) / 1024 << "K)"
-                    << std::endl;
-    }
+        printf("  output arg %d: %d of size %ld (%luK)\n",  cur_exec().nargs, nelem, sizeof(T), (sizeof(T) * nelem) / 1024);
 
     cur_exec().outputExt.push_back({});
     auto &ext = cur_exec().outputExt.back();
@@ -191,9 +183,7 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
 void Kernel::go()
 {
     if (verbose)
-    {
-        printf("Enqueueing task on kernel %d (input_bank=%d, output_bank=%d)\n", kernel_no, input_bank, output_bank);
-    }
+        printf("  enqueueing task on kernel %d (input_bank=%d, output_bank=%d)\n", kernel_no, input_bank, output_bank);
 
     cl::Event krnlDone;
     cl_data.q.enqueueTask(krnl, &cur_exec().inputWait, &krnlDone);
@@ -240,7 +230,7 @@ void predict_compounds(
     {
         if (verbose)
         {
-            printf("Starting block at compound %d / %d\n", c, num_compounds);
+            printf(" Starting block at compound %d / %d\n", c, num_compounds);
         }
         int num_compounds_left = std::min(block_size, num_compounds - c);
         auto &kernel = cl_data.get_next_kernel();

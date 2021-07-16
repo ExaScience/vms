@@ -189,6 +189,7 @@ main (int argc, char **argv)
     double start = tick();
     for (int n = 0; n < args.num_repeat; n++)
     {
+        printf(" Repeat %d/%d\n", n, args.num_repeat);
         predict_compounds(args.num_compounds, tb_input_base, tb_output_base, Ub, Mb, Bb);
     }
     double stop = tick();
