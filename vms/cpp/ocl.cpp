@@ -40,6 +40,7 @@ struct Kernel
     cl::Kernel krnl;
 
     std::vector<cl::Buffer> inputArgs, outputArgs;
+	std::vector<cl::Event> inputWait, outputWait, krnlWait;
 
     Kernel(CLData &c);
 
@@ -54,6 +55,9 @@ struct Kernel
 
     void go();
     void finish();
+
+    cl::CommandQueue &q() const;
+    cl::Context &context() const;
 };
 
 
@@ -111,17 +115,23 @@ Kernel::Kernel(CLData &c)
     krnl = cl::Kernel(cl_data.program, cl_data.function_name);
 }
 
+cl::CommandQueue &Kernel::q() const { return cl_data.q; }
+cl::Context &Kernel::context() const { return cl_data.context; }
+
 template <typename T>
 void Kernel::addInputArg(const T *ptr, int nelem)
 {
+    cl::Event inputDone;
     if (verbose)
     {
         std::cout << " input arg " << nargs << ": " << nelem << " of size " << sizeof(T)
                     << " (" << (sizeof(T) * nelem) / 1024 << "K)"
                     << std::endl;
     }
-    cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr);
+    cl::Buffer buf(context(), CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(T) * nelem, (void *)ptr);
     krnl.setArg(nargs++, buf);
+    q().enqueueMigrateMemObjects({buf}, 0, 0, &inputDone); 
+    inputWait.push_back(inputDone);
     inputArgs.push_back(buf);
 }
 
@@ -134,7 +144,6 @@ void Kernel::addInputArg(const T val)
 template <typename T>
 void Kernel::addOutputArg(const T *ptr, int nelem)
 {
-    cl_int err;
     if (verbose)
     {
         std::cout << " output arg " << nargs << ": " << nelem << " of size " << sizeof(T)
@@ -142,37 +151,41 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
                     << std::endl;
     }
     cl::Buffer buf(cl_data.context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(T) * nelem, (void *)ptr);
-    err = krnl.setArg(nargs++, buf);
+    krnl.setArg(nargs++, buf);
     outputArgs.push_back(buf);
 }
 
 void Kernel::go()
 {
+    cl::Event krnlDone;
+
     if (state == RUNNING) finish();
 
-    for (auto &buffer_input : inputArgs)
-        cl_data.q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means host -> device */);
+    cl_data.q.enqueueTask(krnl, &inputWait, &krnlDone);
+    krnlWait.push_back(krnlDone);
 
-    cl_data.q.enqueueTask(krnl);
+    for (auto &buffer_output : outputArgs)
+    {
+        cl::Event outputDone;
+        q().enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &krnlWait, &outputDone);
+        outputWait.push_back(outputDone);
+    }
+
     state = RUNNING;
-
-    finish();
-
 }
 
 void Kernel::finish()
 {
     if (state == IDLE) return;
 
-    cl_int err;
-    for (auto &buffer_output : outputArgs)
-        OCL_CHECK(err, err = cl_data.q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
-
     cl_data.q.finish();
 
     nargs = 0;
     inputArgs.clear();
+    inputWait.clear();
+    krnlWait.clear();
     outputArgs.clear();
+    outputWait.clear();
 
     state = IDLE;
 }
