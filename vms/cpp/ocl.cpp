@@ -37,7 +37,7 @@ struct Kernel
 {
     CLData &cl_data;
     cl::Kernel krnl;
-    const int input_bank, output_bank;
+    const int kernel_no, input_bank, output_bank;
 
     //-- keep track of kernel executions
     struct Exec
@@ -50,7 +50,7 @@ struct Kernel
 
     std::vector<Exec> execs;
 
-    Kernel(CLData &c, int i, int o);
+    Kernel(CLData &c, int k, int i, int o);
 
     template <typename T>
     void addInputArg(const T *ptr, int nelem);
@@ -106,7 +106,7 @@ struct CLData
         cl::Program::Binaries bins{{xclbin, xclbin_len}};
         program = cl::Program(context, { device }, bins);
 
-        for(int i=0; i<num_kernels; ++i) kernels.push_back(Kernel(*this, input_banks[i], output_banks[i]));
+        for(int i=0; i<num_kernels; ++i) kernels.push_back(Kernel(*this, i, input_banks[i], output_banks[i]));
         cur_kernel = -1;
     }
 
@@ -122,10 +122,10 @@ struct CLData
 };
 
 
-Kernel::Kernel(CLData &c, int i, int o)
+Kernel::Kernel(CLData &c, int k, int i, int o)
     : cl_data(c),
       krnl(cl::Kernel(cl_data.program, cl_data.function_name)),
-      input_bank(i), output_bank(o)
+      kernel_no(k), input_bank(i), output_bank(o)
 {
     new_exec();
 }
@@ -190,6 +190,11 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
 
 void Kernel::go()
 {
+    if (verbose)
+    {
+        printf("Enqueueing task on kernel %d (input_bank=%d, output_bank=%d)\n", kernel_no, input_bank, output_bank);
+    }
+
     cl::Event krnlDone;
     cl_data.q.enqueueTask(krnl, &cur_exec().inputWait, &krnlDone);
     cur_exec().krnlWait.push_back(krnlDone);
@@ -233,7 +238,10 @@ void predict_compounds(
 
     for(int c=0; c<block_size*num_blocks; c+=block_size)
     {
-        if (verbose) printf("c: %d\n", c);
+        if (verbose)
+        {
+            printf("Starting block at compound %d / %d\n", c, num_compounds);
+        }
         int num_compounds_left = std::min(block_size, num_compounds - c);
         auto &kernel = cl_data.get_next_kernel();
         kernel.addInputArg(model_no);
