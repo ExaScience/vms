@@ -2,8 +2,8 @@ TOPDIR=..
 
 default: hls
 
-include ../Makefile.common
 include ../Makefile.ompss
+include ../Makefile.common
 
 .PHONY: hls clean
 
