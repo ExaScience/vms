@@ -75,9 +75,9 @@ struct Kernel
 
 struct CLData
 {
-    const static int num_kernels = 5;
-    const int input_banks[num_kernels] = { 0, 0, 1, 3, 3 };
-    const int output_banks[num_kernels] = { 0, 0, 2, 3, 3 };
+    const static int num_kernels = 3;
+    const int input_banks[num_kernels] = { 0, 1, 3 };
+    const int output_banks[num_kernels] = { 0, 2, 3 };
     int cur_kernel;
 
     cl::Device device;
@@ -102,7 +102,7 @@ struct CLData
 
         device = get_first_device();
         context = cl::Context(device);
-        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE /*| CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE*/);
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
         cl::Program::Binaries bins{{xclbin, xclbin_len}};
         program = cl::Program(context, { device }, bins);
 
