@@ -204,8 +204,11 @@ void predict_one_block(
 		const B_arr B_in)        //[num_samples][num_features][num_latent]
 {
 #ifndef OMPSS_FPGA
-#pragma HLS INTERFACE m_axi port=features offset=slave bundle=features_in max_widen_bitwidth=512
-#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=predictions_out max_widen_bitwidth=512
+#pragma HLS INTERFACE m_axi port=features    offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=U_in        offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=M_in        offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=B_in        offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=predictions offset=slave
 #endif
 
 	load_model(new_model_no, U_in, M_in, B_in);
