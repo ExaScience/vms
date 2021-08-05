@@ -25,14 +25,14 @@ include $(SELF_DIR)/../Makefile.common
 PROFILE:= no
 
 # Host compiler global settings
-CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O2 -g -std=c++11
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++11
 CXXFLAGS += -I$(MODELDIR)
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --config ../design.cfg --save-temps
+CLFLAGS += -t $(TARGET) --config ../design.cfg
 CLFLAGS += -I$(MODELDIR)
 CLFLAGS += -g
 
@@ -85,10 +85,3 @@ kill:
 	killall xsim xsimk
 
 ECHO := @echo
-
-#Generates profile summary report
-ifeq ($(PROFILE), yes)
-LDCLFLAGS += --profile_kernel data:all:all:all
-LDCLFLAGS += --profile_kernel stall:all:all:all
-LDCLFLAGS += --profile_kernel exec:all:all:all
-endif
