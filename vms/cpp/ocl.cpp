@@ -77,7 +77,7 @@ struct CLData
 {
     const static int num_kernels = 3;
     const int input_banks[num_kernels] = { 0, 1, 3 };
-    const int output_banks[num_kernels] = { 0, 2, 3 };
+    const int output_banks[num_kernels] = { 0, 1, 3 };
     int cur_kernel;
 
     cl::Device device;
@@ -145,7 +145,7 @@ void Kernel::addInputArg(const T *ptr, int nelem)
 
     cur_exec().inputExt.push_back({});
     auto &ext = cur_exec().inputExt.back();
-    ext.flags = input_bank | XCL_MEM_TOPOLOGY; // DDR[1]
+    ext.flags = input_bank | XCL_MEM_TOPOLOGY; // DDR[input_bank]
     ext.param = 0;
     ext.obj   = (void *)ptr; 
 
@@ -171,7 +171,7 @@ void Kernel::addOutputArg(const T *ptr, int nelem)
 
     cur_exec().outputExt.push_back({});
     auto &ext = cur_exec().outputExt.back();
-    ext.flags = output_bank | XCL_MEM_TOPOLOGY; // DDR[1]
+    ext.flags = output_bank | XCL_MEM_TOPOLOGY; // DDR[output_bank]
     ext.param = 0;
     ext.obj   = (void *)ptr;     
 

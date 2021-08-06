@@ -208,7 +208,7 @@ void predict_one_block(
 #pragma HLS INTERFACE m_axi port=U_in        offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=M_in        offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=B_in        offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=predictions offset=slave
+#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
 #endif
 
 	load_model(new_model_no, U_in, M_in, B_in);
