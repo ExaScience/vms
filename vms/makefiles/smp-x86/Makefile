@@ -1,4 +1,5 @@
 TOPDIR=..
+HOST_IF=ompss
 
 default: run
 
