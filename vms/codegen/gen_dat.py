@@ -57,9 +57,6 @@ def gen_const(datatype, num_proteins, num_features, num_latent, num_samples):
     const_output += gen_int("num_latent",    num_latent)
     const_output += gen_int("num_samples",   num_samples)
     log_num_samples = num_samples.bit_length() - 1
-    const_output += gen_int("log_num_samples", log_num_samples)
-
-    assert 2**log_num_samples == num_samples
 
     return const_output
 
