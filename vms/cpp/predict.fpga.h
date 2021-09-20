@@ -44,7 +44,7 @@ const int vec_size = 512;
 
 const int F_el_size = sizeof(F_base) * 8;
 const int F_vec_len = vec_size / F_el_size;
-typedef std::array<F_base, F_vec_len> F_vec;
+typedef arr<F_base, F_vec_len> F_vec;
 
 void input_loop(
     int num_compounds,

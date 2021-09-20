@@ -1,5 +1,3 @@
-#include <array>
-
 #include "vms_const.h"
 
 extern int verbose;
@@ -36,6 +34,7 @@ const float epsilon = 1.0F;
 #ifdef DT_FIXED_EXT
 
 #include "fxp.h"
+#include "arr.h"
 
 typedef int_type<U_wl>::T U_base;
 typedef int_type<M_wl>::T M_base;
@@ -105,7 +104,7 @@ typedef float S_type;
 #error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
-typedef std::array<P_base, num_samples> P_vec;
+typedef arr<P_base, num_samples> P_vec;
 
 typedef F_base F_flx[][num_features];
 typedef P_vec  P_flx[][num_proteins];
