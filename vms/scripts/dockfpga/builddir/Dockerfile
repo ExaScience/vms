@@ -1,4 +1,4 @@
-FROM ompss_at_fpga:2.5.2-euroexa
+FROM ompss_at_fpga:3.1.0
 
 USER root
 
@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
   gosu \
   && rm -rf /var/lib/apt/lists/*
 
-ENV OMPSS_ROOT=/opt/bsc/x86_64/ompss/2.5.2-euroexa
+ENV OMPSS_ROOT=/opt/bsc/x86_64/ompss/3.1.0
 ENV XILINX_VITIS=/home/vanderaa/local/software/Xilinx/Vitis/2020.1
 ENV XILINX_VIVADO=/home/vanderaa/local/software/Xilinx/Vivado/2020.1
 

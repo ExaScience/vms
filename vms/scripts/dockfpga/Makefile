@@ -1,9 +1,9 @@
 
-OMPSS_FPGA_URL := https://euroexa:exaCRDBompss@ompssatfpga.bsc.es/downloads-euroexa/docker/docker_2.5.2-euroexa.tar.gz
-OMPSS_FPGA_TAR := docker_2.5.2-euroexa.tar.gz
-OMPSS_FPGA_IMAGE_TAR := ompss_at_fpga_2.5.2-euroexa/ompss_at_fpga_2.5.2-euroexa.tar
+OMPSS_FPGA_URL := https://euroexa:exaCRDBompss@ompssatfpga.bsc.es/downloads-euroexa/docker/docker_3.1.0.tar.gz
+OMPSS_FPGA_TAR := docker_3.1.0.tar.gz
+OMPSS_FPGA_IMAGE_TAR := ompss_at_fpga_3.1.0/ompss_at_fpga_3.1.0.tar
 OMPSS_FILES_TAR := builddir/ompss_at_fpga.tar.gz
-OMPSS_IMAGE_NAME := ompss_at_fpga:2.5.2-euroexa
+OMPSS_IMAGE_NAME := ompss_at_fpga:3.1.0
 CROSS_IMAGE_NAME := dockfpga
 
 all: $(CROSS_IMAGE_NAME)
