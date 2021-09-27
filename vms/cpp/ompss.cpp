@@ -9,11 +9,11 @@
 #pragma omp task \
     in ([block_size*num_features]features, m) \
     out([block_size*num_proteins*num_samples]predictions)
-void predict_one_block(
+extern "C" void predict_one_block(
 		int num_compounds,
 		const F_base *features,    //[block_size][num_features]
 		      P_base *predictions, //[block_size][num_proteins]
-		const Model &m);
+		const Model *m);
 
 void predict_compounds(
 		int num_compounds,
@@ -26,7 +26,7 @@ void predict_compounds(
     for(int i=0; i<num_compounds; i+=block_size)
     {
         int left = std::min(block_size, num_compounds-i);
-        predict_one_block(left, &features[i][0], &predictions[i][0][0], m);
+        predict_one_block(left, &features[i][0], &predictions[i][0][0], &m);
     }
 #pragma omp taskwait
 

@@ -38,13 +38,17 @@ void prepare_tb_input(
             out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
 
+
 Model prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
     const float M_in[num_samples][num_latent],
     const float B_in[num_samples][num_features][num_latent]
     )
 {
+    static int model_counter = 0;
+
     Model m;
+    m.nr = model_counter++;
 
     for (int i = 0; i < num_samples; i++)
     {

@@ -205,8 +205,6 @@ void Kernel::finish()
         cl::Event::waitForEvents(e.outputWait);
 }
 
-
-
 extern unsigned char KERNEL_VAR[];
 extern unsigned int KERNEL_VAR_LEN;
 
@@ -216,15 +214,10 @@ void predict_compounds(
                int num_compounds,
                const F_flx features,     //[block_size*num_features]
                      P_flx predictions,  //[block_size*num_proteins]
-               const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-               const M_arr M_in,        //[num_samples][num_latent]
-               const B_arr B_in)        //[num_samples][num_features][num_latent]
+               const Model &m)
 {
-    static int model_no = 0;
-
     // round up
     int num_blocks = (num_compounds + block_size - 1) / block_size;
-
 
     for(int c=0; c<block_size*num_blocks; c+=block_size)
     {
@@ -234,17 +227,12 @@ void predict_compounds(
         }
         int num_compounds_left = std::min(block_size, num_compounds - c);
         auto &kernel = cl_data.get_next_kernel();
-        kernel.addInputArg(model_no);
         kernel.addInputArg(num_compounds_left);
         kernel.addInputArg(&features[c][0], block_size*num_features);
         kernel.addOutputArg(&predictions[c][0], block_size*num_proteins);
-        kernel.addInputArg(U_in, num_samples);
-        kernel.addInputArg(M_in, num_samples);
-        kernel.addInputArg(B_in, num_samples);
+        kernel.addInputArg(&m, 1);
         kernel.go();
     }
 
     cl_data.finish();
-
-    model_no++;
 }

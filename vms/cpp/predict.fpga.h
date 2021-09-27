@@ -9,11 +9,10 @@
 typedef arr<P_base, num_samples> P_vec;
 
 static Model model_cache;
-int Model::counter = 0;
 
 void load_model(const Model &m)
 {
-	if (m.nr ==  model_cache.nr) return;
+	if (m.nr == model_cache.nr) return;
 
 	model_cache.nr = m.nr;
 
@@ -42,13 +41,16 @@ void input_loop(
     const F_base *features)
 {
 	const int total = num_compounds * num_features;
+	int count = 0;
 	for (int i = 0; i < total; i+=F_vec_len)
 	{
 #pragma HLS loop_tripcount min = block_size*num_features/F_vec_len max = block_size*num_features/F_vec_len
 #pragma HLS PIPELINE II = F_vec_len
 		for (int j = 0; j < F_vec_len; j++)
-			if (i+j < total)
-				features_stream << features[i+j];
+		{
+			if (count < total) features_stream << features[count];
+			count++;
+		}
 	}
 }
 
@@ -69,11 +71,11 @@ void features_loop(
 		for (int d = 0; d < num_features; d++)
 		{
 #pragma HLS PIPELINE II = 1
-#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 3
-#pragma HLS ARRAY_PARTITION variable = B_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = m.B complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = m.B complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = M_local complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = m.M complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = m.M complete dim = 1
 
 			const F_type feature = features.read();
 			for (int s = 0; s < num_samples; s++)
@@ -111,8 +113,8 @@ void proteins_loop(
 		for (int d = 0; d < num_proteins; d++)
 		{
 #pragma HLS PIPELINE II=4
-#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = U_local complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = m.U complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = m.U complete dim = 3
 
 			P_vec pred;
 
@@ -178,9 +180,7 @@ void predict_dataflow(
 #pragma HLS STREAM variable = features_stream depth = 16
 #pragma HLS STREAM variable = predictions_stream depth = 16
 
-#pragma HLS STABLE variable = U_local
-#pragma HLS STABLE variable = M_local
-#pragma HLS STABLE variable = B_local
+#pragma HLS STABLE variable = m
 #pragma HLS STABLE variable = num_compounds
 #pragma HLS DATAFLOW
 	input_loop(num_compounds, features_stream, features);
@@ -194,19 +194,17 @@ void predict_one_block(
 		int num_compounds,
 		const F_base *features,    //[block_size*num_features]
 		      P_base *predictions, //[block_size*num_proteins*num_samples]
-		const Model &m)
+		const Model *m)
 {
 #ifndef OMPSS_FPGA
 #pragma HLS INTERFACE m_axi port=features    offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=U_in        offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=M_in        offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=B_in        offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=m           offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
 
-	load_model(m);
+	load_model(*m);
 	predict_dataflow(num_compounds, features, predictions, model_cache);
 #else
-	predict_dataflow(num_compounds, features, predictions, m);
+	predict_dataflow(num_compounds, features, predictions, *m);
 #endif
 } // end function
 
