@@ -1,39 +1,32 @@
 #include "predict.fpga.h"
 
 #ifdef OMPSS_SMP
-#pragma omp target device(smp) copy_deps
+#pragma omp target device(smp)
 #endif
 #ifdef OMPSS_FPGA
-#pragma omp target device(fpga) copy_deps
+#pragma omp target device(fpga) copy_deps(U_in, M_in, B_in)
 #endif
 #pragma omp task \
-    in([block_size]features, \
-       [num_samples*num_proteins*num_latent]U_in,\
-       [num_samples*num_latent]M_in,\
-       [num_samples*num_features*num_latent]B_in) \
-    out([block_size]predictions)
+    in ([block_size*num_features]features, m) \
+    out([block_size*num_proteins*num_samples]predictions)
 void predict_one_block(
-		int new_model_no,
 		int num_compounds,
-		const F_arr features,    //[block_size][num_features]
-		      P_arr predictions, //[block_size][num_proteins]
-		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-		const M_arr M_in,        //[num_samples][num_latent]
-		const B_arr B_in);       //[num_samples][num_features][num_latent]
+		const F_base *features,    //[block_size][num_features]
+		      P_base *predictions, //[block_size][num_proteins]
+		const Model &m);
 
 void predict_compounds(
 		int num_compounds,
 		const F_flx features,    //[][num_features]
-		      P_flx predictions, //[][num_proteins]
-		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-		const M_arr M_in,        //[num_samples][num_latent]
-		const B_arr B_in)        //[num_samples][num_features][num_latent]
+		      P_flx predictions, //[][num_proteins][num_samples]
+		const Model &m)
 {
     static int model_counter = 0;
+
     for(int i=0; i<num_compounds; i+=block_size)
     {
         int left = std::min(block_size, num_compounds-i);
-        predict_one_block(model_counter, left, &features[i], &predictions[i], U_in, M_in, B_in);
+        predict_one_block(left, &features[i][0], &predictions[i][0][0], m);
     }
 #pragma omp taskwait
 
