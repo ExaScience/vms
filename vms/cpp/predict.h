@@ -104,13 +104,12 @@ typedef float S_type;
 #error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
-typedef arr<P_base, num_samples> P_vec;
 
 typedef F_base F_flx[][num_features];
-typedef P_vec  P_flx[][num_proteins];
+typedef P_base  P_flx[][num_proteins][num_samples];
 
 typedef F_base F_arr[block_size][num_features];
-typedef P_vec P_arr[block_size][num_proteins];
+typedef P_base P_arr[block_size][num_proteins][num_samples];
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];

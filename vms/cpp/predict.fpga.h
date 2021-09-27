@@ -1,11 +1,12 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <array>
 
 
 #include "predict.h"
 #include "stream.h"
+
+typedef arr<P_base, num_samples> P_vec;
 
 static U_base U_local[num_samples][num_proteins][num_latent];
 static M_base M_local[num_samples][num_latent];
@@ -41,10 +42,8 @@ void load_model(
 
 
 const int vec_size = 512;
-
 const int F_el_size = sizeof(F_base) * 8;
 const int F_vec_len = vec_size / F_el_size;
-typedef arr<F_base, F_vec_len> F_vec;
 
 void input_loop(
     int num_compounds,
@@ -53,17 +52,13 @@ void input_loop(
 {
 	const F_base *features_flat = (F_base *)&features[0][0];
 	const int total = num_compounds * num_features;
-	const int num_vec_reads = total / F_vec_len;
-	int i;
-	for (i = 0; i < total; i+=F_vec_len)
+	for (int i = 0; i < total; i+=F_vec_len)
 	{
 #pragma HLS loop_tripcount min = block_size*num_features/F_vec_len max = block_size*num_features/F_vec_len
 #pragma HLS PIPELINE II = F_vec_len
-		// safe to read F_vec_len elements here, since features-array is padded to be 4096bytes aligned
-		F_vec features_vec = *(F_vec *)(&features_flat[i]);
 		for (int j = 0; j < F_vec_len; j++)
 			if (i+j < total)
-				features_stream << features_vec[j];
+				features_stream << features_flat[i+j];
 	}
 }
 
@@ -154,7 +149,7 @@ void output_loop(
     P_arr predictions,
     hls::stream<P_vec> &predictions_stream)
 {
-	P_vec padding = {};
+	P_vec padding;
 	// we always write block_size compounds: num_compounds + padding
 	// see: https://xilinx.github.io/XRT/2021.1/html/debug-faq.html#memory-read-before-write
 	for (int i = 0; i < block_size; ++i)
@@ -164,7 +159,12 @@ void output_loop(
 		{
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
-			predictions[i][d] = (i < num_compounds) ? predictions_stream.read() : padding;
+			const P_vec &data = (i < num_compounds) ? predictions_stream.read() : padding;
+			for (int s = 0; s < num_samples; s++)
+			{
+#pragma HLS UNROLL
+				predictions[i][d][s] = data[s];
+			}
 		}
 	}
 }

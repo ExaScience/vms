@@ -1,4 +1,6 @@
 
+#include <sys/time.h>
+
 #include <cassert>
 #include <cstdio>
 #include <cmath>
@@ -69,7 +71,7 @@ void prepare_model(
 
 int check_result(
     int num_compounds,
-    const P_vec out[][num_proteins],
+    const P_base out[][num_proteins][num_samples],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
@@ -168,13 +170,13 @@ main (int argc, char **argv)
     printf("  ncmps: %d\n", args.num_compounds);
     printf("  alloc: %d\n", num_compounds_alloc);
 
-    P_vec(*tb_output_base)[num_proteins];
+    P_base(*tb_output_base)[num_proteins][num_samples];
     F_base(*tb_input_base)[num_features];
     U_base(*Ub)[num_proteins][num_latent];
     M_base(*Mb)[num_latent];
     B_base(*Bb)[num_features][num_latent];
 
-    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * sizeof(P_vec));
+    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * num_samples * sizeof(P_base));
     posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));
     posix_memalign((void **)&Ub, 4096, num_samples * num_proteins * num_latent * sizeof(U_base));
     posix_memalign((void **)&Mb, 4096, num_samples * num_latent * sizeof(M_base));
