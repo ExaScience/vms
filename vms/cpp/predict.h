@@ -126,7 +126,11 @@ extern "C" void predict_one_block(
     int num_compounds,
     const F_base *features,    //[block_size][num_features]
           P_base *predictions, //[block_size][num_proteins][num_samples]
-    const Model *m);
+    const int model_nr, 
+    const U_base *u,           //[num_samples][num_proteins][num_latent]
+    const M_base *m,           //[num_samples][num_latent]
+	const B_base *b            //[num_samples][num_features][num_latent]
+    );
 
 void predict_compounds(
     int num_compounds,

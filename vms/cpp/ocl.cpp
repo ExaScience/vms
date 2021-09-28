@@ -230,7 +230,10 @@ void predict_compounds(
         kernel.addInputArg(num_compounds_left);
         kernel.addInputArg(&features[c][0], block_size*num_features);
         kernel.addOutputArg(&predictions[c][0], block_size*num_proteins);
-        kernel.addInputArg(&m, 1);
+        kernel.addInputArg(m.nr);
+        kernel.addInputArg(&m.U[0][0][0], num_samples*num_proteins*num_latent);
+        kernel.addInputArg(&m.M[0][0], num_samples*num_latent);
+        kernel.addInputArg(&m.B[0][0][0], num_samples*num_features*num_latent);
         kernel.go();
     }
 

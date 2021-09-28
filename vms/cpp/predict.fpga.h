@@ -10,24 +10,28 @@ typedef arr<P_base, num_samples> P_vec;
 
 static Model model_cache;
 
-void load_model(const Model &m)
+void load_model(const int model_nr, const U_base *u, const M_base *m, const B_base *b)
 {
-	if (m.nr == model_cache.nr) return;
+	if (model_nr == model_cache.nr) return;
 
-	model_cache.nr = m.nr;
+	model_cache.nr = model_nr;
+
+	int u_count = 0;
+	int m_count = 0;
+	int b_count = 0;
 
 	for (int i = 0; i < num_samples; i++)
 	{
 		for (int j = 0; j < num_proteins; j++)
 			for (int k = 0; k < num_latent; k++)
-				model_cache.U[i][j][k] = m.U[i][j][k];
+				model_cache.U[i][j][k] = u[u_count++];
 
 		for (int j = 0; j < num_latent; j++)
-			model_cache.M[i][j] = m.M[i][j];
+			model_cache.M[i][j] = m[m_count++];
 
 		for (int j = 0; j < num_features; j++)
 			for (int k = 0; k < num_latent; k++)
-				model_cache.B[i][j][k] = m.B[i][j][k];
+				model_cache.B[i][j][k] = b[b_count++];
 	}
 }
 
@@ -194,18 +198,20 @@ void predict_one_block(
 		int num_compounds,
 		const F_base *features,    //[block_size*num_features]
 		      P_base *predictions, //[block_size*num_proteins*num_samples]
-		const Model *m)
+		const int model_nr,
+		const U_base *u,           //
+		const M_base *m,
+		const B_base *b
+		)
 {
 #ifndef OMPSS_FPGA
 #pragma HLS INTERFACE m_axi port=features    offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=m           offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
-
-	load_model(*m);
-	predict_dataflow(num_compounds, features, predictions, model_cache);
-#else
-	predict_dataflow(num_compounds, features, predictions, *m);
 #endif
+
+	load_model(model_nr, u, m, b);
+	predict_dataflow(num_compounds, features, predictions, model_cache);
 } // end function
 
 
