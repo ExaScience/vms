@@ -2,9 +2,10 @@
 #include <cstdio>
 #include <cstring>
 
+#include <hls_stream.h>
+
 
 #include "predict.h"
-#include "stream.h"
 
 typedef arr<P_base, num_samples> P_vec;
 
@@ -206,7 +207,9 @@ void predict_one_block(
 {
 #ifndef OMPSS_FPGA
 #pragma HLS INTERFACE m_axi port=features    offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=u           offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=m           offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b           offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
 #endif
 
