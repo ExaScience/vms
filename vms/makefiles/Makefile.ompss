@@ -3,6 +3,7 @@ HOST_IF = ompss
 
 MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
 MCXX_FLAGS_   += -k # --verbose
+MCXX_FLAGS_   += -Wno-unused-local-typedefs -Wno-unknown-pragmas
 MCXX_FLAGS_I_ = --instrument
 MCXX_FLAGS_D_ = --debug -g
 
@@ -21,3 +22,6 @@ $(PROGRAM_)-i: $(DEPS)
 
 $(PROGRAM_)-d: $(DEPS)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+clean: cleancommon
+	rm -f mcxx*.cpp
