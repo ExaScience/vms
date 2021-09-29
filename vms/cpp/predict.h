@@ -126,20 +126,25 @@ typedef U_one *U_flx;
 typedef M_one *M_flx;
 typedef B_one *B_flx;
 
-extern "C"
-void predict_one_block(
-		int new_model_no,
-		int num_compounds,
-		const F_arr features,    //[block_size][num_features]
-		      P_arr predictions, //[block_size][num_proteins]
-		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-		const M_arr M_in,        //[num_samples][num_latent]
-		const B_arr B_in);       //[num_samples][num_features][num_latent]
+struct Model {
+	int nr = -1;
+	U_arr U;   //[num_samples][num_proteins][num_latent]
+	M_arr M;   //[num_samples][num_latent]
+	B_arr B;   //[num_samples][num_features][num_latent]
+};
+
+extern "C" void predict_one_block(
+    int num_compounds,
+    const F_base *features, //[block_size][num_features]
+    P_base *predictions,    //[block_size][num_proteins][num_samples]
+    const int model_nr,
+    const U_base *U, //[num_samples][num_proteins][num_latent]
+    const M_base *M, //[num_samples][num_latent]
+    const B_base *B  //[num_samples][num_features][num_latent]
+);
 
 void predict_compounds(
-               int num_compounds,
-               const F_flx features,     //[block_size*num_features]
-                     P_flx predictions,  //[block_size*num_proteins]
-               const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-               const M_arr M_in,        //[num_samples][num_latent]
-               const B_arr B_in);       //[num_samples][num_features][num_latent]
+    int num_compounds,
+    const F_flx features, //[block_size*num_features]
+    P_flx predictions,	  //[block_size*num_proteins]
+    const Model &m);
