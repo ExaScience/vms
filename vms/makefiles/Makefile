@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 TOPDIR=.
-HOST_IF=ompss
+HOST_IF=plain
 
 all: native ompss-smp-x86 ompss-smp-arm64 hls crdb opencl
 

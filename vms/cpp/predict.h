@@ -105,8 +105,11 @@ typedef float S_type;
 #endif
 
 
-typedef F_base F_flx[][num_features];
-typedef P_base  P_flx[][num_proteins][num_samples];
+typedef F_base F_one[num_features];
+typedef P_base P_one[num_proteins][num_samples];
+
+typedef F_one *F_flx;
+typedef P_one *P_flx;
 
 typedef F_base F_arr[block_size][num_features];
 typedef P_base P_arr[block_size][num_proteins][num_samples];
@@ -114,6 +117,14 @@ typedef P_base P_arr[block_size][num_proteins][num_samples];
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
+
+typedef U_base U_one[num_proteins][num_latent];
+typedef M_base M_one[num_latent];
+typedef B_base B_one[num_features][num_latent];
+
+typedef U_one *U_flx;
+typedef M_one *M_flx;
+typedef B_one *B_flx;
 
 extern "C"
 void predict_one_block(
