@@ -1,8 +1,8 @@
 TOPDIR=..
+HOST_IF=ompss
 
 default: hls
 
-include ../Makefile.ompss
 include ../Makefile.common
 
 .PHONY: hls clean

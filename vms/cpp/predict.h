@@ -104,32 +104,47 @@ typedef float S_type;
 #error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
 #endif
 
-typedef arr<P_base, num_samples> P_vec;
 
-typedef F_base F_flx[][num_features];
-typedef P_vec  P_flx[][num_proteins];
+typedef F_base F_one[num_features];
+typedef P_base P_one[num_proteins][num_samples];
+
+typedef F_one *F_flx;
+typedef P_one *P_flx;
 
 typedef F_base F_arr[block_size][num_features];
-typedef P_vec P_arr[block_size][num_proteins];
+typedef P_base P_arr[block_size][num_proteins][num_samples];
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
-extern "C"
-void predict_one_block(
-		int new_model_no,
-		int num_compounds,
-		const F_arr features,    //[block_size][num_features]
-		      P_arr predictions, //[block_size][num_proteins]
-		const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-		const M_arr M_in,        //[num_samples][num_latent]
-		const B_arr B_in);       //[num_samples][num_features][num_latent]
+typedef U_base U_one[num_proteins][num_latent];
+typedef M_base M_one[num_latent];
+typedef B_base B_one[num_features][num_latent];
+
+typedef U_one *U_flx;
+typedef M_one *M_flx;
+typedef B_one *B_flx;
+
+struct Model {
+	int nr = -1;
+	U_arr U;   //[num_samples][num_proteins][num_latent]
+	M_arr M;   //[num_samples][num_latent]
+	B_arr B;   //[num_samples][num_features][num_latent]
+};
+
+extern "C" void predict_one_block(
+    int num_compounds,
+    const F_base *features, //[block_size][num_features]
+    P_base *predictions,    //[block_size][num_proteins][num_samples]
+    const int model_nr,
+    const U_base *U, //[num_samples][num_proteins][num_latent]
+    const M_base *M, //[num_samples][num_latent]
+    const B_base *B  //[num_samples][num_features][num_latent]
+);
 
 void predict_compounds(
-               int num_compounds,
-               const F_flx features,     //[block_size*num_features]
-                     P_flx predictions,  //[block_size*num_proteins]
-               const U_arr U_in,        //[num_samples][num_proteins][num_latent]
-               const M_arr M_in,        //[num_samples][num_latent]
-               const B_arr B_in);       //[num_samples][num_features][num_latent]
+    int num_compounds,
+    const F_flx features, //[block_size*num_features]
+    P_flx predictions,	  //[block_size*num_proteins]
+    const Model &m);

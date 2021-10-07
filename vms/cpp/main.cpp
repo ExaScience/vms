@@ -1,4 +1,6 @@
 
+#include <sys/time.h>
+
 #include <cassert>
 #include <cstdio>
 #include <cmath>
@@ -36,40 +38,45 @@ void prepare_tb_input(
             out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
 
-void prepare_model(
+
+Model prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
     const float M_in[num_samples][num_latent],
-    const float B_in[num_samples][num_features][num_latent],
-    U_base U_out[num_samples][num_proteins][num_latent],
-    M_base M_out[num_samples][num_latent],
-    B_base B_out[num_samples][num_features][num_latent]
+    const float B_in[num_samples][num_features][num_latent]
     )
 {
+    static int model_counter = 0;
+
+    Model m;
+    m.nr = model_counter++;
+
     for (int i = 0; i < num_samples; i++)
     {
         for (int j = 0; j < num_proteins; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                U_out[i][j][k] = U_base(U_type(U_in[i][j][k]));
+                m.U[i][j][k] = U_base(U_type(U_in[i][j][k]));
             }
 
         for (int j = 0; j < num_latent; j++)
         {
-            M_out[i][j] = M_base(M_type(M_in[i][j]));
+            m.M[i][j] = M_base(M_type(M_in[i][j]));
         }
 
         for (int j = 0; j < num_features; j++)
             for (int k = 0; k < num_latent; k++)
             {
-                B_out[i][j][k] = B_base(B_type(B_in[i][j][k]));
+                m.B[i][j][k] = B_base(B_type(B_in[i][j][k]));
             }
     }
+
+    return m;
 }
 
 
 int check_result(
     int num_compounds,
-    const P_vec out[][num_proteins],
+    const P_base out[][num_proteins][num_samples],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
@@ -168,20 +175,14 @@ main (int argc, char **argv)
     printf("  ncmps: %d\n", args.num_compounds);
     printf("  alloc: %d\n", num_compounds_alloc);
 
-    P_vec(*tb_output_base)[num_proteins];
+    P_base(*tb_output_base)[num_proteins][num_samples];
     F_base(*tb_input_base)[num_features];
-    U_base(*Ub)[num_proteins][num_latent];
-    M_base(*Mb)[num_latent];
-    B_base(*Bb)[num_features][num_latent];
 
-    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * sizeof(P_vec));
+    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * num_samples * sizeof(P_base));
     posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));
-    posix_memalign((void **)&Ub, 4096, num_samples * num_proteins * num_latent * sizeof(U_base));
-    posix_memalign((void **)&Mb, 4096, num_samples * num_latent * sizeof(M_base));
-    posix_memalign((void **)&Bb, 4096, num_samples * num_features * num_latent * sizeof(B_base));
 
     prepare_tb_input(args.num_compounds, tb_input, tb_input_base);
-    prepare_model(U, M, B, Ub, Mb, Bb);
+    Model m = prepare_model(U, M, B);
 
     int nerrors = 0;
 
@@ -190,7 +191,7 @@ main (int argc, char **argv)
     for (int n = 0; n < args.num_repeat; n++)
     {
         printf(" Repeat %d/%d\n", n, args.num_repeat);
-        predict_compounds(args.num_compounds, tb_input_base, tb_output_base, Ub, Mb, Bb);
+        predict_compounds(args.num_compounds, tb_input_base, tb_output_base, m);
     }
     double stop = tick();
     if (args.check)
@@ -222,9 +223,6 @@ main (int argc, char **argv)
     
     free(tb_output_base);
     free(tb_input_base);
-    free(Ub);
-    free(Mb);
-    free(Bb);
 
     return nerrors;
 }

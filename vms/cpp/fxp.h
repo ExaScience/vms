@@ -50,11 +50,11 @@ struct fxp
     static const int wl = sizeof(T) * 8;
     static const int iwl = IWL;
     static const int shift = wl - iwl;
-    static constexpr float fudge_factor = 256.0F;
+    static const int fudge_factor = 256;
     static float epsilon()
     {
-        float eps = (fudge_factor / (float)(1L << shift));
-        eps = std::max(eps, fudge_factor * std::numeric_limits<float>::epsilon());
+        float eps = ((float)fudge_factor / (float)(1L << shift));
+        eps = std::max(eps, (float)fudge_factor * std::numeric_limits<float>::epsilon());
         //std::cerr << "fxp<" << wl << "," << iwl << ">" << " (eps: " << eps << ")" << std::endl;
         return eps;
     }
@@ -105,7 +105,7 @@ struct fxp
     template<typename otherT, int otherIWL>
     fxp(fxp<otherT, otherIWL> v)
     {
-        constexpr int s = v.shift - shift;
+        const int s = v.shift - shift;
         if (wl >= v.wl) // assign + shift
         {
             val = v.val; // extend

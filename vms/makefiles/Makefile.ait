@@ -8,7 +8,7 @@ CFLAGS_ += -DOMPSS_FPGA -std=c++11
 
 AVDIR = $(PWD)/$(BOARD)
 BITSTREAM = $(AVDIR)/$(PROGRAM_)_ait/$(PROGRAM_).bit
-BITSTREAM_FLAGS=--bitstream-generation --Wf,"--name=$(PROGRAM_),--dir=$(AVDIR),--board=$(BOARD),--clock=200,--hwruntime=som"
+BITSTREAM_FLAGS=--bitstream-generation --Wf,"--name=$(PROGRAM_),--dir=$(AVDIR),--board=$(BOARD),--clock=100,--hwruntime=som"
 
 bitstream: $(BITSTREAM)
 
