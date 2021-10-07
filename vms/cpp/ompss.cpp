@@ -4,7 +4,7 @@
 #pragma omp target device(smp)
 #endif
 #ifdef OMPSS_FPGA
-#pragma omp target device(fpga) local_mem([1]m) no_localmem_copies  
+#pragma omp target device(fpga) local_mem() no_localmem_copies num_instances(3)
 #endif
 #pragma omp task \
     in ([block_size*num_features]features, \
