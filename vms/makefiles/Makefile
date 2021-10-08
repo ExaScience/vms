@@ -50,7 +50,7 @@ crdb: $(ALLCODE)
 	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
 
 opencl: $(ALLCODE)
-	module load Vitis/2020.2 && $(MAKE) -C opencl
+	module load Vitis/2021.1 && $(MAKE) -C opencl
 
 clean:
 	rm -rf model code
