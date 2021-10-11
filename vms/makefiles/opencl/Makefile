@@ -3,16 +3,16 @@ TOPDIR=..
 .PHONY:  clean all check
 
 all: 
-	$(MAKE) -C sw_emu >make.log 2>&1
-	$(MAKE) -C hw_emu >make.log 2>&1
-	$(MAKE) -C hw >make.log 2>&1
+	cd sw_emu && $(MAKE) >make.log 2>&1
+	cd hw_emu && $(MAKE) >make.log 2>&1
+	cd hw     && $(MAKE) >make.log 2>&1
 
 check: 
-	$(MAKE) -C sw_emu check >make.log 2>&1
-	$(MAKE) -C hw_emu check >make.log 2>&1
-	$(MAKE) -C hw check >make.log 2>&1
+	cd sw_emu && $(MAKE) check >make.log 2>&1
+	cd hw_emu && $(MAKE) check >make.log 2>&1
+	cd hw     && $(MAKE) check >make.log 2>&1
 
 clean:
-	$(MAKE) -C sw_emu cleancommon
-	$(MAKE) -C hw_emu cleancommon
-	$(MAKE) -C hw cleancommon
+	cd sw_emu && $(MAKE) cleancommon
+	cd hw_emu && $(MAKE) cleancommon
+	cd hw     && $(MAKE) cleancommon
