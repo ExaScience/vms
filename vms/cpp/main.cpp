@@ -31,11 +31,11 @@ double tick() {
 void prepare_tb_input(
     int num_compounds,
     const float in[tb_num_compounds][num_features],
-    F_base out[][num_features])
+    F_base out[][block_size][num_features])
 {
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
-            out[c][p] = F_base(F_type(in [c%tb_num_compounds][p]));
+            out[c/block_size][c%block_size][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
 
 
@@ -76,7 +76,7 @@ Model prepare_model(
 
 int check_result(
     int num_compounds,
-    const P_base out[][num_proteins][num_samples],
+    const P_base out[][block_size][num_proteins][num_samples],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
@@ -86,7 +86,7 @@ int check_result(
 
             // compute average predictions accross samples
             S_type sum = S_type();
-            for (int s = 0; s < num_samples; s++) sum = sum + P_type(out[c][p][s]);
+            for (int s = 0; s < num_samples; s++) sum = sum + P_type(out[c/block_size][c%block_size][p][s]);
             float o = (float)sum / (float)num_samples;
 
             float r = ref[c % tb_num_compounds][p];
@@ -175,8 +175,8 @@ main (int argc, char **argv)
     printf("  ncmps: %d\n", args.num_compounds);
     printf("  alloc: %d\n", num_compounds_alloc);
 
-    P_base(*tb_output_base)[num_proteins][num_samples];
-    F_base(*tb_input_base)[num_features];
+    P_base(*tb_output_base)[block_size][num_proteins][num_samples];
+    F_base(*tb_input_base)[block_size][num_features];
 
     posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * num_samples * sizeof(P_base));
     posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));

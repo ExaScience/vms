@@ -212,8 +212,8 @@ CLData cl_data("predict_one_block", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, 
 
 void predict_compounds(
                int num_compounds,
-               const F_flx features,     //[block_size*num_features]
-                     P_flx predictions,  //[block_size*num_proteins]
+               const F_blks features,     //[block_size*num_features]
+                     P_blks predictions,  //[block_size*num_proteins]
                const Model &m)
 {
     // round up

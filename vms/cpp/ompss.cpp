@@ -24,8 +24,8 @@ extern "C" void predict_one_block(
 
 void predict_compounds(
 		int num_compounds,
-		const F_flx features,    //[][num_features]
-		      P_flx predictions, //[][num_proteins][num_samples]
+		const F_blks features,    //[][num_features]
+		      P_blks predictions, //[][num_proteins][num_samples]
 		const Model &m)
 {
     static int model_counter = 0;
@@ -33,7 +33,7 @@ void predict_compounds(
     for(int i=0; i<num_compounds; i+=block_size)
     {
         int left = std::min(block_size, num_compounds-i);
-        predict_one_block(left, &features[i][0], &predictions[i][0][0],
+        predict_one_block(left, &features[i][0][0], &predictions[i][0][0][0],
             m.nr, &m.U[0][0][0], &m.M[0][0], &m.B[0][0][0]);
     }
 #pragma omp taskwait

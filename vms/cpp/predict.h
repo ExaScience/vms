@@ -108,11 +108,11 @@ typedef float S_type;
 typedef F_base F_one[num_features];
 typedef P_base P_one[num_proteins][num_samples];
 
-typedef F_one *F_flx;
-typedef P_one *P_flx;
+typedef F_base F_blk[block_size][num_features];
+typedef P_base P_blk[block_size][num_proteins][num_samples];
 
-typedef F_base F_arr[block_size][num_features];
-typedef P_base P_arr[block_size][num_proteins][num_samples];
+typedef F_blk *F_blks;
+typedef P_blk *P_blks;
 
 typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
@@ -141,6 +141,6 @@ struct Model {
 
 void predict_compounds(
     int num_compounds,
-    const F_flx features,
-    P_flx predictions,
+    const F_blks features,
+    P_blks predictions,
     const Model &m);
