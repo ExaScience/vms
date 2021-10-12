@@ -1,5 +1,5 @@
 TOPDIR=..
-HOST_IF=ompss
+HOST_IF=hls
 
 default: hls
 

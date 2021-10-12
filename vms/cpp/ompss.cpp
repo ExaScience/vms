@@ -12,7 +12,7 @@
         [num_samples*num_latent]M,\
         [num_samples*num_features*num_latent]B) \
     out([block_size*num_proteins*num_samples]predictions)
-extern "C" void predict_one_block(
+void predict_one_block(
 		int num_compounds,
 		const F_base *features,    //[block_size][num_features]
 		      P_base *predictions, //[block_size][num_proteins]
@@ -20,7 +20,11 @@ extern "C" void predict_one_block(
         const U_base *U,           //[num_samples][num_proteins][num_latent]
         const M_base *M,           //[num_samples][num_latent]
         const B_base *B            //[num_samples][num_features][num_latent]
-);
+)
+{
+	load_model(model_nr, U, M, B);
+	predict_dataflow(num_compounds, features, predictions, model_cache);
+} // end function
 
 void predict_compounds(
 		int num_compounds,
@@ -32,8 +36,9 @@ void predict_compounds(
 
     for(int i=0; i<num_compounds; i+=block_size)
     {
+        int block = i / block_size;
         int left = std::min(block_size, num_compounds-i);
-        predict_one_block(left, &features[i][0][0], &predictions[i][0][0][0],
+        predict_one_block(left, &features[block][0][0], &predictions[block][0][0][0],
             m.nr, &m.U[0][0][0], &m.M[0][0], &m.B[0][0][0]);
     }
 #pragma omp taskwait

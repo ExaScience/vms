@@ -219,8 +219,9 @@ void predict_compounds(
     // round up
     int num_blocks = (num_compounds + block_size - 1) / block_size;
 
-    for(int c=0; c<block_size*num_blocks; c+=block_size)
+    for(int block=0; block<num_blocks; block++)
     {
+        int c = block * block_size; // current compound
         if (verbose)
         {
             printf(" Starting block at compound %d / %d\n", c, num_compounds);
@@ -228,8 +229,8 @@ void predict_compounds(
         int num_compounds_left = std::min(block_size, num_compounds - c);
         auto &kernel = cl_data.get_next_kernel();
         kernel.addInputArg(num_compounds_left);
-        kernel.addInputArg(&features[c][0], block_size*num_features);
-        kernel.addOutputArg(&predictions[c][0], block_size*num_proteins);
+        kernel.addInputArg(&features[block][0][0], block_size*num_features);
+        kernel.addOutputArg(&predictions[block][0][0], block_size*num_proteins);
         kernel.addInputArg(m.nr);
         kernel.addInputArg(&m.U[0][0][0], num_samples*num_proteins*num_latent);
         kernel.addInputArg(&m.M[0][0], num_samples*num_latent);
