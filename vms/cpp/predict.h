@@ -126,25 +126,21 @@ typedef U_one *U_flx;
 typedef M_one *M_flx;
 typedef B_one *B_flx;
 
+#ifdef HOSTIF_OPENCL
+#define ALIGN_MODEL_ATTR __attribute__((aligned (4096)))
+#else
+#define ALIGN_MODEL_ATTR
+#endif
+
 struct Model {
 	int nr = -1;
-	U_arr U;   //[num_samples][num_proteins][num_latent]
-	M_arr M;   //[num_samples][num_latent]
-	B_arr B;   //[num_samples][num_features][num_latent]
+	ALIGN_MODEL_ATTR U_arr U;   //[num_samples][num_proteins][num_latent]
+	ALIGN_MODEL_ATTR M_arr M;   //[num_samples][num_latent]
+	ALIGN_MODEL_ATTR B_arr B;   //[num_samples][num_features][num_latent]
 };
-
-extern "C" void predict_one_block(
-    int num_compounds,
-    const F_base *features, //[block_size][num_features]
-    P_base *predictions,    //[block_size][num_proteins][num_samples]
-    const int model_nr,
-    const U_base *U, //[num_samples][num_proteins][num_latent]
-    const M_base *M, //[num_samples][num_latent]
-    const B_base *B  //[num_samples][num_features][num_latent]
-);
 
 void predict_compounds(
     int num_compounds,
-    const F_flx features, //[block_size*num_features]
-    P_flx predictions,	  //[block_size*num_proteins]
+    const F_flx features,
+    P_flx predictions,
     const Model &m);

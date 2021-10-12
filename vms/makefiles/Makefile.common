@@ -10,7 +10,7 @@ $(error TOPDIR is not set)
 endif
 
 PROGRAM_ = predict
-SRCFILES = main.cpp $(HOST_IF).cpp
+SRCFILES = main.cpp $(HOST_IF).cpp hls.cpp
 KERNELFILES = predict.cpp
 HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h arr.h
 MODELFILES = vms_const.h vms_tb.h

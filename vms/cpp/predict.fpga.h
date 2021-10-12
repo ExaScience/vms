@@ -3,8 +3,6 @@
 #include <cstring>
 
 #include <hls_stream.h>
-
-
 #include "predict.h"
 
 typedef arr<P_base, num_samples> P_vec;
@@ -195,26 +193,5 @@ void predict_dataflow(
 
 } // end function
 
-void predict_one_block(
-		int num_compounds,
-		const F_base *features,    //[block_size*num_features]
-		      P_base *predictions, //[block_size*num_proteins*num_samples]
-		const int model_nr,
-		const U_base *u,           //
-		const M_base *m,
-		const B_base *b
-		)
-{
-#ifndef OMPSS_FPGA
-#pragma HLS INTERFACE m_axi port=features    offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=u           offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=m           offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=b           offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
-#endif
-
-	load_model(model_nr, u, m, b);
-	predict_dataflow(num_compounds, features, predictions, model_cache);
-} // end function
 
 
