@@ -32,22 +32,22 @@ $(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/codegen/gen_dat.py
 model: $(FULLMODELFILES)
 
 native: $(ALLCODE)
-	module load Vitis/2020.1 && cd native && $(MAKE) >make.log 2>&1
+	module load Vitis/2020.1 && cd native && $(MAKE)
 
 ompss-smp-x86: $(ALLCODE)
-	module load Vitis/2021.1 GCC/7.3.0 ompss/19.06 && cd smp-x86 && $(MAKE) >make.log 2>&1
+	module load Vitis/2021.1 GCC/7.3.0 ompss/19.06 && cd smp-x86 && $(MAKE)
 
 ompss-smp-arm64: $(ALLCODE)
-	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
+	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE)
 
 hls: $(ALLCODE)
-	module load Vitis/2020.1 && cd hls && $(MAKE) >make.log 2>&1
+	module load Vitis/2020.1 && cd hls && $(MAKE)
 
 zcu102: $(ALLCODE)
-	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
+	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) $(MAKE)
 
 crdb: $(ALLCODE)
-	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE) >make.log 2>&1
+	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE)
 
 opencl: $(ALLCODE)
 	module load Vitis/2021.1 && $(MAKE) -C opencl
