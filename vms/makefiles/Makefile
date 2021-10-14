@@ -3,7 +3,7 @@ SHELL=/bin/bash
 TOPDIR=.
 HOST_IF=ompss
 
-all: native ompss-smp-x86 ompss-smp-arm64 hls crdb opencl
+all: native ompss-smp-x86 ompss-smp-arm64 hls crdb opencl zip
 
 include config.mk
 include Makefile.common
@@ -12,7 +12,7 @@ INPUT_DATA=test.sdm train.sdm features.ddm
 ROOTFILE=model/root.ini
 OPTIONS=$(SRCDIR)/data/$(DATASET)/options.ini
 
-.PHONY: hls clean cleanall model native all opencl
+.PHONY: hls clean cleanall model native all opencl zip
 
 CONDA_BIN = $(dir $(CONDA_EXE))
 
@@ -51,6 +51,11 @@ crdb: $(ALLCODE)
 
 opencl: $(ALLCODE)
 	module load Vitis/2021.1 && $(MAKE) -C opencl
+
+ZIPFILE=$(notdir $(realpath  .)).zip
+zip: $(ZIPFILE)
+$(ZIPFILE): crdb
+	zip $(notdir $(realpath  .)).zip fpga-crdb/* fpga-crdb/euroexa_*/*_ait/*
 
 clean:
 	rm -rf model code
