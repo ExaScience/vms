@@ -40,6 +40,12 @@ ompss-smp-x86: $(ALLCODE)
 ompss-smp-arm64: $(ALLCODE)
 	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE)
 
+ompss-2-cluster: $(ALLCODE)
+	. $(HOME)/local/spack/share/spack/setup-env.sh && \
+		spack load ompss-2-cluster/iamwjnb && \
+		cd cluster && \
+		make
+
 hls: $(ALLCODE)
 	module load Vitis/2020.1 && cd hls && $(MAKE)
 
