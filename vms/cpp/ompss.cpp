@@ -3,15 +3,29 @@
 #ifdef OMPSS_SMP
 #pragma omp target device(smp)
 #endif
-#ifdef OMPSS_FPGA
-#pragma omp target device(fpga) local_mem() no_localmem_copies num_instances(3)
-#endif
 #pragma omp task \
     in ([block_size*num_features]features, \
         [num_samples*num_proteins*num_latent]U,\
         [num_samples*num_latent]M,\
         [num_samples*num_features*num_latent]B) \
     out([block_size*num_proteins*num_samples]predictions)
+#ifdef OMPSS_FPGA
+#pragma omp target device(fpga) local_mem() no_localmem_copies num_instances(3)
+#pragma omp task \
+    in ([block_size*num_features]features, \
+        [num_samples*num_proteins*num_latent]U,\
+        [num_samples*num_latent]M,\
+        [num_samples*num_features*num_latent]B) \
+    out([block_size*num_proteins*num_samples]predictions)
+#endif
+#ifdef OMPSS_TWO
+#pragma oss task \
+    in ([block_size*num_features]features, \
+        [num_samples*num_proteins*num_latent]U,\
+        [num_samples*num_latent]M,\
+        [num_samples*num_features*num_latent]B) \
+    out([block_size*num_proteins*num_samples]predictions)
+#endif
 void predict_one_block(
 		int num_compounds,
 		const F_base *features,    //[block_size][num_features]
@@ -42,6 +56,7 @@ void predict_compounds(
             m.nr, &m.U[0][0][0], &m.M[0][0], &m.B[0][0][0]);
     }
 #pragma omp taskwait
+#pragma oss taskwait
 
     model_counter++;
 }
