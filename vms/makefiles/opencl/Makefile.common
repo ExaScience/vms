@@ -80,7 +80,7 @@ clean:
 	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
 	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb *.ltx
 	-$(RMDIR) xrt.ini dsa.xml ext_metadata.json
-	-$(RMDIR) _x
+	-$(RMDIR) _x .ipcache .run
 
 kill:
 	killall xsim xsimk

@@ -13,6 +13,6 @@ check:
 	cd hw     && $(MAKE) check
 
 clean:
-	cd sw_emu && $(MAKE) cleancommon
-	cd hw_emu && $(MAKE) cleancommon
-	cd hw     && $(MAKE) cleancommon
+	cd sw_emu && $(MAKE) clean
+	cd hw_emu && $(MAKE) clean
+	cd hw     && $(MAKE) clean

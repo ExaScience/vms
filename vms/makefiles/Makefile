@@ -58,7 +58,7 @@ $(ZIPFILE): crdb
 	zip $(notdir $(realpath  .)).zip fpga-crdb/* fpga-crdb/euroexa_*/*_ait/*
 
 clean:
-	rm -rf model code
+	rm -rf model code *.zip
 	$(MAKE) -C native cleancommon
 	$(MAKE) -C smp-arm64 cleancommon
 	$(MAKE) -C smp-x86 cleancommon
