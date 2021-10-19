@@ -29,5 +29,6 @@ $(BITSTREAM): $(ALLCODE)
 clean:
 	rm -f *.log $(LOCALFILES)
 	rm -f *mcxx.cpp aarch64-linux-gnu-fpgacxx*cpp
+	rm -f *.json
 	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
 	rm -rf zcu102 euroexa_crdb euroexa_maxilink
