@@ -1,0 +1,6 @@
+Compilation and Running Instructions
+====================================
+
+This directory contains the kernel and testbench for running the VMS application on FPGA.
+
+The kernel relies on generated source code files. Those
