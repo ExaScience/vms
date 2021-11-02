@@ -20,41 +20,44 @@ double tick() {
 }
 
 void prepare_tb_input(
-    int num_compounds,
-    const float in[tb_num_compounds][num_features],
-    float out[][num_features])
+    int num_blocks,
+    const float in[][num_features],
+    float out[][block_size][num_features])
 {
-    for (int c = 0; c < num_compounds; c++)
-        for (int p = 0; p < num_features; p++)
-            out[c][p] = in[c%tb_num_compounds][p];
+    for (int b = 0; b < num_blocks; b++)
+        for (int c = 0; c < block_size; c++)
+            for (int p = 0; p < num_features; p++)
+                out[b][c][p] = in[c % tb_num_compounds][p];
 }
 
 
 int check_result(
-    int num_compounds,
-    const float out[][num_proteins],
+    int num_blocks,
+    const float out[][block_size][num_proteins],
     const float ref[tb_num_compounds][num_proteins])
 {
     int nerrors = 0;
-    for (int c = 0; c < num_compounds; c++)
-        for (int p = 0; p < num_proteins; p++)
-        {
-            float o = out[c][p];
-            float r = ref[c % tb_num_compounds][p];
-            if (std::abs(o - r) < epsilon)
+    for (int b = 0; b < num_blocks; b++)
+        for (int c = 0; c < block_size; c++)
+            for (int p = 0; p < num_proteins; p++)
             {
-                ; //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+                float o = out[b][c][p];
+                float r = ref[c % tb_num_compounds][p];
+                if (std::abs(o - r) < epsilon)
+                {
+                    ; //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+                }
+                else
+                {
+                    if (nerrors < 10)
+                        printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
+                    else if (nerrors == 10)
+                        printf("More than 10 errors. Printing stopped.\n");
+                    nerrors++;
+                }
             }
-            else
-            {
-                if (nerrors < 10)
-                    printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
-                else if (nerrors == 10)
-                    printf("More than 10 errors. Printing stopped.\n");
-                nerrors++;
-            }
-        }
 
+    int num_compounds = num_blocks*block_size;
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
     return nerrors;
 }
@@ -77,10 +80,10 @@ int main(int argc, char *argv[])
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    float (*tb_output)[num_proteins] = new float[block_size][num_proteins];
-    float (*tb_inpufloat)[num_features] = new float[block_size][num_features];
+    float (*tb_output_blocks)[block_size][num_proteins] = new float[num_blocks][block_size][num_proteins];
+    float (*tb_input_blocks)[block_size][num_features] = new float[num_blocks][block_size][num_features];
 
-    prepare_tb_input(block_size, tb_input, tb_inpufloat);
+    prepare_tb_input(num_blocks, tb_input, tb_input_blocks);
 
     int nerrors = 0;
 
@@ -89,12 +92,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i< num_repeat; ++i)
     {
         double start = tick();
-        predict_block(num_blocks, tb_inpufloat, tb_output, U, M, B);
+        predict_blocks(num_blocks, tb_input_blocks, tb_output_blocks, U, M, B);
         double stop = tick();
         elapsed = std::min(stop-start, elapsed);
         printf("%d: took %.2f sec; %.2f compounds/sec\n", i, stop-start, block_size * num_blocks / elapsed);
     }
-    nerrors += check_result(block_size, tb_output, tb_ref);
+    nerrors += check_result(num_blocks, tb_output_blocks, tb_ref);
     printf("minimum time %.2f sec; %.2f compounds/sec\n", elapsed, block_size * num_blocks / elapsed);
 
     // terra-ops aka 10^12 ops
@@ -104,8 +107,8 @@ int main(int argc, char *argv[])
     printf("%.4f tera-ops; %.4f tera-ops/second (%d-bit float ops)\n", tops, tops/elapsed, op_size);
     printf("%.4f giga-ops; %.4f giga-ops/second (%d-bit float ops)\n", 1e3 * tops, 1e3 * tops/elapsed, op_size);
 
-    delete[] tb_output;
-    delete[] tb_inpufloat;
+    delete[] tb_output_blocks;
+    delete[] tb_input_blocks;
 
     return nerrors;
 }
