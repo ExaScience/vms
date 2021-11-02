@@ -3,8 +3,6 @@
 
 #include "predict.h"
 
-
-
 #pragma oss task \
 	in(U[:num_proteins]) \
 	in(M[:num_samples]) \
@@ -19,18 +17,18 @@ void predict_block(
 		const B_arr B 
 )
 {
-	#pragma acc data \
+#pragma acc data \
 	copyin( \
 		U[:num_proteins][:num_samples][:num_latent], \
 		M[:num_samples][:num_latent], \
 		B[:num_features][:num_samples][:num_latent], \
 		features[:block_size][:num_features]) \
 	copyout(predictions[:block_size][:num_proteins])
-	#pragma acc parallel loop 
+#pragma acc parallel loop 
 		for (int i = 0; i < block_size; ++i)
 		{
 			float latents[num_samples][num_latent];
-	#pragma acc cache(latents)
+#pragma acc cache(latents)
 			{
 #pragma acc loop collapse(2) independent vector
 				for (int s = 0; s < num_samples; s++)
@@ -70,7 +68,9 @@ void predict_blocks(
 )
 {
 	for(int i=0; i<num_blocks; ++i)
+	{
 		predict_block(features[i], predictions[i], U, M, B);
+	}
 	
-#pragma oss taskwaitt
+#pragma oss taskwait
 }
