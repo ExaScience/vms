@@ -68,6 +68,7 @@ clean:
 	$(MAKE) -C native cleancommon
 	$(MAKE) -C smp-arm64 cleancommon
 	$(MAKE) -C smp-x86 cleancommon
+	$(MAKE) -C cluster cleancommon
 	$(MAKE) -C fpga-crdb cleancommon
 	$(MAKE) -C fpga-zcu102 cleancommon
 	$(MAKE) -C opencl clean
