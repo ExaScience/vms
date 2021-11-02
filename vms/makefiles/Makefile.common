@@ -30,7 +30,7 @@ OBJFILES := ${SRCFILES:.cpp=.o}
 
 DEPS = $(FULLSRCFILES) $(FULLHDRFILES) $(FULLMODELFILES)
 
-CFLAGS_      = $(CFLAGS) -Wall -Wno-shift-count-negative -O0 -g -I$(CPPDIR) -I$(MODELDIR) -I$(XILINX_VIVADO)/include
+CFLAGS_      = $(CFLAGS) -Wall -Wno-shift-count-negative -O3 -g -I$(CPPDIR) -I$(MODELDIR) -I$(XILINX_VIVADO)/include
 LDFLAGS_     = $(LDFLAGS)
 
 ifeq ($(XILINX_VIVADO),)
