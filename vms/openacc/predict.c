@@ -3,7 +3,7 @@
 
 #include "predict.h"
 
-#pragma oss task \
+#pragma oss task device(openacc) \
 	in(U[:num_proteins]) \
 	in(M[:num_samples]) \
 	in(B[:num_features]) \

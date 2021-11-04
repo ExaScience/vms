@@ -1,26 +1,28 @@
 default: run
 
 PROGRAM = predict
-SRCFILES = predict.cpp test_bench.cpp
+SRCFILES = predict.c test_bench.c
 HDRFILES = predict.h 
 MODELFILES = vms_const.h vms_tb.h
 
-OBJFILES := ${SRCFILES:.cpp=.o} 
+OBJFILES := ${SRCFILES:.c=.o} 
 
 DEPS = $(HDRFILES) $(MODELFILES) Makefile 
 
-PGCXX = pgc++
-CXXFLAGS += -g -std=c++11
-CXXFLAGS += -fast -Minfo=accel -ta=tesla
+PGCC = pgimcc
+CCFLAGS += -g
+CCFLAGS += --openacc --ompss-2
+# CCFLAGS += -fast -Minfo=accel -ta=tesla
+CCFLAGS += -DBLOCK_SIZE=1000
 
 run: $(PROGRAM)
 	./$(PROGRAM) $(ARGS)
 
 $(PROGRAM): $(OBJFILES)
-	        $(PGCXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
+	        $(PGCC) $(CCFLAGS) $^ -o $@ $(LDFLAGS)
 
-%.o: %.cpp $(DEPS)
-	        $(PGCXX) $(CXXFLAGS)  -c -o $@ $<
+%.o: %.c $(DEPS)
+	        $(PGCC) $(CCFLAGS)  -c -o $@ $<
 
 .PHONY: clean
 

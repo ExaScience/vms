@@ -1,8 +1,6 @@
 #include "vms_const.h"
 
-static const int block_size = 10000;
-
-const float epsilon = 0.5;
+#define epsilon 0.5
 
 typedef float F_blk[block_size][num_features];
 typedef float P_blk[block_size][num_proteins];
