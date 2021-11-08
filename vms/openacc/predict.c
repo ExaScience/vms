@@ -3,12 +3,21 @@
 
 #include "predict.h"
 
+#ifdef OMPSS_SMP
+#pragma oss task \
+	in(U[:num_proteins]) \
+	in(M[:num_samples]) \
+	in(B[:num_features]) \
+	in(features[:block_size]) \
+	out(predictions[:block_size])
+#elif defined(OMPSS_OPENACC)
 #pragma oss task device(openacc) \
 	in(U[:num_proteins]) \
 	in(M[:num_samples]) \
 	in(B[:num_features]) \
 	in(features[:block_size]) \
 	out(predictions[:block_size])
+#endif
 void predict_block(
 		const F_blk features, 
 		      P_blk predictions,
