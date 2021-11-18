@@ -45,7 +45,7 @@ Model prepare_model(
     const float B_in[num_samples][num_features][num_latent]
     )
 {
-    static int model_counter = 0;
+    static int model_counter = 1;
 
     Model m;
     m.nr = model_counter++;
