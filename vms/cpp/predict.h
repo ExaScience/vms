@@ -133,7 +133,7 @@ typedef B_one *B_flx;
 #endif
 
 struct Model {
-	int nr = -1;
+	int nr = 0;
 	ALIGN_MODEL_ATTR U_arr U;   //[num_samples][num_proteins][num_latent]
 	ALIGN_MODEL_ATTR M_arr M;   //[num_samples][num_latent]
 	ALIGN_MODEL_ATTR B_arr B;   //[num_samples][num_features][num_latent]

@@ -8,12 +8,16 @@
 typedef arr<P_base, num_samples> P_vec;
 
 static Model model_cache;
+static int model_cache_nr = 0;
 
 void load_model(const int model_nr, const U_base *u, const M_base *m, const B_base *b)
 {
-	if (model_nr == model_cache.nr) return;
+	if (model_nr == model_cache_nr) return;
+	#pragma HLS reset variable = model_cache_nr
+	#pragma HLS reset variable = model_cache.nr
 
 	model_cache.nr = model_nr;
+	model_cache_nr = model_nr;
 
 	int u_count = 0;
 	int m_count = 0;
