@@ -2,15 +2,15 @@
 
 #ifdef OMPSS_SMP
 #pragma omp target device(smp)
-#endif
 #pragma omp task \
     in ([block_size*num_features]features, \
         [num_samples*num_proteins*num_latent]U,\
         [num_samples*num_latent]M,\
         [num_samples*num_features*num_latent]B) \
     out([block_size*num_proteins*num_samples]predictions)
+#endif
 #ifdef OMPSS_FPGA
-#pragma omp target device(fpga) local_mem() no_localmem_copies num_instances(3)
+#pragma omp target device(fpga) no_localmem_copies num_instances(3)
 #pragma omp task \
     in ([block_size*num_features]features, \
         [num_samples*num_proteins*num_latent]U,\
@@ -48,7 +48,7 @@ void predict_compounds(
 {
     static int model_counter = 0;
 
-    for(int i=0; i<num_compounds; i+=block_size)
+    for(int i=0; i<=num_compounds; i+=block_size)
     {
         int block = i / block_size;
         int left = std::min(block_size, num_compounds-i);
