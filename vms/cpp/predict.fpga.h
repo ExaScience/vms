@@ -8,16 +8,13 @@
 typedef arr<P_base, num_samples> P_vec;
 
 static Model model_cache;
-static int model_cache_nr = 0;
 
 void load_model(const int model_nr, const U_base *u, const M_base *m, const B_base *b)
 {
-	if (model_nr == model_cache_nr) return;
-	#pragma HLS reset variable = model_cache_nr
+	if (model_nr == model_cache.nr) return;
 	#pragma HLS reset variable = model_cache.nr
 
 	model_cache.nr = model_nr;
-	model_cache_nr = model_nr;
 
 	int u_count = 0;
 	int m_count = 0;
@@ -150,7 +147,7 @@ void output_loop(
     P_base *predictions,
     hls::stream<P_vec> &predictions_stream)
 {
-	P_vec padding = {};
+	P_vec data;
 	int out = 0;
 	// we always write block_size compounds: num_compounds + padding
 	// see: https://xilinx.github.io/XRT/2021.1/html/debug-faq.html#memory-read-before-write
@@ -161,7 +158,9 @@ void output_loop(
 		{
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
-			const P_vec &data = (i < num_compounds) ? predictions_stream.read() : padding;
+			if (i < num_compounds) 
+				data = predictions_stream.read();
+				
 			for (int s = 0; s < num_samples; s++)
 			{
 #pragma HLS UNROLL
