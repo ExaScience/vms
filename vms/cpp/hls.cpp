@@ -26,7 +26,7 @@ void predict_compounds(
 {
     static int model_counter = 0;
 
-    for(int i=0, j=0; i<num_compounds; j++,i+=block_size)
+    for(int i=0, j=0; i<=num_compounds; j++,i+=block_size)
     {
         int left = std::min(block_size, num_compounds-i);
         const F_blk &f = features[i];
