@@ -9,6 +9,7 @@ import subprocess
 import logging
 import datetime
 import xml.etree.cElementTree as cET
+from configparser import ConfigParser
 
 global_build_logger = None
 LOGFORMAT = '%(asctime)s - %(process)d - %(levelname)s - %(message)s'
@@ -95,6 +96,26 @@ def log_xtasks_config():
         with open (config_file, "r") as f:
             build_logger().info("%s:\n%s", config_file, f.read())
 
+
+def action_update(builddir):
+    if builddir is None:
+        builddir = "."
+
+    config = ConfigParser()
+    with open(os.path.join(builddir, "config.mk")) as stream:
+        config.read_string("[top]\n" + stream.read())  # add [top] section
+    sourcedir = config["top"]["srcdir"]
+    makefiles_dir = os.path.abspath(os.path.join(sourcedir, "makefiles"))
+
+    def update_symlink(src, dst):
+        if not os.path.exists(dst):
+            os.symlink(src, dst)
+
+    shutil.copytree(makefiles_dir, builddir, copy_function=update_symlink, dirs_exist_ok=True)
+
+    logging.info("Updated links in %s", builddir)
+    return builddir            
+
 def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype):
     if basedir is None:
         basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
@@ -171,6 +192,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     srcdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+
+    parser.add_argument("action", type=str, default = "populate", choices = [ "populate", "build", "update" ], help="Action to perform")
     parser.add_argument("--srcdir", type=str, metavar="DIR", default = srcdir, help="Source directory")
     parser.add_argument("--builddir", type=str, metavar="DIR", default = None, help="Actual build directory")
     parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
@@ -178,19 +201,22 @@ if __name__ == "__main__":
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
     parser.add_argument("--num-latent", type=int, default=4, help="Number of latent dimensions")
     parser.add_argument("--num-samples", type=int, default=4, help="Number of samples to collect")
-    parser.add_argument("--do-build", action="store_true", help="Do build directory")
+    parser.add_argument("--do-build", action="store_true", help="Perform actual `make` in build directory")
     parser.add_argument("--verbose", action="store_true", help="Verbose logging on stderr")
     args = parser.parse_args()
 
     if args.verbose:
         logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 
+    if args.action == "update":
+        action_update(args.builddir)
+
     if args.builddir is None:
         builddir = action_populate(args.srcdir, args.basedir, args.dataset, args.num_latent, args.num_samples, args.datatype)
     else:
         builddir = args.builddir
 
-    if args.do_build:
+    if args.do_build or args.action == "build":
         action_build(builddir)
     
 

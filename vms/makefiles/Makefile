@@ -72,3 +72,7 @@ clean:
 	$(MAKE) -C fpga-crdb cleancommon
 	$(MAKE) -C fpga-zcu102 cleancommon
 	$(MAKE) -C opencl clean
+
+updatelinks:
+	python3 $(SRCDIR)/scripts/build.py update
+	   
