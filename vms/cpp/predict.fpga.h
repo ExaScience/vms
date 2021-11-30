@@ -35,16 +35,14 @@ void load_model(const int model_nr, const U_base *u, const M_base *m, const B_ba
 	}
 }
 
-const int vec_size = 512;
-const int F_el_size = sizeof(F_base) * 8;
-const int F_vec_len = vec_size / F_el_size;
+const int F_vec_len = block_size;
 
 void input_loop(
-    int num_compounds,
     hls::stream<F_base> &features_stream,
     const F_base *features)
 {
-	const int total = num_compounds * num_features;
+	const int total = block_size * num_features;
+	assert(total % F_vec_len == 0);
 	int count = 0;
 	for (int i = 0; i < total; i+=F_vec_len)
 	{
@@ -52,14 +50,13 @@ void input_loop(
 #pragma HLS PIPELINE II = F_vec_len
 		for (int j = 0; j < F_vec_len; j++)
 		{
-			if (count < total) features_stream << features[count];
+			features_stream << features[count];
 			count++;
 		}
 	}
 }
 
 void features_loop(
-    int num_compounds,
     hls::stream<F_base>& features,
     hls::stream<L_type> latents[num_samples][num_latent],
     const Model &m)
@@ -68,10 +65,8 @@ void features_loop(
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_acc complete dim = 2
 
-	for (int i = 0; i < num_compounds; ++i)
+	for (int i = 0; i < block_size; ++i)
 	{
-#pragma HLS loop_tripcount min = block_size max = block_size
-
 		for (int d = 0; d < num_features; d++)
 		{
 #pragma HLS PIPELINE II = 1
@@ -101,7 +96,6 @@ void features_loop(
 
 
 void proteins_loop(
-    int num_compounds,
     hls::stream<P_vec> &predictions,
     hls::stream<L_type> latents[num_samples][num_latent],
     const Model &m)
@@ -110,9 +104,8 @@ void proteins_loop(
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = latents_cache complete dim = 2
 
-	for (int i = 0; i < num_compounds; ++i)
+	for (int i = 0; i < block_size; ++i)
 	{
-#pragma HLS loop_tripcount min = block_size max = block_size
 
 		for (int d = 0; d < num_proteins; d++)
 		{
@@ -143,24 +136,18 @@ void proteins_loop(
 }
 
 void output_loop(
-    int num_compounds,
     P_base *predictions,
     hls::stream<P_vec> &predictions_stream)
 {
 	P_vec data;
 	int out = 0;
-	// we always write block_size compounds: num_compounds + padding
-	// see: https://xilinx.github.io/XRT/2021.1/html/debug-faq.html#memory-read-before-write
 	for (int i = 0; i < block_size; ++i)
 	{
-#pragma HLS loop_tripcount min = block_size max = block_size
 		for (int d = 0; d < num_proteins; d++)
 		{
 #pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
-			if (i < num_compounds) 
-				data = predictions_stream.read();
-				
+			data = predictions_stream.read();
 			for (int s = 0; s < num_samples; s++)
 			{
 #pragma HLS UNROLL
@@ -174,7 +161,6 @@ void output_loop(
 
 
 void predict_dataflow(
-		int num_compounds,
 		const F_base *features,    //[block_size*num_features]
 		      P_base *predictions, //[block_size*num_proteins*num_samples]
 		const Model &m)
@@ -187,12 +173,11 @@ void predict_dataflow(
 #pragma HLS STREAM variable = predictions_stream depth = 16
 
 #pragma HLS STABLE variable = m
-#pragma HLS STABLE variable = num_compounds
 #pragma HLS DATAFLOW
-	input_loop(num_compounds, features_stream, features);
-	features_loop(num_compounds, features_stream, latents, m);
-	proteins_loop(num_compounds, predictions_stream, latents, m);
-	output_loop(num_compounds, predictions, predictions_stream);
+	input_loop(features_stream, features);
+	features_loop(features_stream, latents, m);
+	proteins_loop(predictions_stream, latents, m);
+	output_loop(predictions, predictions_stream);
 
 } // end function
 

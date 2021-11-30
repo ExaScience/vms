@@ -211,24 +211,15 @@ extern unsigned int KERNEL_VAR_LEN;
 CLData cl_data("predict_one_block", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
 
 void predict_compounds(
-               int num_compounds,
+               int num_blocks,
                const F_blks features,     //[block_size*num_features]
                      P_blks predictions,  //[block_size*num_proteins]
                const Model &m)
 {
-    // round up
-    int num_blocks = (num_compounds + block_size - 1) / block_size;
-
     for(int block=0; block<num_blocks; block++)
     {
-        int c = block * block_size; // current compound
-        if (verbose)
-        {
-            printf(" Starting block at compound %d / %d\n", c, num_compounds);
-        }
-        int num_compounds_left = std::min(block_size, num_compounds - c);
+        printf("  Block %d/%d\n", i, num_blocks);
         auto &kernel = cl_data.get_next_kernel();
-        kernel.addInputArg(num_compounds_left);
         kernel.addInputArg(&features[block][0][0], block_size*num_features);
         kernel.addOutputArg(&predictions[block][0][0], block_size*num_proteins);
         kernel.addInputArg(m.nr);

@@ -2,7 +2,6 @@
 
 extern "C"
 void predict_one_block(
-		int num_compounds,
 		const F_base *features,    //[block_size*num_features]
 		      P_base *predictions, //[block_size*num_proteins*num_samples]
 		const int model_nr,
@@ -18,5 +17,5 @@ void predict_one_block(
 #pragma HLS INTERFACE m_axi port=predictions offset=slave bundle=gmem
 
 	load_model(model_nr, u, m, b);
-	predict_dataflow(num_compounds, features, predictions, model_cache);
+	predict_dataflow(features, predictions, model_cache);
 } // end function

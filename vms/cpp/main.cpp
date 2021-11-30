@@ -113,11 +113,11 @@ static char args_doc[] = "";
 
 /* The options we understand. */
 static struct argp_option options[] = {
-  {"num-compounds",  'c', "NUM",      0,  "Number of compounds (10)." },
-  {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
-  {"no-check",       'n',     0,      0,  "Do not check for errors." },
-  {"check",          'd',     0,      0,  "Do check for errors." },
-  {"verbose",        'v',     0,      0,  "Verbose messages" },
+  {"num-blocks", 'b', "NUM",      0,  "Number of blocks (2)." },
+  {"num-repeat", 'r', "NUM",      0,  "Number of time to repeat (1)." },
+  {"no-check",   'n',     0,      0,  "Do not check for errors." },
+  {"check",      'd',     0,      0,  "Do check for errors." },
+  {"verbose",    'v',     0,      0,  "Verbose messages" },
   { 0 }
 };
 
@@ -125,7 +125,7 @@ static struct argp_option options[] = {
 struct arguments
 {
   int num_repeat = 2;
-  int num_compounds = 100;
+  int num_blocks = 2;
   bool check = true;
 };
 
@@ -140,7 +140,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
   switch (key)
     {
     case 'r': arguments->num_repeat = std::atoi(arg); break;
-    case 'c': arguments->num_compounds = std::atoi(arg); break;
+    case 'b': arguments->num_blocks = std::atoi(arg); break;
     case 'n': arguments->check = false; break;
     case 'd': arguments->check = true; break;
     case 'v': verbose++; break;
@@ -161,27 +161,25 @@ main (int argc, char **argv)
      be reflected in arguments. */
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
-    // divide and round up
-    int num_blocks = (args.num_compounds + block_size - 1) / block_size;
-    int num_compounds_alloc = num_blocks * block_size;
-    
+    int num_compounds = args.num_blocks * block_size;
+
     printf("  dt:    %s\n", DT_NAME);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
     printf("  blks:  %d\n", block_size);
+    printf("  nblks: %d\n", args.num_blocks);
     printf("  nrep:  %d\n", args.num_repeat);
-    printf("  ncmps: %d\n", args.num_compounds);
-    printf("  alloc: %d\n", num_compounds_alloc);
+    printf("  ncmps: %d\n", num_compounds);
 
     P_base(*tb_output_base)[block_size][num_proteins][num_samples];
     F_base(*tb_input_base)[block_size][num_features];
 
-    posix_memalign((void **)&tb_output_base, 4096, num_compounds_alloc * num_proteins * num_samples * sizeof(P_base));
-    posix_memalign((void **)&tb_input_base, 4096, num_compounds_alloc * num_features * sizeof(F_base));
+    posix_memalign((void **)&tb_output_base, 4096, num_compounds * num_proteins * num_samples * sizeof(P_base));
+    posix_memalign((void **)&tb_input_base, 4096, num_compounds * num_features * sizeof(F_base));
 
-    prepare_tb_input(args.num_compounds, tb_input, tb_input_base);
+    prepare_tb_input(num_compounds, tb_input, tb_input_base);
     Model m = prepare_model(U, M, B);
 
     int nerrors = 0;
@@ -191,27 +189,27 @@ main (int argc, char **argv)
     for (int n = 0; n < args.num_repeat; n++)
     {
         printf(" Repeat %d/%d\n", n, args.num_repeat);
-        predict_compounds(args.num_compounds, tb_input_base, tb_output_base, m);
+        predict_compounds(args.num_blocks, tb_input_base, tb_output_base, m);
     }
     double stop = tick();
     if (args.check)
-        nerrors += check_result(args.num_compounds, tb_output_base, tb_ref);
+        nerrors += check_result(num_compounds, tb_output_base, tb_ref);
     else
         printf( "Error checking skipped\n");
 
     double elapsed = stop - start;
-    double compounds_per_sec = (double)args.num_compounds * args.num_repeat / elapsed;
+    double compounds_per_sec = (double)num_compounds * args.num_repeat / elapsed;
 
     printf( "took: %.2f sec; %.2f compounds/second\n", elapsed, compounds_per_sec);
 
     // terra-ops aka 10^12 ops
-    double gops = (double)args.num_repeat * (double)num_samples * (double)args.num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e9;
+    double gops = (double)args.num_repeat * (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e9;
     double tops = gops / 1e3;
 
     printf( "%.2f tera-ops; %.2f tera-ops/second\n", tops, tops/elapsed);
     printf( "%.2f giga-ops; %.2f giga-ops/second\n", gops, gops/elapsed);
 
-    int num_kernel_executions = ceil((args.num_compounds) / double(block_size)) * args.num_repeat;
+    int num_kernel_executions = double(args.num_blocks) * args.num_repeat;
     double kernel_ms = 1e3 * elapsed / num_kernel_executions;
     printf( "%d kernel executions of  %.2f ms each (avg)\n", num_kernel_executions, kernel_ms);
 
