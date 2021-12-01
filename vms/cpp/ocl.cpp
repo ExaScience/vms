@@ -218,7 +218,7 @@ void predict_compounds(
 {
     for(int block=0; block<num_blocks; block++)
     {
-        printf("  Block %d/%d\n", i, num_blocks);
+        printf("  Block %d/%d\n", block, num_blocks);
         auto &kernel = cl_data.get_next_kernel();
         kernel.addInputArg(&features[block][0][0], block_size*num_features);
         kernel.addOutputArg(&predictions[block][0][0], block_size*num_proteins);
