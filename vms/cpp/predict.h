@@ -2,7 +2,8 @@
 
 extern int verbose;
 
-static const int block_size = 4096; // align to page size
+// static const int block_size = 4096; // align to page size
+static const int block_size = 16; // small for testing
 
 const int L_wl = 32;
 const int L_iwl = 12;
@@ -133,14 +134,14 @@ typedef B_one *B_flx;
 #endif
 
 struct Model {
-	int nr = 0;
+	int nr = -1;
 	ALIGN_MODEL_ATTR U_arr U;   //[num_samples][num_proteins][num_latent]
 	ALIGN_MODEL_ATTR M_arr M;   //[num_samples][num_latent]
 	ALIGN_MODEL_ATTR B_arr B;   //[num_samples][num_features][num_latent]
 };
 
 void predict_compounds(
-    int num_compounds,
+    int num_blocks,
     const F_blks features,
     P_blks predictions,
     const Model &m);
