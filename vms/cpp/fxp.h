@@ -10,6 +10,7 @@ template<int N> struct int_type;
 template<> struct int_type< 8> { typedef signed char T; };
 template<> struct int_type<16> { typedef signed short T; };
 template<> struct int_type<32> { typedef signed int T; };
+template<> struct int_type<64> { typedef signed long long T; };
 
 template<typename T, int IWL>
 struct fxp;
