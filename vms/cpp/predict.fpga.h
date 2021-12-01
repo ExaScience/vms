@@ -139,18 +139,12 @@ void output_loop(
     P_base *predictions,
     hls::stream<P_vec> &predictions_stream)
 {
-	int num_out = 0;
 	P_vec *predictions_vec = (P_vec *)predictions;
 
-	for (int i = 0; i < block_size; ++i)
+	for (int i = 0; i < block_size*num_proteins; ++i)
 	{
-		for (int d = 0; d < num_proteins; d++)
-		{
-#pragma HLS LOOP_FLATTEN
 #pragma HLS PIPELINE II = 1
-			predictions_vec[num_out] = predictions_stream.read();
-			num_out++;
-		}
+		predictions_vec[i] = predictions_stream.read();
 	}
 }
 
