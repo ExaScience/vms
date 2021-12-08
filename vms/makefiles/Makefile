@@ -24,7 +24,7 @@ $(ROOTFILE): $(INPUT_DATA) $(OPTIONS)
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 		OMP_NUM_THREADS=1 smurff --ini $(OPTIONS) --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
 
-$(FULLMODELFILES): $(ROOTFILE) $(SRCDIR)/scripts/codegen.py
+$(ALLCODE): $(ROOTFILE) $(ORGINALSRCFILES) $(SRCDIR)/scripts/codegen.py
 	mkdir -p code 
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python3 $(SRCDIR)/scripts/codegen.py --root $(ROOTFILE) --output code

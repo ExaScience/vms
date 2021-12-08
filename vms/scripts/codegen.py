@@ -9,13 +9,25 @@ import os.path as pth
 import io
 import argparse
 from configparser import ConfigParser
+from glob import glob
 
+def filter_file(inputfile, outputfile, patterns):
+    lines = open(inputfile, "r").readlines() 
+    for p in patterns:
+        lines = filter(lambda l: not p.upper() in l.upper(), lines)
+    open(outputfile, "w").writelines(lines) 
 
+def filter_files(inputdir, outputdir, patterns):
+    for inputfile in glob(pth.join(inputdir, '*')):
+        if pth.isdir(inputfile):
+            continue
+
+        outputfile = pth.join(outputdir, pth.basename(inputfile))
+        filter_file(inputfile, outputfile, patterns)
 
 def gen_file(dir, suffix, content):
     with open(pth.join(dir, "vms_" + suffix), "w") as os:
         os.write(content)
-
 
 def gen_int(name, value, indent = ""):
     """Generates code for an int:
@@ -162,6 +174,11 @@ def gen_session(root, outputdir, config_file):
         const_output += gen_int(name + "_shift", wl - iwl)
 
     gen_file(outputdir, "const.h", const_output)
+
+    patterns = config["top"]["patterns"].split(",")
+    patterns = list(filter(len, patterns))
+    srcdir = pth.join(config["top"]["srcdir"], "cpp")
+    filter_files(srcdir, outputdir, patterns)
 
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')
