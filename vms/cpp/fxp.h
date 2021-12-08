@@ -74,7 +74,7 @@ struct fxp
     }
 
 
-#ifdef DT_CHECK
+#ifdef VMS_DT_CHECK
     void check(float ref, float eps = -1.) const
     {
         float cur = (float)(*this);
@@ -118,7 +118,7 @@ struct fxp
         }
 
 
-#ifdef DT_CHECK
+#ifdef VMS_DT_CHECK
         float eps = std::max(fxp<otherT, otherIWL>::epsilon(), epsilon());
         check((float)v, eps);
 #endif
@@ -136,7 +136,7 @@ struct fxp
         else
             val = (mul.a.val * mul.b.val) << -diff;
 
-#ifdef DT_CHECK
+#ifdef VMS_DT_CHECK
         float eps;
         eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
         eps = std::max(eps, epsilon());
@@ -159,7 +159,7 @@ struct fxp
         if (s > 0) val = val << s;
         else       val = val >> -s;
 
-#ifdef DT_CHECK
+#ifdef VMS_DT_CHECK
         float eps;
         eps = std::max(fxp<T1, IWL1>::epsilon(), fxp<T2, IWL2>::epsilon());
         eps = std::max(eps, epsilon());

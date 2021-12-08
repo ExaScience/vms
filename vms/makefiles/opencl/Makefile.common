@@ -27,7 +27,7 @@ PROFILE:= no
 CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++11
 CXXFLAGS += -I$(MODELDIR)
 CXXFLAGS += -fmessage-length=0
-CXXFLAGS += -DHOSTIF_OPENCL
+CXXFLAGS += -DVMS_HOSTIF_OPENCL
 
 LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
 LDFLAGS += -lrt -lstdc++

@@ -1,4 +1,4 @@
-#define HOSTIF_HLS
+#define VMS_HOSTIF_HLS
 
 #include "predict.fpga.h"
 

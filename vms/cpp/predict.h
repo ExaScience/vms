@@ -12,27 +12,27 @@ const int S_iwl = 12;
 
 const float epsilon = 1.0F;
 
-#if defined(DT_FIXED)
-#define DT_NAME "fxp<T,I>"
-#define DT_FIXED_INT
-#define DT_FIXED_EXT
-#elif defined(DT_MIXED)
-#define DT_NAME "float + fxp<WL,IWL>"
-#define DT_FIXED_INT
-#define DT_FLOAT_EXT
-#elif defined(DT_FLOAT)
-#define DT_NAME "float"
-#define DT_FLOAT_INT
-#define DT_FLOAT_EXT
-#elif defined(DT_HALF)
-#define DT_NAME "half"
-#define DT_FLOAT_EXT
-#define DT_HALF_INT
+#if defined(VMS_DT_FIXED)
+#define VMS_DT_NAME "fxp<T,I>"
+#define VMS_DT_FIXED_INT
+#define VMS_DT_FIXED_EXT
+#elif defined(VMS_DT_MIXED)
+#define VMS_DT_NAME "float + fxp<WL,IWL>"
+#define VMS_DT_FIXED_INT
+#define VMS_DT_FLOAT_EXT
+#elif defined(VMS_DT_FLOAT)
+#define VMS_DT_NAME "float"
+#define VMS_DT_FLOAT_INT
+#define VMS_DT_FLOAT_EXT
+#elif defined(VMS_DT_HALF)
+#define VMS_DT_NAME "half"
+#define VMS_DT_FLOAT_EXT
+#define VMS_DT_HALF_INT
 #else
-#error Need to define DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
+#error Need to define VMS_DT_FIXED, VMS_DT_MIXED, VMS_DT_FLOAT or VMS_DT_HALF
 #endif
 
-#ifdef DT_FIXED_EXT
+#ifdef VMS_DT_FIXED_EXT
 
 #include "fxp.h"
 #include "arr.h"
@@ -51,7 +51,7 @@ typedef int_type<S_wl>::T S_base;
 
 const bool dt_fixed = true;
 
-#else // DT_FLOAT_EXT
+#else // VMS_DT_FLOAT_EXT
 
 typedef float U_base;
 typedef float M_base;
@@ -67,7 +67,7 @@ const bool dt_fixed = false;
 
 #endif
 
-#ifdef DT_FIXED_INT
+#ifdef VMS_DT_FIXED_INT
 
 #include "fxp.h"
 
@@ -79,7 +79,7 @@ typedef fxp<int_type<P_wl>::T, P_iwl> P_type;
 typedef fxp<int_type<L_wl>::T, L_iwl> L_type;
 typedef fxp<int_type<S_wl>::T, S_iwl> S_type;
 
-#elif defined(DT_FLOAT_INT)
+#elif defined(VMS_DT_FLOAT_INT)
 
 typedef float U_type;
 typedef float M_type;
@@ -89,7 +89,7 @@ typedef float P_type;
 typedef float L_type;
 typedef float S_type;
 
-#elif defined(DT_HALF_INT)
+#elif defined(VMS_DT_HALF_INT)
 
 #include "hls_half.h"
 
@@ -102,7 +102,7 @@ typedef float L_type;
 typedef float S_type;
 
 #else
-#error Need to defined DT_FIXED, DT_MIXED, DT_FLOAT or DT_HALF
+#error Need to defined VMS_DT_FIXED, VMS_DT_MIXED, VMS_DT_FLOAT or VMS_DT_HALF
 #endif
 
 
@@ -127,7 +127,7 @@ typedef U_one *U_flx;
 typedef M_one *M_flx;
 typedef B_one *B_flx;
 
-#ifdef HOSTIF_OPENCL
+#ifdef VMS_HOSTIF_OPENCL
 #define ALIGN_MODEL_ATTR __attribute__((aligned (4096)))
 #else
 #define ALIGN_MODEL_ATTR

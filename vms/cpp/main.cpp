@@ -15,7 +15,7 @@
 #include "predict.h"
 #include "vms_tb.h"
 
-#ifdef DT_OBSERVED_FLOAT
+#ifdef VMS_DT_OBSERVED_FLOAT
 const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
@@ -163,7 +163,7 @@ main (int argc, char **argv)
 
     int num_compounds = args.num_blocks * block_size;
 
-    printf("  dt:    %s\n", DT_NAME);
+    printf("  dt:    %s\n", VMS_DT_NAME);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
