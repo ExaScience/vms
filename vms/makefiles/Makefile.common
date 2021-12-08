@@ -12,7 +12,7 @@ endif
 PROGRAM_ = predict
 SRCFILES = main.cpp $(HOST_IF).cpp
 KERNELFILES = predict.cpp
-HDRFILES = predict.fpga.h predict.h fxp.h observed_float.h arr.h
+HDRFILES = predict.fpga.h predict_nodf.fpga.h predict.h fxp.h observed_float.h arr.h
 MODELFILES = vms_const.h vms_tb.h
 
 LOCALFILES = $(MODELFILES) $(SRCFILES) $(HDRFILES) 
