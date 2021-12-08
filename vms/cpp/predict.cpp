@@ -1,4 +1,10 @@
+#ifdef VMS_DATAFLOW
 #include "predict.fpga.h"
+#elif defined(VMS_NODATAFLOW)
+#include "predict_nodf.fpga.h"
+#else
+#error need to define either VMS_DATAFLOW or VMS_NODATAFLOW
+#endif
 
 extern "C"
 void predict_one_block(

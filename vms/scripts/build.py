@@ -116,7 +116,7 @@ def action_update(builddir):
     logging.info("Updated links in %s", builddir)
     return builddir            
 
-def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype):
+def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype, dataflow):
     if basedir is None:
         basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
@@ -141,6 +141,7 @@ DATASET = {dataset}
 NUM_LATENT = {num_latent}
 NUM_SAMPLES = {num_samples}
 DATATYPE = {datatype}
+DATAFLOW = {dataflow}
 """)
 
     logging.info("Populated %s", builddir)
@@ -199,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
     parser.add_argument("--dataset", type=str, default="chem2vec", choices=["chem2vec", "random", ], help="Dataset to use")
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
+    parser.add_argument("--no-dataflow", type=bool, default=False, action="store_true", help="Disable HLS DATAFLOW")
     parser.add_argument("--num-latent", type=int, default=4, help="Number of latent dimensions")
     parser.add_argument("--num-samples", type=int, default=4, help="Number of samples to collect")
     parser.add_argument("--do-build", action="store_true", help="Perform actual `make` in build directory")
@@ -212,7 +214,8 @@ if __name__ == "__main__":
         action_update(args.builddir)
 
     if args.builddir is None:
-        builddir = action_populate(args.srcdir, args.basedir, args.dataset, args.num_latent, args.num_samples, args.datatype)
+        builddir = action_populate(args.srcdir, args.basedir, args.dataset, args.num_latent, args.num_samples,
+                    args.datatype, not args.no_dataflow)
     else:
         builddir = args.builddir
 

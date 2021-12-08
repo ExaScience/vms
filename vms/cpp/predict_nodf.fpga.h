@@ -108,7 +108,7 @@ void proteins_nodf_loop(
 	}
 }
 
-void predict_nodf(
+void predict_dataflow(
 		const F_base *features,    //[block_size*num_features]
 		      P_base *predictions, //[block_size*num_proteins*num_samples]
 		const Model &m)
