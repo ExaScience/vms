@@ -120,7 +120,8 @@ def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, dataty
     if basedir is None:
         basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
-    builddir = os.path.join(basedir, "%s_%dl_%ds_%s" % (dataset, num_latent, num_samples, datatype))
+    dataflow_str = "df" if dataflow else "nodf"
+    builddir = os.path.join(basedir, "%s_%dl_%ds_%s_%s" % (dataset, num_latent, num_samples, datatype, dataflow_str))
 
     if os.path.isdir(builddir):
         logging.warning("Not populating %s: already exists", builddir)
@@ -141,7 +142,7 @@ DATASET = {dataset}
 NUM_LATENT = {num_latent}
 NUM_SAMPLES = {num_samples}
 DATATYPE = {datatype}
-DATAFLOW = {dataflow}
+DATAFLOW = {int(dataflow)}
 """)
 
     logging.info("Populated %s", builddir)
@@ -200,7 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
     parser.add_argument("--dataset", type=str, default="chem2vec", choices=["chem2vec", "random", ], help="Dataset to use")
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
-    parser.add_argument("--no-dataflow", type=bool, default=False, action="store_true", help="Disable HLS DATAFLOW")
+    parser.add_argument("--no-dataflow", default=False, action="store_true", help="Disable HLS DATAFLOW")
     parser.add_argument("--num-latent", type=int, default=4, help="Number of latent dimensions")
     parser.add_argument("--num-samples", type=int, default=4, help="Number of samples to collect")
     parser.add_argument("--do-build", action="store_true", help="Perform actual `make` in build directory")
