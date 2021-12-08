@@ -4,12 +4,11 @@ import matrix_io as mio
 import smurff
 import numpy as np
 import scipy as sp
-import sys
+import os
 import os.path as pth
-import glob
-import shutil
 import io
 import argparse
+from configparser import ConfigParser
 
 
 
@@ -87,10 +86,10 @@ def map_to_int(M, dt):
 def gen_session(root, outputdir, config_file):
     #read config_file
     config = ConfigParser()
-    with open(os.path.join(builddir, config_file)) as stream:
+    with open(config_file) as stream:
         config.read_string("[top]\n" + stream.read())  # add [top] section
     datatype = config["top"]["datatype"]
-    dataflow = config["top"]["dataflow"]
+    dataflow = config["top"].getboolean("dataflow")
 
     # read model
     session = smurff.PredictSession(root)
@@ -146,7 +145,7 @@ def gen_session(root, outputdir, config_file):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(datatype, dataflow, num_features, num_latent, len(samples)) + "\n"
+    const_output = gen_const(datatype, dataflow, num_proteins, num_features, num_latent, len(samples)) + "\n"
 
     types = {
         8 : "signed char",
