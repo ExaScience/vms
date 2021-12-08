@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <hls_stream.h>
+#include "arr.h"
 #include "predict.h"
 
 typedef arr<P_base, num_samples> P_vec;
@@ -35,6 +36,13 @@ void load_model(const int model_nr, const U_base *u, const M_base *m, const B_ba
 	}
 }
 
+#if defined(VMS_NODATAFLOW)
+
+#include "predict_nodf.fpga.h"
+
+#elif defined(VMS_DATAFLOW)
+
+const char *dataflow = "on";
 const int F_vec_len = block_size;
 
 void input_loop(
@@ -170,5 +178,6 @@ void predict_dataflow(
 
 } // end function
 
-
-
+#else
+#error need to define either VMS_DATAFLOW or VMS_NODATAFLOW
+#endif
