@@ -164,6 +164,7 @@ main (int argc, char **argv)
     int num_compounds = args.num_blocks * block_size;
 
     printf("  dt:    %s\n", VMS_DT_NAME);
+    printf("  df:    %s\n", dataflow);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);

@@ -1,6 +1,7 @@
 #include "vms_const.h"
 
 extern int verbose;
+extern const char *dataflow;
 
 // static const int block_size = 4096; // align to page size
 static const int block_size = 16; // small for testing
