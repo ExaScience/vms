@@ -3,9 +3,6 @@
 extern int verbose;
 extern const char *dataflow;
 
-// static const int block_size = 4096; // align to page size
-static const int block_size = 16; // small for testing
-
 const int L_wl = 32;
 const int L_iwl = 12;
 const int S_wl = 32;

@@ -95,10 +95,10 @@ def resource_utilization(name, dir = "."):
 
 def latency_estimation(name, dir = "."):
     report_file, *_ = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
-        root = cET.parse(report_file).getroot()
-        latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
-        latency = int(latency_node.text)
-        build_logger().info("Average latency of %s:\n%d (file %s)", name, latency, report_file)
+    root = cET.parse(report_file).getroot()
+    latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
+    latency = int(latency_node.text)
+    build_logger().info("Average latency of %s:\n%d (file %s)", name, latency, report_file)
 
 def log_xtasks_config(dir = "."):
     config_files = glob.glob(f'{dir}/**/*xtasks.config', recursive=True) 
@@ -135,16 +135,17 @@ def action_update(builddir):
     return builddir            
 
 
-def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, datatype, dataflow, filter_pragmas):
+def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts):
     if basedir is None:
         basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
     dataflow_str = "df" if dataflow else "nodf"
     filter_str = "hls" if filter_pragmas else "nohls"
+    bursts_str = "burst" if filter_pragmas else "noburst"
     pragmas_to_filter = [ "pragma HLS" ]
     filter_patterns = ",".join(pragmas_to_filter) if filter_pragmas else ""
-    builddir = os.path.join(basedir, "%s_%dl_%ds_%s_%s_%s" % 
-        (dataset, num_latent, num_samples, datatype, dataflow_str, filter_str))
+    builddir = os.path.join(basedir, "%s_%dl_%ds_%db_%s_%s_%s_%s" % 
+        (dataset, num_latent, num_samples, block_size, datatype, dataflow_str, filter_str, bursts_str))
 
     if os.path.isdir(builddir):
         logging.warning("Not populating %s: already exists", builddir)
@@ -164,9 +165,11 @@ BUILDDIR = {abs_build_dir}
 DATASET = {dataset}
 NUM_LATENT = {num_latent}
 NUM_SAMPLES = {num_samples}
+BLOCK_SIZE = {block_size}
 DATATYPE = {datatype}
 DATAFLOW = {int(dataflow)}
 FILTER_PATTERNS = {filter_patterns}
+DISABLE_BURSTS = {disable_bursts}
 """)
 
     logging.info("Populated %s", builddir)
@@ -228,8 +231,11 @@ def do_main():
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
     parser.add_argument("--no-dataflow", default=False, action="store_true", help="Disable HLS DATAFLOW")
     parser.add_argument("--no-pragmas", default=False, action="store_true", help="Disable HLS PRAGMAS")
+    parser.add_argument("--no-burst", default=False, action="store_true", help="Disable burst reads")
+
     parser.add_argument("--num-latent", type=int, default=4, help="Number of latent dimensions")
     parser.add_argument("--num-samples", type=int, default=4, help="Number of samples to collect")
+    parser.add_argument("--block-size", type=int, default=4096, help="Number of compounds per block")
 
     parser.add_argument("--do-build", action="store_true", help="Perform actual `make` in build directory")
     parser.add_argument("--verbose", action="store_true", help="Verbose logging on stderr")
@@ -248,8 +254,8 @@ def do_main():
 
     if args.builddir is None:
         builddir = action_populate(args.srcdir, args.basedir,
-                    args.dataset, args.num_latent, args.num_samples,
-                    args.datatype, not args.no_dataflow, args.no_pragmas)
+                    args.dataset, args.num_latent, args.num_samples, args.block_size,
+                    args.datatype, not args.no_dataflow, args.no_pragmas, args.no_bursts)
     else:
         builddir = args.builddir
 
