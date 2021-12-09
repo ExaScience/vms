@@ -35,7 +35,7 @@ native: $(ALLCODE)
 	module load Vitis/2020.1 && cd native && $(MAKE)
 
 ompss-smp-x86: $(ALLCODE)
-	module load Vitis/2021.1 GCC/7.3.0 ompss/19.06 && cd smp-x86 && $(MAKE)
+	cd smp-x86 && dockfpga -i bscpm/ompss -w $(BUILDDIR) $(MAKE)
 
 ompss-smp-arm64: $(ALLCODE)
 	cd smp-arm64 && dockfpga -w $(BUILDDIR) $(MAKE)
