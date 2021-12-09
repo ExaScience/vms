@@ -175,7 +175,7 @@ def gen_session(root, outputdir, config_file):
 
     gen_file(outputdir, "const.h", const_output)
 
-    patterns = config["top"]["patterns"].split(",")
+    patterns = config["top"]["filter_patterns"].split(",")
     patterns = list(filter(len, patterns))
     srcdir = pth.join(config["top"]["srcdir"], "cpp")
     filter_files(srcdir, outputdir, patterns)
