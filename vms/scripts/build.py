@@ -136,12 +136,11 @@ def action_update(builddir):
 
 
 def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts):
-    if basedir is None:
-        basedir = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
+    logging.info("Populating with: %s", (dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts))
 
     dataflow_str = "df" if dataflow else "nodf"
     filter_str = "hls" if filter_pragmas else "nohls"
-    bursts_str = "burst" if filter_pragmas else "noburst"
+    bursts_str = "burst" if disable_bursts else "noburst"
     pragmas_to_filter = [ "pragma HLS" ]
     filter_patterns = ",".join(pragmas_to_filter) if filter_pragmas else ""
     builddir = os.path.join(basedir, "%s_%dl_%ds_%db_%s_%s_%s_%s" % 
@@ -211,8 +210,21 @@ def action_build(dir):
     print("Done ...")
     return True
 
-def action_ci(*args):
-    return action_build(action_populate(*args))
+def action_explore(srcdir, basedir, dataset):
+    space = {
+        "num_latent"     : [ 4, 8, 16, 32, ],
+        "num_samples"    : [ 4, 8, 16, ],
+        "block_size"     : [ 4096, ],
+        "datatype"       : ["float", "fixed", ],
+        "dataflow"       : [ True, False ],
+        "filter_pragmas" : [ True, False ],
+        "disable_bursts" : [ True, False ],
+    }
+
+    from itertools import product
+    for c in product(*space.values()):
+        kwargs = dict(zip(space.keys(), c))
+        action_populate(srcdir, basedir, dataset, **kwargs)
 
 
 def do_main():
@@ -221,11 +233,12 @@ def do_main():
     parser = argparse.ArgumentParser()
 
     srcdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+    basedir_default = "ci_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S")
 
-    parser.add_argument("action", type=str, default = "populate", choices = [ "populate", "build", "update", "report" ], help="Action to perform")
+    parser.add_argument("action", type=str, default = "populate", choices = [ "explore", "populate", "build", "update", "report" ], help="Action to perform")
     parser.add_argument("--srcdir", type=str, metavar="DIR", default = srcdir, help="Source directory")
     parser.add_argument("--builddir", type=str, metavar="DIR", default = None, help="Actual build directory")
-    parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
+    parser.add_argument("--basedir", type=str, metavar="DIR", default = basedir_default, help="Base of builds directory")
     parser.add_argument("--dataset", type=str, default="chem2vec", choices=["chem2vec", "random", ], help="Dataset to use")
 
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
@@ -244,6 +257,10 @@ def do_main():
     if args.verbose:
         logging.basicConfig(format=LOGFORMAT, level=logging.INFO)
 
+    if args.action == "explore":
+        action_explore(args.srcdir, args.basedir, args.dataset)
+        return
+        
     if args.action == "update":
         action_update(args.builddir)
         return
