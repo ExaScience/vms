@@ -109,6 +109,9 @@ def log_xtasks_config(dir = "."):
 
 
 def action_report(builddir):
+    if builddir is None:
+        builddir = "."
+
     resource_utilization("predict_one_block", builddir)
     latency_estimation("predict_one_block", builddir)
 
