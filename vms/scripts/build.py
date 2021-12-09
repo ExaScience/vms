@@ -72,7 +72,7 @@ def patch_file(fname, pattern, repl):
         f.write(new_content)
 
 def resource_utilization(name, dir = "."):
-    report_file, = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
+    report_file, *_ = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
     root = cET.parse(report_file).getroot()
     area = root.find('AreaEstimates')
 
@@ -81,10 +81,10 @@ def resource_utilization(name, dir = "."):
     merged = { t : ( ar[t], ur[t] ) for t in ar.keys() }
 
 
-    header = "{:<8} {:>8} {:>8} {:>4}%".format("", "Used", "Avail", "")
+    header = "{:<8} {:>8} {:>8} {:>7}%".format("", "Used", "Avail", "")
     as_string = "\n".join(
         [
-            ("{:<8} {:>8} {:>8} {:>4}%".format(k, used, avail, int(used * 100 / avail)))
+            ("{:<8} {:>8} {:>8} {:>8.2%}".format(k, used, avail, used / avail))
             for k, (avail, used)  in merged.items()
         ]
     )
@@ -94,8 +94,7 @@ def resource_utilization(name, dir = "."):
     return merged
 
 def latency_estimation(name, dir = "."):
-    report_files = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
-    for report_file in report_files:
+    report_file, *_ = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
         root = cET.parse(report_file).getroot()
         latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
         latency = int(latency_node.text)
@@ -112,8 +111,9 @@ def action_report(builddir):
     if builddir is None:
         builddir = "."
 
-    resource_utilization("predict_one_block", builddir)
-    latency_estimation("predict_one_block", builddir)
+    hlsdir = os.path.join(builddir, "hls")
+    resource_utilization("predict_one_block", hlsdir)
+    latency_estimation("predict_one_block", hlsdir)
 
 def action_update(builddir):
     if builddir is None:
