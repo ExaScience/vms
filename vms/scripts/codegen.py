@@ -11,6 +11,13 @@ import argparse
 from configparser import ConfigParser
 from glob import glob
 
+def read_config(config_file):
+    #read config_file
+    config = ConfigParser()
+    with open(config_file) as stream:
+        config.read_string("[top]\n" + stream.read())  # add [top] section
+    return config["top"]
+
 def filter_file(inputfile, outputfile, patterns):
     lines = open(inputfile, "r").readlines() 
     for p in patterns:
@@ -26,8 +33,9 @@ def filter_files(inputdir, outputdir, patterns):
         filter_file(inputfile, outputfile, patterns)
 
 def gen_file(dir, suffix, content):
-    with open(pth.join(dir, "vms_" + suffix), "w") as os:
-        os.write(content)
+    os.makedirs(dir, exist_ok=True)
+    with open(pth.join(dir, "vms_" + suffix), "w") as f:
+        f.write(content)
 
 def gen_int(name, value, indent = ""):
     """Generates code for an int:
@@ -60,7 +68,7 @@ def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
-def gen_const(datatype, dataflow, num_proteins, num_features, num_latent, num_samples):
+def gen_const(datatype, dataflow, num_proteins, num_features, num_latent, num_samples, block_size, F_vec_len):
     const_output = "#pragma once\n\n"
 
     const_output += f"#define VMS_DT_{datatype.upper()}\n"
@@ -73,6 +81,8 @@ def gen_const(datatype, dataflow, num_proteins, num_features, num_latent, num_sa
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
     const_output += gen_int("num_samples",   num_samples)
+    const_output += gen_int("block_size",    block_size)
+    const_output += gen_int("F_vec_len",     F_vec_len)
     log_num_samples = num_samples.bit_length() - 1
 
     return const_output
@@ -96,16 +106,23 @@ def map_to_int(M, dt):
 
 
 def gen_session(root, outputdir, config_file):
-    #read config_file
-    config = ConfigParser()
-    with open(config_file) as stream:
-        config.read_string("[top]\n" + stream.read())  # add [top] section
-    datatype = config["top"]["datatype"]
-    dataflow = config["top"].getboolean("dataflow")
+    config = read_config(config_file)
+
+    datatype = config["datatype"]
+    dataflow = config.getboolean("dataflow", True)
+    block_size = config.getint("block_size")
+    if config.getboolean("disable_bursts"):
+        F_vec_len = 1
+    elif block_size < 8:
+        F_vec_len = block_size 
+    else:
+        F_vec_len = 8 
 
     # read model
     session = smurff.PredictSession(root)
     num_latent = session.num_latent
+    assert num_latent == config.getint("num_latent")
+
     _, num_proteins = session.data_shape
     num_features = session.beta_shape[0]
 
@@ -157,7 +174,10 @@ def gen_session(root, outputdir, config_file):
 
     assert tb_num_features == num_features
 
-    const_output = gen_const(datatype, dataflow, num_proteins, num_features, num_latent, len(samples)) + "\n"
+    num_samples = len(samples)
+    assert num_samples == config.getint("num_samples")
+
+    const_output = gen_const(datatype, dataflow, num_proteins, num_features, num_latent, len(samples), block_size, F_vec_len) + "\n"
 
     types = {
         8 : "signed char",
@@ -175,9 +195,9 @@ def gen_session(root, outputdir, config_file):
 
     gen_file(outputdir, "const.h", const_output)
 
-    patterns = config["top"]["filter_patterns"].split(",")
+    patterns = config["filter_patterns"].split(",")
     patterns = list(filter(len, patterns))
-    srcdir = pth.join(config["top"]["srcdir"], "cpp")
+    srcdir = pth.join(config["srcdir"], "cpp")
     filter_files(srcdir, outputdir, patterns)
 
 
