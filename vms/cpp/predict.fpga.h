@@ -27,8 +27,8 @@ void load_model(const int model_nr, const U_base *u, const M_base *m, const B_ba
 			for (int k = 0; k < num_latent; k++)
 				model_cache.U[i][j][k] = u[u_count++];
 
-		for (int j = 0; j < num_latent; j++)
-			model_cache.M[i][j] = m[m_count++];
+		for (int k = 0; k < num_latent; k++)
+			model_cache.M[i][k] = m[m_count++];
 
 		for (int j = 0; j < num_features; j++)
 			for (int k = 0; k < num_latent; k++)
