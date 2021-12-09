@@ -11,8 +11,9 @@ import datetime
 import xml.etree.cElementTree as cET
 from configparser import ConfigParser
 
-global_build_logger = None
 LOGFORMAT = '%(asctime)s - %(process)d - %(levelname)s - %(message)s'
+logging.basicConfig(format = LOGFORMAT, level=logging.INFO)
+global_build_logger = logging.getLogger()
 
 def build_logger():
     global global_build_logger
@@ -20,7 +21,7 @@ def build_logger():
 
 def make_build_logger(dir):
     global global_build_logger
-    global_build_logger = logging.getLogger(os.path.basename(dir))
+    global_build_logger = logging.getLogger(dir)
     fh = logging.FileHandler('build.log')
     fh.setFormatter(logging.Formatter(LOGFORMAT))
     fh.setLevel(logging.INFO)
@@ -29,7 +30,7 @@ def make_build_logger(dir):
 
 def reset_build_logger():
     global global_build_logger
-    global_build_logger = None
+    global_build_logger = logging.getLogger()
 
 def execute(cmd, modules = None, workdir = None, log_name = "make.log"):
     if modules is not None:
@@ -70,32 +71,46 @@ def patch_file(fname, pattern, repl):
     with open(fname, "w") as f:
         f.write(new_content)
 
-def resource_utilization(name):
-    report_file, = glob.glob(f'**/{name}_csynth.xml', recursive=True)
+def resource_utilization(name, dir = "."):
+    report_file, = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
     root = cET.parse(report_file).getroot()
     area = root.find('AreaEstimates')
 
     ar = { r.tag : int(r.text) for r in area.find('AvailableResources') }
     ur = { r.tag : int(r.text) for r in area.find('Resources') }
     merged = { t : ( ar[t], ur[t] ) for t in ar.keys() }
-    build_logger().info("Resource utilization of %s:\n%s", name, merged)
+
+
+    header = "{:<8} {:>8} {:>8} {:>4}%".format("", "Used", "Avail", "")
+    as_string = "\n".join(
+        [
+            ("{:<8} {:>8} {:>8} {:>4}%".format(k, used, avail, int(used * 100 / avail)))
+            for k, (avail, used)  in merged.items()
+        ]
+    )
+
+    build_logger().info("Resource utilization of %s:\n%s\n%s", name, header, as_string)
 
     return merged
 
-def latency_estimation(name):
-    report_files = glob.glob(f'**/{name}_csynth.xml', recursive=True)
+def latency_estimation(name, dir = "."):
+    report_files = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
     for report_file in report_files:
         root = cET.parse(report_file).getroot()
         latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
         latency = int(latency_node.text)
-        build_logger().info("Average latency of %s: %d (file %s)", name, latency, report_file)
+        build_logger().info("Average latency of %s:\n%d (file %s)", name, latency, report_file)
 
-def log_xtasks_config():
-    config_files = glob.glob(f'**/*xtasks.config', recursive=True) 
+def log_xtasks_config(dir = "."):
+    config_files = glob.glob(f'{dir}/**/*xtasks.config', recursive=True) 
     for config_file in config_files:
         with open (config_file, "r") as f:
             build_logger().info("%s:\n%s", config_file, f.read())
 
+
+def action_report(builddir):
+    resource_utilization("predict_one_block", builddir)
+    latency_estimation("predict_one_block", builddir)
 
 def action_update(builddir):
     if builddir is None:
@@ -193,15 +208,15 @@ def action_build(dir):
 def action_ci(*args):
     return action_build(action_populate(*args))
 
-if __name__ == "__main__":
 
+def do_main():
     import argparse
 
     parser = argparse.ArgumentParser()
 
     srcdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
 
-    parser.add_argument("action", type=str, default = "populate", choices = [ "populate", "build", "update" ], help="Action to perform")
+    parser.add_argument("action", type=str, default = "populate", choices = [ "populate", "build", "update", "report" ], help="Action to perform")
     parser.add_argument("--srcdir", type=str, metavar="DIR", default = srcdir, help="Source directory")
     parser.add_argument("--builddir", type=str, metavar="DIR", default = None, help="Actual build directory")
     parser.add_argument("--basedir", type=str, metavar="DIR", default = None, help="Base of builds directory")
@@ -222,6 +237,11 @@ if __name__ == "__main__":
 
     if args.action == "update":
         action_update(args.builddir)
+        return
+
+    if args.action == "report":
+        action_report(args.builddir)
+        return
 
     if args.builddir is None:
         builddir = action_populate(args.srcdir, args.basedir,
@@ -233,6 +253,5 @@ if __name__ == "__main__":
     if args.do_build or args.action == "build":
         action_build(builddir)
     
-
-
-
+if __name__ == "__main__":
+    do_main()

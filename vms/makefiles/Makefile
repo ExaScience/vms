@@ -73,6 +73,10 @@ clean:
 	$(MAKE) -C fpga-zcu102 cleancommon
 	$(MAKE) -C opencl clean
 
+report:
+	python3 $(SRCDIR)/scripts/build.py --builddir . report
+
 updatelinks:
-	python3 $(SRCDIR)/scripts/build.py update
+	python3 $(SRCDIR)/scripts/build.py  --builddir . update
 	   
+
