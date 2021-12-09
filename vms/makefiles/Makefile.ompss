@@ -14,13 +14,13 @@ run: $(addsuffix .out,$(PROGS_))
 %.out: %
 	$(QEMU_CMD) ./$< >$<.out
 
-$(PROGRAM_)-p: $(DEPS)
+$(PROGRAM_)-p: $(ALLCODE)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)-i: $(DEPS)
+$(PROGRAM_)-i: $(ALLCODE)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
-$(PROGRAM_)-d: $(DEPS)
+$(PROGRAM_)-d: $(ALLCODE)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
 clean: cleancommon

@@ -12,7 +12,7 @@ MCXX_FLAGS_  += -Wno-unused-local-typedefs -Wno-unknown-pragmas
 
 PROGS_   = $(PROGRAM_)
 
-$(PROGRAM_): $(DEPS)
+$(PROGRAM_): $(ALLCODE)
 	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
 run: $(PROGRAM_)

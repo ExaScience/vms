@@ -14,7 +14,7 @@ $(PROGRAM_).out: $(PROGRAM_)
 
 CFLAGS_ += -fsanitize=address -std=c++11 -Wno-unknown-pragmas
 
-$(PROGRAM_): $(DEPS)
+$(PROGRAM_): $(ALLCODE)
 	        $(CXX) $(CFLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
 
 clean: cleancommon
