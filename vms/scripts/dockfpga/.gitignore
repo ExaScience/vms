@@ -1,5 +1,4 @@
-ompss_at_fpga_3.1.2-euroexa
 builddir/ompss_at_fpga.tar.gz
-*tar.gz
 dockfpga
-ompss_at_fpga_2.5.2-euroexa
+*.tar.gz
+ompss_at_fpga_*
