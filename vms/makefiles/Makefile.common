@@ -11,7 +11,7 @@ endif
 
 PROGRAM_ = predict
 SRCFILES = main.cpp $(HOST_IF).cpp
-KERNELFILES = predict.cpp
+KERNELFILES = predict.cpp # only used in with ocl.cpp
 HDRFILES = predict.fpga.h predict_nodf.fpga.h predict.h fxp.h observed_float.h arr.h
 MODELFILES = vms_const.h vms_tb.h
 
