@@ -12,14 +12,23 @@ USER_IDS=( -e BUILDER_UID="$( id -u )" \
 # determine /work directory
 GITROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 
-if getopts "w:" options; then
-    WORK=${OPTARG}
-    shift 2
-elif [[ -n ${GITROOT} ]]; then
+if [[ -n ${GITROOT} ]]; then
     WORK=${GITROOT}
 else
     WORK=$PWD
 fi
+
+while getopts "w:i:" o; do
+    case "${o}" in
+        w)
+            WORK=${OPTARG}
+            ;;
+        i)
+            IMAGE=${OPTARG}
+            ;;
+    esac
+done
+shift $((OPTIND-1))
 
 SUB=$(realpath --relative-to="$WORK" $PWD)
 
