@@ -164,6 +164,7 @@ main (int argc, char **argv)
     int num_compounds = args.num_blocks * block_size;
 
     printf("  dt:    %s\n", VMS_DT_NAME);
+    printf("  filt:  %s\n", VMS_FILTER_PRAGMAS);
     printf("  df:    %s\n", dataflow);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
@@ -171,6 +172,7 @@ main (int argc, char **argv)
     printf("  nsmpl: %d\n", num_samples);
     printf("  blks:  %d\n", block_size);
     printf("  nblks: %d\n", args.num_blocks);
+    printf("  flen:  %d\n", F_vec_len);
     printf("  nrep:  %d\n", args.num_repeat);
     printf("  ncmps: %d\n", num_compounds);
 
