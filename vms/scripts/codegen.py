@@ -68,12 +68,14 @@ def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
-def gen_const(datatype, dataflow, num_proteins, num_features, num_latent, num_samples, block_size, F_vec_len):
+def gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_latent, num_samples, block_size, F_vec_len):
     const_output = "#pragma once\n\n"
 
     const_output += f"#define VMS_DT_{datatype.upper()}\n"
     dataflow_str = "VMS_DATAFLOW" if dataflow else "VMS_NODATAFLOW"
     const_output += f"#define {dataflow_str}\n"
+    patterns = " ".join(patterns)
+    const_output += f"#define VMS_FILTER_PRAGMAS \"{patterns}\"\n"
     const_output += "\n"
 
 
@@ -117,6 +119,9 @@ def gen_session(root, outputdir, config_file):
         F_vec_len = block_size 
     else:
         F_vec_len = 8 
+
+    patterns = config["filter_patterns"].split(",")
+    patterns = list(filter(len, patterns))
 
     # read model
     session = smurff.PredictSession(root)
@@ -177,7 +182,7 @@ def gen_session(root, outputdir, config_file):
     num_samples = len(samples)
     assert num_samples == config.getint("num_samples")
 
-    const_output = gen_const(datatype, dataflow, num_proteins, num_features, num_latent, len(samples), block_size, F_vec_len) + "\n"
+    const_output = gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_latent, len(samples), block_size, F_vec_len) + "\n"
 
     types = {
         8 : "signed char",
@@ -195,8 +200,7 @@ def gen_session(root, outputdir, config_file):
 
     gen_file(outputdir, "const.h", const_output)
 
-    patterns = config["filter_patterns"].split(",")
-    patterns = list(filter(len, patterns))
+
     srcdir = pth.join(config["srcdir"], "cpp")
     filter_files(srcdir, outputdir, patterns)
 
