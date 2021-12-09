@@ -1,3 +1,5 @@
+#pragma once
+
 template <class T, std::size_t N>
 struct arr {
 	T& operator[](std::size_t pos) { return elems[pos]; }
