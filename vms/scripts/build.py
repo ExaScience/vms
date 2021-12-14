@@ -210,11 +210,11 @@ def action_build(dir):
     print("Done ...")
     return True
 
-def action_explore(srcdir, basedir, dataset):
+def full_space():
     space = {
         "num_latent"     : [ 4, 8, 16, 32, ],
         "num_samples"    : [ 4, 8, 16, ],
-        "block_size"     : [ 4096, ],
+        "block_size"     : [ 32, 4096, ],
         "datatype"       : ["float", "fixed", ],
         "dataflow"       : [ True, False ],
         "filter_pragmas" : [ True, False ],
@@ -222,8 +222,26 @@ def action_explore(srcdir, basedir, dataset):
     }
 
     from itertools import product
-    for c in product(*space.values()):
-        kwargs = dict(zip(space.keys(), c))
+    return space.keys(), product(*space.values())
+
+def limited_space():
+    space = {
+        "num_latent"     : [ 4,   4,  4,  4,  4, 32,   32, ],
+        "num_samples"    : [ 4,   4,  4,  4,  4, 16,   16, ],
+        "block_size"     : [ 32, 32, 32, 32, 32, 32, 4096, ],
+        "datatype"       : ["float", "fixed", "fixed", "fixed", "fixed", "fixed", "fixed", ],
+        "filter_pragmas" : [ True, True, False, False, False, False, False, ],
+        "dataflow"       : [ False, False, False, True, True, True, True, ],
+        "disable_bursts" : [ True, True, True, True, False, False, False, ],
+    }
+
+    return space.keys(), zip(*space.values())
+
+def action_explore(srcdir, basedir, dataset, full = False):
+    keys, values = full_space() if full else limited_space()
+    for v in values:
+        assert len(v) == len(keys), f"len({v}) != len({keys})"
+        kwargs = dict(zip(keys, v))
         action_populate(srcdir, basedir, dataset, **kwargs)
 
 
