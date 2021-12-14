@@ -85,7 +85,6 @@ def gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_late
     const_output += gen_int("num_samples",   num_samples)
     const_output += gen_int("block_size",    block_size)
     const_output += gen_int("F_vec_len",     F_vec_len)
-    log_num_samples = num_samples.bit_length() - 1
 
     return const_output
 
