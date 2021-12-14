@@ -106,14 +106,14 @@ def log_xtasks_config(dir = "."):
         with open (config_file, "r") as f:
             build_logger().info("%s:\n%s", config_file, f.read())
 
-
 def action_report(builddir):
     if builddir is None:
         builddir = "."
 
     hlsdir = os.path.join(builddir, "hls")
-    resource_utilization("predict_one_block", hlsdir)
-    latency_estimation("predict_one_block", hlsdir)
+    for func in [ "predict_one_block", "predict_dataflow" ]:
+        resource_utilization(func, hlsdir)
+        latency_estimation(func, hlsdir)
 
 def action_update(builddir):
     if builddir is None:
