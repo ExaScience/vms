@@ -57,6 +57,16 @@ crdb: $(ALLCODE)
 opencl: $(ALLCODE)
 	module load Vitis/2021.1 && $(MAKE) -C opencl
 
+opencl-swemu: $(ALLCODE)
+	module load Vitis/2021.1 && $(MAKE) -C opencl/sw_emu check
+
+opencl-hwemu: $(ALLCODE)
+	module load Vitis/2021.1 && $(MAKE) -C opencl/hw_emu check
+
+opencl-hw: $(ALLCODE)
+	module load Vitis/2021.1 && $(MAKE) -C opencl/hw check
+
+
 ZIPFILE=$(notdir $(realpath  .)).zip
 zip: $(ZIPFILE)
 $(ZIPFILE): crdb
