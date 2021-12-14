@@ -1,7 +1,6 @@
 #include "vms_const.h"
 
 extern int verbose;
-extern const char *dataflow;
 
 const int L_wl = 32;
 const int L_iwl = 12;

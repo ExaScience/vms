@@ -42,8 +42,6 @@ void load_model(const int model_nr, const U_base *u, const M_base *m, const B_ba
 
 #elif defined(VMS_DATAFLOW)
 
-const char *dataflow = "on";
-
 void input_loop(
     hls::stream<F_base> &features_stream,
     const F_base *features)

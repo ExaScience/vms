@@ -1,7 +1,5 @@
 #pragma once
 
-const char *dataflow = "off";
-
 int features_nodf_loop(
     const F_base *features,
     L_type latents[num_samples][num_latent],

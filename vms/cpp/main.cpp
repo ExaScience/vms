@@ -20,6 +20,13 @@ const char *typenames[] = {"U", "mu", "F", "P", "B", "S", "T"};
 std::vector<float> values[ntypes];
 #endif
 
+#ifdef VMS_DATAFLOW
+#define VMS_DATAFLOW_STR "on"
+#else
+#define VMS_DATAFLOW_STR "off"
+#endif
+
+
 int verbose = 0;
 
 double tick() {
@@ -165,7 +172,7 @@ main (int argc, char **argv)
 
     printf("  dt:    %s\n", VMS_DT_NAME);
     printf("  filt:  %s\n", VMS_FILTER_PRAGMAS);
-    printf("  df:    %s\n", dataflow);
+    printf("  df:    %s\n", VMS_DATAFLOW_STR);
     printf("  nprot: %d\n", num_proteins);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
