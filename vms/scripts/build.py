@@ -139,8 +139,8 @@ def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, block_
     logging.info("Populating with: %s", (dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts))
 
     dataflow_str = "df" if dataflow else "nodf"
-    filter_str = "hls" if filter_pragmas else "nohls"
-    bursts_str = "burst" if disable_bursts else "noburst"
+    filter_str = "nohls" if filter_pragmas else "hls"
+    bursts_str = "noburst" if disable_bursts else "burst"
     pragmas_to_filter = [ "pragma HLS" ]
     filter_patterns = ",".join(pragmas_to_filter) if filter_pragmas else ""
     builddir = os.path.join(basedir, "%s_%dl_%ds_%db_%s_%s_%s_%s" % 
