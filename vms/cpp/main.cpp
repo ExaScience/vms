@@ -169,6 +169,9 @@ main (int argc, char **argv)
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
     int num_compounds = args.num_blocks * block_size;
+    int mpi_world_size, mpi_world_rank;
+
+    mpi_init(mpi_world_size, mpi_world_rank);
 
     printf("  dt:    %s\n", VMS_DT_NAME);
     printf("  filt:  %s\n", VMS_FILTER_PRAGMAS);
@@ -182,6 +185,8 @@ main (int argc, char **argv)
     printf("  flen:  %d\n", F_vec_len);
     printf("  nrep:  %d\n", args.num_repeat);
     printf("  ncmps: %d\n", num_compounds);
+    printf("  nproc: %d\n", mpi_world_size);
+    printf("  proc:  %d\n", mpi_world_rank);
 
     P_base(*tb_output_base)[block_size][num_proteins][num_samples];
     F_base(*tb_input_base)[block_size][num_features];
@@ -192,15 +197,21 @@ main (int argc, char **argv)
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
     Model m = prepare_model(U, M, B);
 
-    int nerrors = 0;
+    int blocks_per_rank = args.num_blocks / mpi_world_size;
+    auto &tb_input = tb_input_base + mpi_world_rank * blocks_per_rank;
+    auto &tb_output = tb_output_base + mpi_world_rank * blocks_per_rank;
 
     printf("Predicting\n");
+    int nerrors = 0;
     double start = tick();
     for (int n = 0; n < args.num_repeat; n++)
     {
         printf(" Repeat %d/%d\n", n, args.num_repeat);
-        predict_compounds(args.num_blocks, tb_input_base, tb_output_base, m);
+        predict_compounds(blocks_per_rank, tb_input, tb_output, m);
     }
+
+    mpi_res
+
     double stop = tick();
     if (args.check)
         nerrors += check_result(num_compounds, tb_output_base, tb_ref);
@@ -231,6 +242,8 @@ main (int argc, char **argv)
     
     free(tb_output_base);
     free(tb_input_base);
+
+    mpi_finit();
 
     return nerrors;
 }
