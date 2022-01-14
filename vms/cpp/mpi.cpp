@@ -2,8 +2,9 @@
 
 #ifdef USE_MPI
 
+#include <cassert>
+#include <cstdio>
 #include <mpi.h>
-#include <stdio.h>
 
 #include "predict.h"
 
