@@ -183,11 +183,11 @@ def action_build(dir):
         build_logger().info("Building %s", dir)
 
         execute("make model")
-        execute("make", modules=["Vitis/2020.1"], workdir="native")
+        execute("make", modules=["Vitis/2020.2"], workdir="native")
         execute("make", modules=["GCC/7.3.0" ,"ompss/19.06"], workdir="smp-x86")
         execute(f"dockfpga -w {absdir} make", workdir="smp-arm64")
 
-        execute("make hls", modules = ["Vitis/2020.1"])
+        execute("make hls", modules = ["Vitis/2020.2"])
         resource_utilization("predict_one_block")
         latency_estimation("predict_one_compound")
 

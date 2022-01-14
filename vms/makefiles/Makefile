@@ -31,7 +31,7 @@ $(ALLCODE): $(ROOTFILE) $(ORIGINALSRCFILES) $(SRCDIR)/scripts/codegen.py config.
 model: $(FULLMODELFILES)
 
 native: $(ALLCODE)
-	module load Vitis/2020.1 && cd native && $(MAKE)
+	module load Vitis/2020.2 && cd native && $(MAKE)
 
 ompss-smp-x86: $(ALLCODE)
 	cd smp-x86 && dockfpga -i bscpm/ompss -w $(BUILDDIR) $(MAKE)
@@ -46,7 +46,7 @@ ompss-2-cluster: $(ALLCODE)
 		make
 
 hls: $(ALLCODE)
-	module load Vitis/2020.1 && cd hls && $(MAKE)
+	module load Vitis/2021.2 && cd hls && $(MAKE)
 
 zcu102: $(ALLCODE)
 	cd fpga-zcu102 && dockfpga -w $(BUILDDIR) $(MAKE)
@@ -55,16 +55,16 @@ crdb: $(ALLCODE)
 	cd fpga-crdb && dockfpga -w $(BUILDDIR) $(MAKE)
 
 opencl: $(ALLCODE)
-	module load Vitis/2021.1 && $(MAKE) -C opencl
+	module load Vitis/2021.2 && $(MAKE) -C opencl
 
 opencl-swemu: $(ALLCODE)
-	module load Vitis/2021.1 && $(MAKE) -C opencl/sw_emu check
+	module load Vitis/2021.2 && $(MAKE) -C opencl/sw_emu check
 
 opencl-hwemu: $(ALLCODE)
-	module load Vitis/2021.1 && $(MAKE) -C opencl/hw_emu check
+	module load Vitis/2021.2 && $(MAKE) -C opencl/hw_emu check
 
 opencl-hw: $(ALLCODE)
-	module load Vitis/2021.1 && $(MAKE) -C opencl/hw check
+	module load Vitis/2021.2 && $(MAKE) -C opencl/hw check
 
 
 ZIPFILE=$(notdir $(realpath  .)).zip
