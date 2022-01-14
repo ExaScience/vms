@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include <hls_stream.h>
+#include "stream.h"
 #include "arr.h"
 #include "predict.h"
 
