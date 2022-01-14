@@ -183,6 +183,8 @@ main (int argc, char **argv)
 
     mpi_init(mpi_world_size, mpi_world_rank);
 
+    assert(args.num_blocks % mpi_world_size == 0);
+
     printf("  dt:    %s\n", VMS_DT_NAME);
     printf("  filt:  %s\n", VMS_FILTER_PRAGMAS);
     printf("  df:    %s\n", VMS_DATAFLOW_STR);
@@ -225,7 +227,7 @@ main (int argc, char **argv)
     mpi_combine_results(args.num_blocks, tb_output_base);
 
     double stop = tick();
-    if (args.check)
+    if (args.check && mpi_world_rank == 0)
         nerrors += check_result(num_compounds, tb_output_base, tb_ref);
     else
         printf( "Error checking skipped\n");
