@@ -90,9 +90,29 @@ struct CLData
 
     CLData(
         const char *function_name,
+        const char *filename,
+        const char *emulation_mode
+    ) : function_name(function_name)
+    {
+        auto fileBuf = xcl::read_binary_file(filename);
+        init(fileBuf.data(), fileBuf.size(), emulation_mode);
+    }
+
+    CLData(
+        const char *function_name,
         const unsigned char * xclbin, unsigned int xclbin_len,
         const char *emulation_mode
     ) : function_name(function_name)
+    {
+        init(xclbin, xclbin_len, emulation_mode);
+    }
+
+
+    void init(
+        const unsigned char *xclbin,
+        unsigned int xclbin_len,
+        const char *emulation_mode
+    ) 
     {
         if (std::string(emulation_mode) != "hw")
         {
@@ -205,10 +225,16 @@ void Kernel::finish()
         cl::Event::waitForEvents(e.outputWait);
 }
 
-extern unsigned char KERNEL_VAR[];
-extern unsigned int KERNEL_VAR_LEN;
+#ifdef KERNEL_VAR
+
+extern "C" unsigned char KERNEL_VAR[];
+extern "C" unsigned int KERNEL_VAR_LEN;
 
 CLData cl_data("predict_one_block", KERNEL_VAR, (std::uint64_t)&KERNEL_VAR_LEN, EMULATION_MODE);
+#else
+
+CLData cl_data("predict_one_block", KERNEL_FILENAME, EMULATION_MODE);
+#endif
 
 void predict_compounds(
                int num_blocks,
@@ -231,3 +257,5 @@ void predict_compounds(
 
     cl_data.finish();
 }
+
+#include "xcl2.cpp"
