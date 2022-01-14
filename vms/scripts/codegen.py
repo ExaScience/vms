@@ -120,7 +120,7 @@ def gen_session(root, outputdir, config_file):
         F_vec_len = 8 
 
     patterns = config["filter_patterns"].split(",")
-    patterns = list(filter(len, patterns))
+    patterns = list(filter(len, patterns)) # remove empty patterns
 
     # read model
     session = smurff.PredictSession(root)
@@ -199,9 +199,9 @@ def gen_session(root, outputdir, config_file):
 
     gen_file(outputdir, "const.h", const_output)
 
-
-    srcdir = pth.join(config["srcdir"], "cpp")
-    filter_files(srcdir, outputdir, patterns)
+    if patterns:
+        srcdir = pth.join(config["srcdir"], "cpp")
+        filter_files(srcdir, outputdir, patterns)
 
 
 parser = argparse.ArgumentParser(description='Generate SMURFF HLS inferencer C-code')

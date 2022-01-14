@@ -24,7 +24,7 @@ $(ROOTFILE): $(INPUT_DATA) $(OPTIONS)
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 		OMP_NUM_THREADS=1 smurff --ini $(OPTIONS) --num-latent $(NUM_LATENT) --nsamples $(NUM_SAMPLES) --save-prefix model
 
-$(ALLCODE): $(ROOTFILE) $(ORIGINALSRCFILES) $(SRCDIR)/scripts/codegen.py config.mk
+$(GENERATED_CODE): $(ROOTFILE) $(ORIGINALSRCFILES) $(SRCDIR)/scripts/codegen.py config.mk
 	source $(CONDA_BIN)/activate smurff-0.14 && \
 	    python3 $(SRCDIR)/scripts/codegen.py --root $(ROOTFILE) --output code
 
@@ -82,7 +82,7 @@ clean:
 	$(MAKE) -C fpga-zcu102 cleancommon
 	$(MAKE) -C opencl clean
 
-report: hls
+report: hls opencl-hwemu
 	python3 $(SRCDIR)/scripts/build.py --builddir . report
 
 updatelinks:

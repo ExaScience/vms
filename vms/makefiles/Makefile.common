@@ -11,39 +11,42 @@ endif
 
 PROGRAM_ = predict
 SRCFILES = main.cpp $(HOST_IF).cpp
-KERNELFILES = predict.cpp # only used in with ocl.cpp
-HDRFILES = predict.fpga.h predict_nodf.fpga.h predict.h fxp.h observed_float.h arr.h
+HOSTFILES = ocl.cpp ompss.cpp hls.cpp
+KERNELFILES = predict.cpp xcl2.cpp # only used in with ocl.cpp
+HDRFILES = predict.fpga.h predict_nodf.fpga.h predict.h fxp.h observed_float.h arr.h stream.h
 MODELFILES = vms_const.h vms_tb.h
 
 LOCALFILES = $(MODELFILES) $(SRCFILES) $(HDRFILES) 
 
 CPPDIR = $(SRCDIR)/cpp
-ORIGINALSRCFILES = $(addprefix $(CPPDIR)/,$(HDRFILES) $(SRCFILES) $(KERNELFILES)) 
 
 MODELDIR = $(TOPDIR)/code
-FULLSRCFILES  = $(addprefix $(MODELDIR)/,$(SRCFILES))
-FULLKERNELFILES  = $(addprefix $(MODELDIR)/,$(KERNELFILES))
-FULLHDRFILES  = $(addprefix $(MODELDIR)/,$(HDRFILES))
 FULLMODELFILES = $(addprefix $(MODELDIR)/,$(MODELFILES))
+
+ifeq ($(FILTER_PATTERNS),)
+	LOCALSRCDIR = $(CPPDIR)
+	ORIGINALSRCFILES = 
+else
+	LOCALSRCDIR = $(MODELDIR)
+	ORIGINALSRCFILES = $(addprefix $(CPPDIR)/,$(HDRFILES) $(SRCFILES) $(KERNELFILES)) 
+endif
+
+FULLSRCFILES     = $(addprefix $(LOCALSRCDIR)/,$(SRCFILES))
+FULLKERNELFILES  = $(addprefix $(LOCALSRCDIR)/,$(KERNELFILES))
+FULLHDRFILES      = $(addprefix $(LOCALSRCDIR)/,$(HDRFILES))
+
 ALLCODE = $(FULLMODELFILES) $(FULLSRCFILES) $(FULLHDRFILES)
+
+ifeq ($(FILTER_PATTERNS),)
+	GENERATED_CODE = $(FULLMODELFILES)
+else
+	GENERATED_CODE = $(ALLCODE)
+endif
 
 OBJFILES := ${SRCFILES:.cpp=.o} 
 
 CFLAGS_      = $(CFLAGS) -Wall -Wno-shift-count-negative -O3 -g -I$(CPPDIR) -I$(MODELDIR) -I$(XILINX_VIVADO)/include
 LDFLAGS_     = $(LDFLAGS)
-
-ifeq ($(XILINX_VIVADO),)
-#Homebrew sc_fixed<>
-SYSTEMCROOT=/usr/local/opt/systemc
-else
-# Vivado Xilinx sc_fixed<>
-SYSTEMCROOT=$(XILINX_VIVADO)/lnx64/tools/systemc
-SYSTEMCROOT=$(XILINX_VIVADO)
-CXX=$(XILINX_VIVADO)/lnx64/tools/clang-3.9/bin/clang++
-endif
-
-SC_CXXFLAGS=-I$(SYSTEMCROOT)/include
-SC_LDFLAGS=-L$(SYSTEMCROOT)/lib -lsystemc
 
 .PHONY: clean cleancommon
 
