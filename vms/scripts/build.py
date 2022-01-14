@@ -9,6 +9,7 @@ import subprocess
 import logging
 import datetime
 import xml.etree.cElementTree as cET
+import csv
 from configparser import ConfigParser
 
 LOGFORMAT = '%(asctime)s - %(process)d - %(levelname)s - %(message)s'
@@ -71,34 +72,36 @@ def patch_file(fname, pattern, repl):
     with open(fname, "w") as f:
         f.write(new_content)
 
-def resource_utilization(name, dir = "."):
-    report_file, *_ = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
-    root = cET.parse(report_file).getroot()
-    area = root.find('AreaEstimates')
+def resource_utilization(dir = "."):
+    report_files = glob.glob(f'{dir}/**/*_csynth.xml', recursive=True)
+    for report_file in report_files:
+        root = cET.parse(report_file).getroot()
+        area = root.find('AreaEstimates')
 
-    ar = { r.tag : int(r.text) for r in area.find('AvailableResources') }
-    ur = { r.tag : int(r.text) for r in area.find('Resources') }
-    merged = { t : ( ar[t], ur[t] ) for t in ar.keys() }
+        ar = { r.tag : int(r.text) for r in area.find('AvailableResources') }
+        ur = { r.tag : int(r.text) for r in area.find('Resources') }
+        merged = { t : ( ar[t], ur[t] ) for t in ar.keys() }
 
 
-    header = "{:<8} {:>8} {:>8} {:>7}%".format("", "Used", "Avail", "")
-    as_string = "\n".join(
-        [
-            ("{:<8} {:>8} {:>8} {:>8.2%}".format(k, used, avail, used / avail))
-            for k, (avail, used)  in merged.items()
-        ]
-    )
+        header = "{:<8} {:>8} {:>8} {:>7}%".format("", "Used", "Avail", "")
+        as_string = "\n".join(
+            [
+                ("{:<8} {:>8} {:>8} {:>8.2%}".format(k, used, avail, used / avail))
+                for k, (avail, used)  in merged.items()
+            ]
+        )
 
-    build_logger().info("Resource utilization of %s:\n%s\n%s", name, header, as_string)
+        build_logger().info("Resource utilization of %s:\n%s\n%s", report_file, header, as_string)
 
     return merged
 
-def latency_estimation(name, dir = "."):
-    report_file, *_ = glob.glob(f'{dir}/**/{name}_csynth.xml', recursive=True)
-    root = cET.parse(report_file).getroot()
-    latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
-    latency = int(latency_node.text)
-    build_logger().info("Average latency of %s:\n%d (file %s)", name, latency, report_file)
+def latency_estimation(dir = "."):
+    report_files = glob.glob(f'{dir}/**/*_csynth.xml', recursive=True)
+    for report_file in report_files:
+        root = cET.parse(report_file).getroot()
+        latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
+        latency = int(latency_node.text)
+        build_logger().info("Average latency of %s:\n%d", report_file, latency)
 
 def log_xtasks_config(dir = "."):
     config_files = glob.glob(f'{dir}/**/*xtasks.config', recursive=True) 
@@ -106,14 +109,40 @@ def log_xtasks_config(dir = "."):
         with open (config_file, "r") as f:
             build_logger().info("%s:\n%s", config_file, f.read())
 
+def read_summary_csv(filename):
+    current_section = None
+    current_data = []
+    opencl_summary_data = dict()
+    with open(filename) as f:
+        csvreader = csv.reader(f)
+        for row in csvreader:
+            if current_section is None and len(row) == 1:
+                current_section = row[0]
+            elif len(row) == 0 and current_section is not None:
+                opencl_summary_data[current_section] = current_data
+                current_section = None
+                current_data = []
+            else:
+                current_data.append(row)
+
+    return opencl_summary_data
+
+def to_table(list_of_lists):
+    row_format = "{:>20}" * len(list_of_lists[0])
+    return "\n".join([ row_format.format(*row) for row in list_of_lists ])
+
 def action_report(builddir):
     if builddir is None:
         builddir = "."
 
     hlsdir = os.path.join(builddir, "hls")
-    for func in [ "predict_one_block", "predict_dataflow" ]:
-        resource_utilization(func, hlsdir)
-        latency_estimation(func, hlsdir)
+    resource_utilization(hlsdir)
+    latency_estimation(hlsdir)
+
+    opencl_summary_file = os.path.join(builddir, "opencl/hw_emu/opencl_summary.csv")
+    opencl_summary = read_summary_csv(opencl_summary_file)
+    kernel_exec = opencl_summary["Kernel Execution (includes estimated device time)"]
+    build_logger().info("Kernel executions:\n" + to_table(kernel_exec))
 
 def action_update(builddir):
     if builddir is None:
