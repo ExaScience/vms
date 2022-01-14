@@ -1,4 +1,4 @@
-.PHONY: help
+.PHONY += help check
 
 DEVICE := xilinx_u200_gen3x16_xdma_1_202110_1
 KERNEL_NAME := predict_one_block
@@ -66,7 +66,9 @@ xrt.ini: ../xrt.ini
 emconfig.json:
 	emconfigutil --platform $(DEVICE) --od .
 
-check: emconfig.json xrt.ini $(EXECUTABLE) 
+check: opencl_summary.csv
+
+opencl_summary.csv: emconfig.json xrt.ini $(EXECUTABLE) 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 else
