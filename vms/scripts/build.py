@@ -164,16 +164,17 @@ def action_update(builddir):
     return builddir            
 
 
-def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts):
-    logging.info("Populating with: %s", (dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts))
+def action_populate(sourcedir, basedir, dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts, enable_mpi):
+    logging.info("Populating with: %s", (dataset, num_latent, num_samples, block_size, datatype, dataflow, filter_pragmas, disable_bursts, enable_mpi))
 
     dataflow_str = "df" if dataflow else "nodf"
     filter_str = "nohls" if filter_pragmas else "hls"
-    bursts_str = "noburst" if disable_bursts else "burst"
+    bursts_str = "nobursts" if disable_bursts else "bursts"
+    mpi_str = "_mpi" if enable_mpi else ""
     pragmas_to_filter = [ "pragma HLS" ]
     filter_patterns = ",".join(pragmas_to_filter) if filter_pragmas else ""
-    builddir = os.path.join(basedir, "%s_%dl_%ds_%db_%s_%s_%s_%s" % 
-        (dataset, num_latent, num_samples, block_size, datatype, dataflow_str, filter_str, bursts_str))
+    builddir = os.path.join(basedir, "%s_%dl_%ds_%db_%s_%s_%s_%s%s" % 
+        (dataset, num_latent, num_samples, block_size, datatype, dataflow_str, filter_str, bursts_str, mpi_str))
 
     if os.path.isdir(builddir):
         logging.warning("Not populating %s: already exists", builddir)
@@ -197,7 +198,8 @@ BLOCK_SIZE = {block_size}
 DATATYPE = {datatype}
 DATAFLOW = {int(dataflow)}
 FILTER_PATTERNS = {filter_patterns}
-DISABLE_BURSTS = {disable_bursts}
+DISABLE_BURSTS = {int(disable_bursts)}
+USE_MPI = {int(enable_mpi)}
 """)
 
     logging.info("Populated %s", builddir)
@@ -291,7 +293,9 @@ def do_main():
     parser.add_argument("--datatype", type=str, default="fixed", choices=["float", "fixed", "half", "mixed"], help="Internal data-type")
     parser.add_argument("--no-dataflow", default=False, action="store_true", help="Disable HLS DATAFLOW")
     parser.add_argument("--no-pragmas", default=False, action="store_true", help="Disable HLS PRAGMAS")
-    parser.add_argument("--no-burst", default=False, action="store_true", help="Disable burst reads")
+    parser.add_argument("--no-bursts", default=False, action="store_true", help="Disable bursts reads")
+
+    parser.add_argument("--enable-mpi", default=False, action="store_true", help="Enable the use of MPI")
 
     parser.add_argument("--num-latent", type=int, default=4, help="Number of latent dimensions")
     parser.add_argument("--num-samples", type=int, default=4, help="Number of samples to collect")
@@ -319,7 +323,8 @@ def do_main():
     if args.builddir is None:
         builddir = action_populate(args.srcdir, args.basedir,
                     args.dataset, args.num_latent, args.num_samples, args.block_size,
-                    args.datatype, not args.no_dataflow, args.no_pragmas, args.no_bursts)
+                    args.datatype, not args.no_dataflow, args.no_pragmas, args.no_bursts,
+                    args.enable_mpi)
     else:
         builddir = args.builddir
 

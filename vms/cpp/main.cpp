@@ -45,6 +45,15 @@ void prepare_tb_input(
             out[c/block_size][c%block_size][p] = F_base(F_type(in [c%tb_num_compounds][p]));
 }
 
+void prepare_tb_output(
+    int num_compounds,
+    P_base out[][block_size][num_proteins][num_samples])
+{
+    for (int c = 0; c < num_compounds; c++)
+        for (int p = 0; p < num_proteins; p++)
+            for (int s = 0; s < num_samples; s++)
+                out[c/block_size][c%block_size][p][s] = 0;
+}
 
 Model prepare_model(
     const float U_in[num_samples][num_proteins][num_latent],
@@ -103,7 +112,8 @@ int check_result(
             }
             else
             {
-                printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
+                if (nerrors <= 10) printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
+                if (nerrors == 10) printf("too many errors - stopping printing\n");
                 nerrors++;
             }
         }
@@ -195,11 +205,13 @@ main (int argc, char **argv)
     posix_memalign((void **)&tb_input_base, 4096, num_compounds * num_features * sizeof(F_base));
 
     prepare_tb_input(num_compounds, tb_input, tb_input_base);
+    prepare_tb_output(num_compounds, tb_output_base);
     Model m = prepare_model(U, M, B);
 
+    // determine what blocks this rank should process, update pointer to input and output
     int blocks_per_rank = args.num_blocks / mpi_world_size;
-    auto &tb_input = tb_input_base + mpi_world_rank * blocks_per_rank;
-    auto &tb_output = tb_output_base + mpi_world_rank * blocks_per_rank;
+    auto tb_input = &tb_input_base[mpi_world_rank * blocks_per_rank];
+    auto tb_output = &tb_output_base[mpi_world_rank * blocks_per_rank];
 
     printf("Predicting\n");
     int nerrors = 0;
@@ -210,7 +222,7 @@ main (int argc, char **argv)
         predict_compounds(blocks_per_rank, tb_input, tb_output, m);
     }
 
-    mpi_res
+    mpi_combine_results(args.num_blocks, tb_output_base);
 
     double stop = tick();
     if (args.check)

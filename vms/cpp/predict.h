@@ -142,3 +142,7 @@ void predict_compounds(
     const F_blks features,
     P_blks predictions,
     const Model &m);
+
+void mpi_init(int &mpi_world_size, int &mpi_world_rank);
+void mpi_finit();
+void mpi_combine_results(int num_blocks, P_blks predictions);
