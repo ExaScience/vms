@@ -183,6 +183,7 @@ main (int argc, char **argv)
 
     mpi_init(mpi_world_size, mpi_world_rank);
 
+    assert(mpi_world_size > 0);
     assert(args.num_blocks % mpi_world_size == 0);
 
     printf("  dt:    %s\n", VMS_DT_NAME);
