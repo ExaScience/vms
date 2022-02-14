@@ -51,6 +51,8 @@ static void proteins_loop(
 	} // end proteins
 }
 
+int block_size = 1000;
+
 void predict_compounds(
 		int num_compounds, 
 		const F_flx features,
@@ -59,13 +61,16 @@ void predict_compounds(
 		const M_arr M,
 		const B_arr B)
 {
-	for (int i=0; i<num_compounds; ++i)
 
-#pragma oss task in(features[i]) in(U) in(M) in(B) out(predictions[i]) firstprivate(i) 
+	for (int i=0; i<num_compounds; i+=block_size)
     {
-        L_base latents[num_samples][num_latent];
-        features_loop(features[i], latents, M, B);
-        proteins_loop(predictions[i], latents, U);
+#pragma oss task in(features[i;block_size]) in(U) in(M) in(B) out(predictions[i;block_size])
+		for(int j=i; j<i+block_size; j++)
+		{
+			L_base latents[num_samples][num_latent];
+			features_loop(features[j], latents, M, B);
+			proteins_loop(predictions[j], latents, U);
+		}
 	}
 
 #pragma oss taskwait

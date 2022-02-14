@@ -2,6 +2,8 @@
 
 #include "vms_const.h"
 
+extern int block_size;
+
 #define DT_NAME "float"
 
 typedef float U_base;

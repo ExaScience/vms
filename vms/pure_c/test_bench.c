@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
     {
         num_compounds = atoi(argv[2]);
     }
+
+    if (num_compounds % block_size)
+        num_compounds = ((num_compounds / block_size) + 1) * block_size;
    
     P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])malloc(sizeof(P_base) * num_compounds * num_proteins);
     F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])malloc(sizeof(F_base) * num_compounds * num_features); 
