@@ -98,8 +98,8 @@ int main(int argc, char *argv[])
     if (num_compounds % block_size)
         num_compounds = ((num_compounds / block_size) + 1) * block_size;
    
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features); 
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features); 
 
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
