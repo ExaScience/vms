@@ -19,7 +19,6 @@ static void features_loop(
 
 		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
-			#pragma omp simd
 			for (int k = 0; k < num_latent; k++)
 			{
 				L_type  v;
@@ -41,7 +40,6 @@ static void proteins_loop(
 	{
 		S_type sum = .0F;
 		for (int s = 0; s < num_samples; s++)
-			#pragma omp simd
 			for (int k = 0; k < num_latent; k++)
 			{
 				S_type prod = latents[s][k] * U[s][d][k];
@@ -61,12 +59,14 @@ void predict_compounds(
 		const M_arr M,
 		const B_arr B)
 {
-#pragma omp parallel for schedule(guided)
 	for (int i=0; i<num_compounds; ++i)
-#pragma oss task in(features[i]) in(U) in(M) in(B) out(predictions[i]) firstprivate(i) \
+
+#pragma oss task in(features[i]) in(U) in(M) in(B) out(predictions[i]) firstprivate(i) 
     {
         L_base latents[num_samples][num_latent];
         features_loop(features[i], latents, M, B);
         proteins_loop(predictions[i], latents, U);
 	}
+
+#pragma oss taskwait
 } // end function
