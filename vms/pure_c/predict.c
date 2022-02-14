@@ -1,4 +1,10 @@
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 #include "predict.h"
+
 
 static void features_loop(
         const F_base features[num_features],
@@ -63,6 +69,3 @@ void predict_compounds(
         proteins_loop(predictions[i], latents, U);
 	}
 } // end function
-
-
-

@@ -1,6 +1,6 @@
-#include "vms_const.h"
+#pragma once
 
-#define block_size 1000
+#include "vms_const.h"
 
 #define DT_NAME "float"
 
@@ -35,3 +35,10 @@ void predict_compounds(
 		const U_arr U,
 		const M_arr M,
 		const B_arr B);
+
+extern int mpi_world_size;
+extern int mpi_world_rank;
+
+void mpi_init(); 
+void mpi_finit();
+void mpi_combine_results(int, P_flx);
