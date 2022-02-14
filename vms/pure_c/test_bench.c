@@ -2,6 +2,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "predict.h"
 #include "vms_tb.h"
@@ -38,6 +39,18 @@ void prepare_tb_output(
         for (int p = 0; p < num_proteins; p++)
             out[c][p] = 0;
 }
+
+struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
+{
+    struct Model *m = lmalloc(sizeof(struct Model));
+    memcpy(&m->U, U, sizeof(m->U));
+    memcpy(&m->M, M, sizeof(m->M));
+    memcpy(&m->B, B, sizeof(m->B));
+
+    return m;
+}
+
+
 
 int check_result(
     int num_compounds,
@@ -85,8 +98,8 @@ int main(int argc, char *argv[])
     if (num_compounds % block_size)
         num_compounds = ((num_compounds / block_size) + 1) * block_size;
    
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])malloc(sizeof(P_base) * num_compounds * num_proteins);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])malloc(sizeof(F_base) * num_compounds * num_features); 
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features); 
 
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
@@ -100,6 +113,9 @@ int main(int argc, char *argv[])
 
     printf("Prepare input\n");
     prepare_tb_input(num_compounds, tb_input, tb_input_block);
+
+    printf("Prepare model\n");
+    struct Model *m = prepare_model(U, M, B);
 
     size_t ncomp_per_rank = num_compounds / mpi_world_size;
     size_t block_start = ncomp_per_rank * mpi_world_rank;
@@ -118,7 +134,7 @@ int main(int argc, char *argv[])
     for(int n=0; n<num_repeat; n++)
     {
         prepare_tb_output(num_compounds, tb_output_block);
-        predict_compounds(ncomp_per_rank, &tb_input_block[block_start], &tb_output_block[block_start], U, M, B);
+        predict_compounds(ncomp_per_rank, &tb_input_block[block_start], &tb_output_block[block_start], m);
         mpi_combine_results(num_compounds, tb_output_block);
     }
 

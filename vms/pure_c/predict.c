@@ -15,8 +15,6 @@ static void features_loop(
 {
 	for (int d = 0; d < num_features; d++)
 	{
-
-
 		const F_type feature = features[d];
 		for (int s = 0; s < num_samples; s++)
 			for (int k = 0; k < num_latent; k++)
@@ -57,19 +55,17 @@ void predict_compounds(
 		int num_compounds, 
 		const F_flx features,
 		      P_flx predictions,
-		const U_arr U,
-		const M_arr M,
-		const B_arr B)
+		const struct Model *m)
 {
 
 	for (int i=0; i<num_compounds; i+=block_size)
     {
-#pragma oss task in(features[i;block_size]) in(U) in(M) in(B) out(predictions[i;block_size])
+#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
 		for(int j=i; j<i+block_size; j++)
 		{
 			L_base latents[num_samples][num_latent];
-			features_loop(features[j], latents, M, B);
-			proteins_loop(predictions[j], latents, U);
+			features_loop(features[j], latents, m->M, m->B);
+			proteins_loop(predictions[j], latents, m->U);
 		}
 	}
 

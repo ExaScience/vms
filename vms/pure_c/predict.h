@@ -30,17 +30,26 @@ typedef U_base U_arr[num_samples][num_proteins][num_latent];
 typedef M_base M_arr[num_samples][num_latent];
 typedef B_base B_arr[num_samples][num_features][num_latent];
 
+struct Model {
+	U_arr U;
+	M_arr M;
+	B_arr B;
+};
+
 void predict_compounds(
 		int num_compounds, 
 		const F_flx features,
 		      P_flx predictions,
-		const U_arr U,
-		const M_arr M,
-		const B_arr B);
+		const struct Model *m);
 
+/* MPI functions and variables */
 extern int mpi_world_size;
 extern int mpi_world_rank;
 
 void mpi_init(); 
 void mpi_finit();
 void mpi_combine_results(int, P_flx);
+
+/* OmpSS-2 */
+void *lmalloc(unsigned long size);
+void *dmalloc(unsigned long size);
