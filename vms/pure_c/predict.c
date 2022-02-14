@@ -62,7 +62,8 @@ void predict_compounds(
 		const B_arr B)
 {
 #pragma omp parallel for schedule(guided)
-    for (int i=0; i<num_compounds; ++i)
+	for (int i=0; i<num_compounds; ++i)
+#pragma oss task in(features[i]) in(U) in(M) in(B) out(predictions[i]) firstprivate(i) \
     {
         L_base latents[num_samples][num_latent];
         features_loop(features[i], latents, M, B);

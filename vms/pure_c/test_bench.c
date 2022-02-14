@@ -119,8 +119,6 @@ int main(int argc, char *argv[])
         mpi_combine_results(num_compounds, tb_output_block);
     }
 
-
-
     double stop = tick();
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);
     double elapsed = stop-start;
