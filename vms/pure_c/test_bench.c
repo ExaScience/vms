@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
         num_compounds = atoi(argv[2]);
     }
 
+    /* round up to the nearest multiple of blocksize */
     if (num_compounds % block_size)
         num_compounds = ((num_compounds / block_size) + 1) * block_size;
    
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
     printf("  ncmpd: %d\n", num_compounds);
+    printf("  blks:  %d\n", block_size);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
