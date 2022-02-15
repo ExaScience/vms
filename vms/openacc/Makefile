@@ -11,9 +11,10 @@ DEPS = $(HDRFILES) $(MODELFILES) Makefile
 
 PGCC = pgimcc
 CCFLAGS += -g
-CCFLAGS += --openacc --ompss-2
+CCFLAGS += --openacc --ompss-2 -O3
 # CCFLAGS += -fast -Minfo=accel -ta=tesla
-CCFLAGS += -DBLOCK_SIZE=1000
+CCFLAGS += -DBLOCK_SIZE=10000
+CCFLAGS += -DOMPSS_OPENACC
 
 run: $(PROGRAM)
 	./$(PROGRAM) $(ARGS)
