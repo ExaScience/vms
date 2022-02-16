@@ -92,6 +92,8 @@ void *gaspi_malloc(int seg, size_t size)
 
 void mpi_send_compound(int compound, P_flx data)
 {
+    if (mpi_world_rank == 0) return;
+
     int offset = compound * num_proteins * sizeof(P_base);
     int size = num_proteins * sizeof(P_base);
     SUCCESS_OR_RETRY(gaspi_write(predictions_seg, offset, 0, predictions_seg, offset, size, 0, GASPI_BLOCK));
