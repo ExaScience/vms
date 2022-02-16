@@ -29,6 +29,12 @@ void mpi_combine_results(int num_compounds, P_flx data)
 {
     MPI_Allreduce(MPI_IN_PLACE, data, num_compounds * num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
 }
+
+
+void mpi_barrier() {
+    MPI_Barrier(MPI_COMM_WORLD);
+}
+
 #elif defined(USE_GPI)
 
 #include <stdlib.h>
@@ -120,7 +126,26 @@ void mpi_combine_results(int num_compounds, P_flx data)
 {
     UNUSED(num_compounds);
     UNUSED(data);
-    gaspi_barrier(GASPI_GROUP_ALL,GASPI_BLOCK);
+    if (mpi_world_rank != 0)
+    {
+        SUCCESS_OR_RETRY(gaspi_notify(predictions_seg, 0, mpi_world_rank, 1, 0, GASPI_BLOCK));
+        printf("%d: Sent notification with id %d and value %d\n", mpi_world_rank, mpi_world_rank, 1);
+    }
+    else
+    {
+        for (int k = 1; k < mpi_world_size; k++)
+        {
+            gaspi_notification_id_t id;
+            gaspi_notification_t val = 0;
+            SUCCESS_OR_DIE(gaspi_notify_waitsome(predictions_seg, 1, mpi_world_size-1, &id, GASPI_BLOCK));
+            SUCCESS_OR_DIE(gaspi_notify_reset(predictions_seg, id, &val));
+            printf("%d: Collected %d-th notification with id %d and value %d\n", mpi_world_rank, k, id, val);
+        }
+    }
+}
+
+void mpi_barrier() {
+    gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 }
 
 #else
@@ -129,7 +154,10 @@ void mpi_init() {
     mpi_world_size = 1;
     mpi_world_rank = 0;
 }
+
 void mpi_finit() {}
+
+void mpi_barrier() {}
 
 void mpi_send_compound(int compound, P_flx data) {}
 void mpi_combine_results(int num_compounds,  P_flx predictions) {}
