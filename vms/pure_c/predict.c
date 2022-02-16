@@ -66,6 +66,7 @@ void predict_compounds(
 			L_base latents[num_samples][num_latent];
 			features_loop(features[j], latents, m->M, m->B);
 			proteins_loop(predictions[j], latents, m->U);
+			mpi_send_compound(j, predictions);
 		}
 	}
 
