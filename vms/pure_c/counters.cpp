@@ -1,3 +1,12 @@
+#include <time.h>
+
+
+extern "C" double tick() {
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return  (double)(t.tv_sec) + (double)(t.tv_nsec) / 1e9;
+}
+
 #ifdef VMS_PROFILING
 
 #include <iostream>
@@ -9,11 +18,7 @@
 
 #include "counters.h"
 
-double tick() {
-    struct timespec t;
-    clock_gettime(CLOCK_REALTIME, &t);
-    return  (double)(t.tv_sec) + (double)(t.tv_nsec) / 1e9;
-}
+
 
 struct Counter {
     Counter *parent;
@@ -159,32 +164,40 @@ void TotalsCounter::print(bool hier) const {
     }
 }
 
-
-void perf_data_init()
+extern "C"
 {
-}
+    void perf_data_init()
+    {
+    }
 
-void perf_data_print() {
-    perf_data_print(hier_perf_data, true);
-    perf_data_print(flat_perf_data, false);
-}
+    void perf_data_print()
+    {
+        perf_data_print(hier_perf_data, true);
+        perf_data_print(flat_perf_data, false);
+    }
 
-void perf_start(const char *name) {
-    active_counter = new Counter(name);
-}
+    void perf_start(const char *name)
+    {
+        active_counter = new Counter(name);
+    }
 
-void perf_end() {
-    Counter *parent = active_counter->parent;
-    delete active_counter;
-    active_counter = parent;
+    void perf_end()
+    {
+        Counter *parent = active_counter->parent;
+        delete active_counter;
+        active_counter = parent;
+    }
 }
-
 
 #else
 
-void perf_data_init() {}
-void perf_data_print() {}
-void perf_start(const char *name) {}
-void perf_end() {}
+extern "C"
+{
+    void perf_data_init() {}
+    void perf_data_print() {}
+    void perf_start(const char *name) {}
+    void perf_end() {}
+}
 
 #endif // VMS_PROFILING
+

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -147,6 +146,8 @@ int main(int argc, char *argv[])
     printf("%d: %.4f giga-ops; %.4f giga-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, 1e3 * tops, 1e3 * tops/elapsed, float_size);
     
     mpi_finit();
+
+    perf_data_print();
 
     return nerrors;
 }
