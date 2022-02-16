@@ -11,10 +11,10 @@ DEPS = $(SRCFILES) $(HDRFILES) Makefile
 native: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
-CFLAGS += -O3 -march=native -g
+EXTRA_FLAGS = -O3 -march=native -g
 
 $(PROGRAM): $(DEPS)
-	        $(CC) $(CFLAGS) $(SRCFILES) -o $@ $(LDFLAGS)
+	        $(CC) $(EXTRA_FLAGS) $(CFLAGS) $(SRCFILES) -o $@ $(LDFLAGS)
 
 .PHONY: clean
 
