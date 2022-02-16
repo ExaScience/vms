@@ -5,13 +5,13 @@
 
 #pragma once
 
-#ifdef BPMF_PROFILING
+#ifdef VMS_PROFILING
 
 #include <string>
 #include <map>
 #include "thread_vector.h"
 
-#define BPMF_COUNTER(name) Counter c(name)
+#define VMS_COUNTER(name) Counter c(name)
 
 struct Counter {
     Counter *parent;
@@ -62,10 +62,10 @@ void perf_data_print();
 
 #else 
 
-#define BPMF_COUNTER(name) 
+#define VMS_COUNTER(name) 
 inline void perf_data_init() {}
 inline void perf_data_print() {}
 
-#endif //BPMF_PROFILING
+#endif //VMS_PROFILING
 
 double tick();

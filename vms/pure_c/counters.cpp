@@ -5,7 +5,7 @@
 
 #include <chrono>
 
-#ifdef BPMF_PROFILING
+#ifdef VMS_PROFILING
 
 #include <cmath>
 #include <mutex>
@@ -155,7 +155,7 @@ void TotalsCounter::print_body(const std::string &thread_str, bool hier) const {
     }
 }
 
-#endif // BPMF_PROFILING
+#endif // VMS_PROFILING
 
 double tick() 
 {
