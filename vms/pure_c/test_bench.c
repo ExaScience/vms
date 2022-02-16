@@ -130,21 +130,23 @@ int main(int argc, char *argv[])
     struct Model *m = prepare_model(U, M, B);
 
     if (mpi_world_rank == 0) printf("Predicting\n");
-    double start = tick();
+
+    double elapsed = 1e6;
     for(int n=0; n<num_repeat; n++)
     {
+        double start = tick();
         prepare_tb_output(num_compounds, tb_output_block);
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
+        double stop = tick();
+        if (stop-start < elapsed) elapsed = stop-start;
     }
 
-    double stop = tick();
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);
-    double elapsed = stop-start;
-    printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, elapsed, num_compounds * num_repeat / elapsed);
+    printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, elapsed, num_compounds / elapsed);
 
     // terra-ops aka 10^12 ops
-    double tops = (double)num_repeat * (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
+    double tops = (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
     printf("%d: %.4f tera-ops; %.4f tera-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, tops, tops/elapsed, float_size);
     printf("%d: %.4f giga-ops; %.4f giga-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, 1e3 * tops, 1e3 * tops/elapsed, float_size);
     
