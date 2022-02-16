@@ -11,7 +11,7 @@ DEPS = $(SRCFILES) $(HDRFILES) Makefile
 native: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
-CFLAGS   = -O3 -march=native -g
+CFLAGS += -O3 -march=native -g
 
 $(PROGRAM): $(DEPS)
 	        $(CC) $(CFLAGS) $(SRCFILES) -o $@ $(LDFLAGS)
