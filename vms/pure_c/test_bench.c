@@ -76,7 +76,7 @@ int check_result(
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
-    int num_compounds = 10;
+    int num_blocks = 2;
 
     mpi_init();
 
@@ -87,20 +87,30 @@ int main(int argc, char *argv[])
 
     if (argc > 2 && atoi(argv[2]))
     {
-        num_compounds = atoi(argv[2]);
+        num_blocks = atoi(argv[2]);
     }
 
-    /* round up to the nearest multiple of blocksize */
-    if (num_compounds % block_size)
-        num_compounds = ((num_compounds / block_size) + 1) * block_size;
-   
+    if (num_blocks % mpi_world_size)
+        num_blocks = ((num_blocks / mpi_world_size) + 1) * mpi_world_size;
+
+    size_t num_compounds = num_blocks * block_size;
+    size_t num_compounds_per_rank = num_compounds / mpi_world_size;
+    size_t block_start = num_compounds_per_rank * mpi_world_rank;
+
+    if (mpi_world_size > 1)
+    {
+        printf( "   mpi_rank:  %d\n", mpi_world_rank);
+        printf( "  mpi_ncomp: %lu\n", num_compounds_per_rank);
+        printf( "  mpi_start: %lu\n", block_start);
+    }
+
     P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
     F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
 
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
     printf("  nprot: %d\n", num_proteins);
-    printf("  ncmpd: %d\n", num_compounds);
+    printf("  ncmpd: %lu\n", num_compounds);
     printf("  blks:  %d\n", block_size);
     printf("  nfeat: %d\n", num_features);
     printf("  nlat:  %d\n", num_latent);
@@ -114,24 +124,12 @@ int main(int argc, char *argv[])
     printf("Prepare model\n");
     struct Model *m = prepare_model(U, M, B);
 
-    size_t ncomp_per_rank = num_compounds / mpi_world_size;
-    size_t block_start = ncomp_per_rank * mpi_world_rank;
-    size_t block_stop  = block_start + ncomp_per_rank;
-    if (block_start + ncomp_per_rank > num_compounds)
-        ncomp_per_rank = num_compounds - block_start;
-
-    if (mpi_world_size > 1)
-    {
-        printf( "  mpi_ncomp: %lu\n", ncomp_per_rank);
-        printf( "  mpi_start: %lu\n", block_start);
-    }
-
     printf("Predicting\n");
     double start = tick();
     for(int n=0; n<num_repeat; n++)
     {
         prepare_tb_output(num_compounds, tb_output_block);
-        predict_compounds(ncomp_per_rank, &tb_input_block[block_start], &tb_output_block[block_start], m);
+        predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
     }
 

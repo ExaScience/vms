@@ -37,6 +37,7 @@ struct Model {
 };
 
 void predict_compounds(
+		int start,
 		int num_compounds, 
 		const F_flx features,
 		      P_flx predictions,

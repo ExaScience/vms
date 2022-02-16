@@ -52,13 +52,14 @@ static void proteins_loop(
 int block_size = 1000;
 
 void predict_compounds(
+		int start,
 		int num_compounds, 
 		const F_flx features,
 		      P_flx predictions,
 		const struct Model *m)
 {
 
-	for (int i=0; i<num_compounds; i+=block_size)
+	for (int i=start; i<start+num_compounds; i+=block_size)
     {
 #pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
 		for(int j=i; j<i+block_size; j++)

@@ -9,7 +9,7 @@ HDRFILES = predict.h vms_const.h vms_tb.h
 DEPS = $(SRCFILES) $(HDRFILES) Makefile
 
 native: $(PROGRAM)
-	./$(PROGRAM) 10 10000
+	./$(PROGRAM) 2 2
 
 CFLAGS   = -O3 -march=native -g
 
