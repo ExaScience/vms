@@ -49,7 +49,7 @@ static void proteins_loop(
 	} // end proteins
 }
 
-int block_size = 1000;
+int block_size = 100;
 
 void predict_compounds(
 		int start,
@@ -59,9 +59,14 @@ void predict_compounds(
 		const struct Model *m)
 {
 
+#ifdef USE_OPENMP
+    #pragma omp parallel for
+#endif
 	for (int i=start; i<start+num_compounds; i+=block_size)
     {
+#ifdef USE_OMPSS
 #pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
+#endif
 		for(int j=i; j<i+block_size; j++)
 		{
 			L_base latents[num_samples][num_latent];
@@ -71,5 +76,7 @@ void predict_compounds(
 		}
 	}
 
+#ifdef USE_OMPSS
 #pragma oss taskwait
+#endif
 } // end function
