@@ -1,66 +1,80 @@
-/*
- * Copyright (c) 2014-2016, imec
- * All rights reserved.
- */
-
-#include <chrono>
-
 #ifdef VMS_PROFILING
 
-#include <cmath>
-#include <mutex>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <unistd.h>
 #include <cmath>
+#include <map>
 
 #include "counters.h"
-#include "bpmf.h"
 
-static thread_vector<Counter *> active_counters(0);
-thread_vector<TotalsCounter> hier_perf_data, flat_perf_data;
-
-void perf_data_init()
-{
-    active_counters.init();
-    hier_perf_data.init();
-    flat_perf_data.init();
+double tick() {
+    struct timespec t;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return  (double)(t.tv_sec) + (double)(t.tv_nsec) / 1e9;
 }
 
-void perf_data_print(const thread_vector<TotalsCounter> &data, bool hier) {
+struct Counter {
+    Counter *parent;
+    std::string name, fullname;
+    double start, stop, diff; // wallclock time
+    long long count;
+
+    bool total_counter;
+
+    Counter(std::string name);
+    Counter(); // needed for std::map in TotalsCounter
+
+    ~Counter();
+
+    void operator+=(const Counter &other);
+
+    std::string as_string(const Counter &total, bool hier) const;
+    std::string as_string(bool hier) const;
+};
+
+struct TotalsCounter {
+    private:
+        std::map<std::string, Counter> data;
+        int procid;
+        void print_body(const std::string &, bool) const;
+
+    public:
+        //c-tor starts PAPI
+        TotalsCounter(int = 0);
+
+        void operator+=(const TotalsCounter &other);
+
+        //prints results
+        void print(int, bool) const;
+        void print(bool) const;
+
+        Counter &operator[](const std::string &name) {
+            return data[name];
+        }
+
+        bool empty() const { return data.empty(); }
+};
+
+static Counter *active_counter(0);
+static TotalsCounter hier_perf_data, flat_perf_data;
+
+
+void perf_data_print(const TotalsCounter &data, bool hier) {
     std::string title = hier ? 
         "\nHierarchical view:\n==================\n" :
         "\nFlat view:\n==========\n";
-    Sys::cout() << title;
-    TotalsCounter sum_all_threads;
-    int num_active_threads = 0;
-    int threadid = 0;
-    for(auto &d : data)
-    {
-        if (!d.empty())
-        {
-            d.print(threadid, hier);
-            sum_all_threads += d;
-            num_active_threads++;
-        }
-    }
 
-    if (num_active_threads > 1)
-        sum_all_threads.print(hier);
-}
-
-void perf_data_print() {
-    perf_data_print(hier_perf_data, true);
-    perf_data_print(flat_perf_data, false);
+    std::cout << title;
+    data.print(hier);
 }
 
 
 Counter::Counter(std::string name)
     : name(name), diff(0), count(1), total_counter(false)
 {
-    parent = active_counters.local();
-    active_counters.local() = this;
+    parent = active_counter;
 
     fullname = (parent) ? parent->fullname + "/" + name : name; 
 
@@ -84,9 +98,9 @@ Counter::~Counter() {
     stop = tick();
     diff = stop - start;
 
-    hier_perf_data.local()[fullname] += *this;
-    flat_perf_data.local()[name] += *this;
-    active_counters.local() = parent;
+    hier_perf_data[fullname] += *this;
+    flat_perf_data[name] += *this;
+    active_counter = parent;
 }
 
 void Counter::operator+=(const Counter &other) {
@@ -125,21 +139,11 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 }
 
 void TotalsCounter::print(bool hier) const {
-    print_body("sum of all threads / ", hier);
-}
-
-void TotalsCounter::print(const int threadid, bool hier) const {
-    std::ostringstream s;
-    s << "thread " << threadid << " / ";
-    print_body(s.str(), hier);
-}
-
-void TotalsCounter::print_body(const std::string &thread_str, bool hier) const {
     if (data.empty()) return;
     char hostname[1024];
     gethostname(hostname, 1024);
-    Sys::cout() << "\nTotals on " << hostname << " (" << procid << ") / " << thread_str;
-    Sys::cout() << (hier ? "hierarchical\n" : "flat\n");
+    std::cout << "\nTotals on " << hostname << " (" << procid << ") ";
+    std::cout << (hier ? "hierarchical\n" : "flat\n");
 
     const auto total = data.find("main");
     for(auto &t : data)
@@ -147,17 +151,40 @@ void TotalsCounter::print_body(const std::string &thread_str, bool hier) const {
         auto parent_name = t.first.substr(0, t.first.find_last_of("/"));
         const auto parent = data.find(parent_name);
         if (hier && parent != data.end())
-            Sys::cout() << t.second.as_string(parent->second, hier);
+            std::cout << t.second.as_string(parent->second, hier);
         else if (!hier && total != data.end())
-            Sys::cout() << t.second.as_string(total->second, hier);
+            std::cout << t.second.as_string(total->second, hier);
         else
-            Sys::cout() << t.second.as_string(hier);
+            std::cout << t.second.as_string(hier);
     }
 }
 
-#endif // VMS_PROFILING
 
-double tick() 
+void perf_data_init()
 {
-   return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
+
+void perf_data_print() {
+    perf_data_print(hier_perf_data, true);
+    perf_data_print(flat_perf_data, false);
+}
+
+void perf_start(const char *name) {
+    active_counter = new Counter(name);
+}
+
+void perf_end() {
+    Counter *parent = active_counter->parent;
+    delete active_counter;
+    active_counter = parent;
+}
+
+
+#else
+
+void perf_data_init() {}
+void perf_data_print() {}
+void perf_start(const char *name) {}
+void perf_end() {}
+
+#endif // VMS_PROFILING

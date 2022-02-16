@@ -10,12 +10,6 @@
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
-double tick() {
-    struct timespec t;
-    clock_gettime(CLOCK_REALTIME, &t);
-    return  (double)(t.tv_sec) + (double)(t.tv_nsec) / 1e9;
-}
-
 void prepare_tb_input(
     int num_compounds,
     const float in[tb_num_compounds][num_features],
