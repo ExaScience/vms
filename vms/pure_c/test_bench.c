@@ -134,8 +134,10 @@ int main(int argc, char *argv[])
     double elapsed = 1e6;
     for(int n=0; n<num_repeat; n++)
     {
-        double start = tick();
         prepare_tb_output(num_compounds, tb_output_block);
+        mpi_barrier();
+
+        double start = tick();
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
         double stop = tick();

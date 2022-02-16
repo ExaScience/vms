@@ -49,6 +49,7 @@ extern int mpi_world_rank;
 
 void mpi_init(); 
 void mpi_finit();
+void mpi_barrier();
 void mpi_combine_results(int, P_flx);
 void mpi_send_compound(int compound, P_flx data);
 
