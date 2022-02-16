@@ -50,6 +50,16 @@ void mpi_init();
 void mpi_finit();
 void mpi_combine_results(int, P_flx);
 
+/* GASPI functions */
+enum {
+	features_seg = 0,
+	predictions_seg = 1, 
+	model_seg = 2
+};
+
+void *gaspi_malloc(int seg, unsigned long size);
+
 /* OmpSS-2 */
-void *lmalloc(unsigned long size);
-void *dmalloc(unsigned long size);
+void *lmalloc(unsigned long size, int seg);
+
+#define UNUSED(x) (void)(x)

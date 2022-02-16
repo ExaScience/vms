@@ -37,7 +37,7 @@ void prepare_tb_output(
 
 struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
 {
-    struct Model *m = lmalloc(sizeof(struct Model));
+    struct Model *m = lmalloc(sizeof(struct Model), model_seg);
     memcpy(&m->U, U, sizeof(m->U));
     memcpy(&m->M, M, sizeof(m->M));
     memcpy(&m->B, B, sizeof(m->B));
@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
     if (num_compounds % block_size)
         num_compounds = ((num_compounds / block_size) + 1) * block_size;
    
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features); 
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
 
     printf("  dt:    %s\n", DT_NAME);
     printf("  nrep:  %d\n", num_repeat);
