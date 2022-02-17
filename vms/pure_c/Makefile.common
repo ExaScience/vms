@@ -1,8 +1,8 @@
 
-PROGRAM = predict
+PROGRAM = $(OUTPUTDIR)/predict
 SRCFILES = predict.c test_bench.c mpi.c ompss.c counters_if.c
 HDRFILES = predict.h vms_const.h vms_tb.h
-OBJFILES += $(SRCFILES:.c=.o)
+OBJFILES += $(addprefix $(OUTPUTDIR)/,$(SRCFILES:.c=.o))
 
 default: $(PROGRAM)
 
@@ -11,21 +11,23 @@ PROGDEPS = $(OBJFILES) $(HDRFILES) Makefile.common
 run: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
-# CFLAGS += -O3 -march=native -g
-CFLAGS += -O0 -g
+CFLAGS += -O3 -march=native -g
+# CFLAGS += -O0 -g
 LINK ?= $(CXX)
 
 $(PROGRAM): $(PROGDEPS)
 	$(LINK) $(CFLAGS) $(OBJFILES) -o $@ $(LDFLAGS)
 
-%.o: %.c
+$(OUTPUTDIR)/%.o: %.c
+	@mkdir -p $(OUTPUTDIR)
 	$(CC) $(CFLAGS) -c $^ -o $@ 
 
-%.o: %.cpp
+$(OUTPUTDIR)/%.o: %.cpp
+	@mkdir -p $(OUTPUTDIR)
 	$(CXX) $(CFLAGS) -c $^ -o $@ 
 
 .PHONY: clean
 
 clean:
-	rm -f *.o $(PROGRAM)
+	rm -f */*.o */$(PROGRAM)
 

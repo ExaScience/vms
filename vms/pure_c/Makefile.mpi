@@ -2,5 +2,6 @@
 CFLAGS += -DUSE_MPI -DVMS_PROFILING
 LDFLAGS += -lmpi
 OBJFILES += counters_impl.o
+OUTPUTDIR ?= mpi
 
 include Makefile.common

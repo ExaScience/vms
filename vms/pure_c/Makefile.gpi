@@ -6,5 +6,6 @@ endif
 
 CFLAGS += -DUSE_GPI
 LDFLAGS += -lmpi -lGPI2 
+OUTPUTDIR ?= gpi
 
 include Makefile.omp
