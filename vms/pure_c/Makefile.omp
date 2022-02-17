@@ -1,5 +1,4 @@
-CFLAGS += -fopenmp -DUSE_OPENMP -DVMS_PROFILING
+CFLAGS += -fopenmp -DUSE_OPENMP 
 OUTPUTDIR ?= omp
-OBJFILES += $(OUTPUTDIR)/counters_impl.o
 
-include Makefile.common
+include Makefile.plain
