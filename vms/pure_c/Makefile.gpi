@@ -1,0 +1,10 @@
+
+ifneq ($(GPI2_ROOT), "")
+CFLAGS += -I$(GPI2_ROOT)/include
+LDFLAGS += -L$(GPI2_ROOT)/lib64
+endif
+
+CFLAGS += -DUSE_GPI
+LDFLAGS += -lmpi -lGPI2 
+
+include Makefile.omp

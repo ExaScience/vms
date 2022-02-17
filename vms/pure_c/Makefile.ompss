@@ -1,0 +1,6 @@
+
+CC = mcc
+LINK = mcc
+CFLAGS += -DUSE_OMPSS --ompss-2
+
+include Makefile.common

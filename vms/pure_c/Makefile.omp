@@ -1,0 +1,4 @@
+CFLAGS += -fopenmp -DUSE_OPENMP -DVMS_PROFILING
+OBJFILES += counters_impl.o
+
+include Makefile.common

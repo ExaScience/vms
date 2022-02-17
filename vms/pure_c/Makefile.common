@@ -11,10 +11,12 @@ PROGDEPS = $(OBJFILES) $(HDRFILES) Makefile.common
 run: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
-CFLAGS += -O3 -march=native -g
+# CFLAGS += -O3 -march=native -g
+CFLAGS += -O0 -g
+LINK ?= $(CXX)
 
 $(PROGRAM): $(PROGDEPS)
-	$(CXX) $(OBJFILES) -o $@ $(LDFLAGS)
+	$(LINK) $(CFLAGS) $(OBJFILES) -o $@ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@ 
