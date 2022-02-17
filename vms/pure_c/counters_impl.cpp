@@ -181,6 +181,8 @@ void perf_data_print(const thread_vector<TotalsCounter> &data, bool hier) {
             sum_all_threads += d;
             num_active_threads++;
         }
+    
+        threadid++;
     }
 
     if (num_active_threads > 1)
