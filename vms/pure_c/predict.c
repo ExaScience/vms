@@ -1,8 +1,4 @@
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 #include "predict.h"
 
 
@@ -60,24 +56,28 @@ void predict_compounds(
 {
 	perf_start("predict_compounds");
 
+
+#ifdef USE_OMPSS
+	for (int i=start; i<start+num_compounds; i+=block_size)
+    {
+#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
+		for(int j=i; j<i+block_size; j++)
+#else
 #ifdef USE_OPENMP
     #pragma omp parallel for
 #endif
-	for (int i=start; i<start+num_compounds; i+=block_size)
-    {
-#ifdef USE_OMPSS
-#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
+	for (int j=start; j<start+num_compounds; j++)
 #endif
-		for(int j=i; j<i+block_size; j++)
 		{
 			L_base latents[num_samples][num_latent];
 			features_loop(features[j], latents, m->M, m->B);
 			proteins_loop(predictions[j], latents, m->U);
 			mpi_send_compound(j, predictions);
 		}
-	}
 
 #ifdef USE_OMPSS
+	}
+
 #pragma oss taskwait
 #endif
 
