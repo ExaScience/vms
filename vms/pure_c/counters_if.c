@@ -11,8 +11,8 @@ double tick() {
 
 void perf_data_init() {}
 void perf_data_print() {}
-void perf_start(const char *) {}
-void perf_end(const char *) {}
+void perf_start(const char *n) {}
+void perf_end(const char *n) {}
 
 #endif // VMS_PROFILING
 
