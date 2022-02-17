@@ -12,6 +12,8 @@
 
 #include "counters.h"
 
+#include "thread_vector.h"
+
 struct Counter {
     Counter *parent;
     std::string name, fullname;
@@ -54,15 +56,13 @@ struct TotalsCounter {
         bool empty() const { return data.empty(); }
 };
 
-static Counter *active_counter(0);
-static TotalsCounter hier_perf_data, flat_perf_data;
-
-
+static thread_vector<Counter *> active_counters(0);
+thread_vector<TotalsCounter> hier_perf_data, flat_perf_data;
 
 Counter::Counter(std::string name)
     : name(name), diff(0), count(1), total_counter(false)
 {
-    parent = active_counter;
+    parent = active_counters.local();
 
     fullname = (parent) ? parent->fullname + "/" + name : name; 
 
@@ -86,9 +86,9 @@ Counter::~Counter() {
     stop = tick();
     diff = stop - start;
 
-    hier_perf_data[fullname] += *this;
-    flat_perf_data[name] += *this;
-    active_counter = parent;
+    hier_perf_data.local()[fullname] += *this;
+    flat_perf_data.local()[name] += *this;
+    active_counters.local() = parent;
 }
 
 void Counter::operator+=(const Counter &other) {
@@ -127,10 +127,20 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 }
 
 void TotalsCounter::print(bool hier) const {
+    print_body("sum of all threads / ", hier);
+}
+
+void TotalsCounter::print(const int threadid, bool hier) const {
+    std::ostringstream s;
+    s << "thread " << threadid << " / ";
+    print_body(s.str(), hier);
+}
+
+void TotalsCounter::print_body(const std::string &thread_str, bool hier) const {
     if (data.empty()) return;
     char hostname[1024];
     gethostname(hostname, 1024);
-    std::cout << "\nTotals on " << hostname << " (" << procid << ") ";
+    std::cout << "\nTotals on " << hostname << " (" << procid << ") / " << thread_str;
     std::cout << (hier ? "hierarchical\n" : "flat\n");
 
     const auto total = data.find("main");
@@ -149,26 +159,51 @@ void TotalsCounter::print(bool hier) const {
 
 void perf_data_init()
 {
+    active_counters.init();
+    hier_perf_data.init();
+    flat_perf_data.init();
 }
 
-void perf_data_print()
-{
-    hier_perf_data.print(true);
-    flat_perf_data.print(false);
+
+void perf_data_print(const thread_vector<TotalsCounter> &data, bool hier) {
+    std::string title = hier ? 
+        "\nHierarchical view:\n==================\n" :
+        "\nFlat view:\n==========\n";
+    std::cout << title;
+    TotalsCounter sum_all_threads;
+    int num_active_threads = 0;
+    int threadid = 0;
+    for(auto &d : data)
+    {
+        if (!d.empty())
+        {
+            d.print(threadid, hier);
+            sum_all_threads += d;
+            num_active_threads++;
+        }
+    }
+
+    if (num_active_threads > 1)
+        sum_all_threads.print(hier);
 }
+
+
+void perf_data_print() {
+    perf_data_print(hier_perf_data, true);
+    perf_data_print(flat_perf_data, false);
+}
+
 
 void perf_start(const char *name)
 {
-    active_counter = new Counter(name);
+    active_counters.local() = new Counter(name);
 }
 
 void perf_end(const char *name)
 {
+    Counter *active_counter = active_counters.local();
     assert(active_counter->name == std::string(name));
-
-    Counter *parent = active_counter->parent;
     delete active_counter;
-    active_counter = parent;
 }
 
 #endif // VMS_PROFILING
