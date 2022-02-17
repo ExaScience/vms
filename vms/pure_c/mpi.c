@@ -27,7 +27,9 @@ void mpi_send_compound(int compound, P_flx data) {}
 
 void mpi_combine_results(int num_compounds, P_flx data)
 {
+    perf_start(__FUNCTION__);
     MPI_Allreduce(MPI_IN_PLACE, data, num_compounds * num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+    perf_end(__FUNCTION__);
 }
 
 
@@ -98,11 +100,15 @@ void *gaspi_malloc(int seg, size_t size)
 
 void mpi_send_compound(int compound, P_flx data)
 {
+    perf_start(__FUNCTION__);
+
     if (mpi_world_rank == 0) return;
 
     int offset = compound * num_proteins * sizeof(P_base);
     int size = num_proteins * sizeof(P_base);
     SUCCESS_OR_RETRY(gaspi_write(predictions_seg, offset, 0, predictions_seg, offset, size, 0, GASPI_BLOCK));
+
+    perf_end(__FUNCTION__);
 }
 
 void mpi_init() 
@@ -124,6 +130,8 @@ void mpi_finit()
 
 void mpi_combine_results(int num_compounds, P_flx data)
 {
+    perf_start(__FUNCTION__);
+
     UNUSED(num_compounds);
     UNUSED(data);
     if (mpi_world_rank != 0)
@@ -142,6 +150,8 @@ void mpi_combine_results(int num_compounds, P_flx data)
             printf("%d: Collected %d-th notification with id %d and value %d\n", mpi_world_rank, k, id, val);
         }
     }
+
+    perf_end(__FUNCTION__);
 }
 
 void mpi_barrier() {

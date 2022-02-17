@@ -1,12 +1,5 @@
 #include <time.h>
 
-
-extern "C" double tick() {
-    struct timespec t;
-    clock_gettime(CLOCK_REALTIME, &t);
-    return  (double)(t.tv_sec) + (double)(t.tv_nsec) / 1e9;
-}
-
 #ifdef VMS_PROFILING
 
 #include <iostream>
@@ -14,11 +7,10 @@ extern "C" double tick() {
 #include <sstream>
 #include <unistd.h>
 #include <cmath>
+#include <cassert>
 #include <map>
 
 #include "counters.h"
-
-
 
 struct Counter {
     Counter *parent;
@@ -65,15 +57,6 @@ struct TotalsCounter {
 static Counter *active_counter(0);
 static TotalsCounter hier_perf_data, flat_perf_data;
 
-
-void perf_data_print(const TotalsCounter &data, bool hier) {
-    std::string title = hier ? 
-        "\nHierarchical view:\n==================\n" :
-        "\nFlat view:\n==========\n";
-
-    std::cout << title;
-    data.print(hier);
-}
 
 
 Counter::Counter(std::string name)
@@ -164,39 +147,28 @@ void TotalsCounter::print(bool hier) const {
     }
 }
 
-extern "C"
+void perf_data_init()
 {
-    void perf_data_init()
-    {
-    }
-
-    void perf_data_print()
-    {
-        perf_data_print(hier_perf_data, true);
-        perf_data_print(flat_perf_data, false);
-    }
-
-    void perf_start(const char *name)
-    {
-        active_counter = new Counter(name);
-    }
-
-    void perf_end()
-    {
-        Counter *parent = active_counter->parent;
-        delete active_counter;
-        active_counter = parent;
-    }
 }
 
-#else
-
-extern "C"
+void perf_data_print()
 {
-    void perf_data_init() {}
-    void perf_data_print() {}
-    void perf_start(const char *name) {}
-    void perf_end() {}
+    hier_perf_data.print(true);
+    flat_perf_data.print(false);
+}
+
+void perf_start(const char *name)
+{
+    active_counter = new Counter(name);
+}
+
+void perf_end(const char *name)
+{
+    assert(active_counter->name == std::string(name));
+
+    Counter *parent = active_counter->parent;
+    delete active_counter;
+    active_counter = parent;
 }
 
 #endif // VMS_PROFILING

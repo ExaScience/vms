@@ -130,11 +130,16 @@ int main(int argc, char *argv[])
         prepare_tb_output(num_compounds, tb_output_block);
         mpi_barrier();
 
+        perf_start("main");
+
+
         double start = tick();
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
         double stop = tick();
         if (stop-start < elapsed) elapsed = stop-start;
+
+        perf_end("main");
     }
 
     nerrors += check_result(num_compounds, tb_output_block, tb_ref);

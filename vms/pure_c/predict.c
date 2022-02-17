@@ -58,6 +58,7 @@ void predict_compounds(
 		      P_flx predictions,
 		const struct Model *m)
 {
+	perf_start("predict_compounds");
 
 #ifdef USE_OPENMP
     #pragma omp parallel for
@@ -79,4 +80,6 @@ void predict_compounds(
 #ifdef USE_OMPSS
 #pragma oss taskwait
 #endif
+
+	perf_end("predict_compounds");
 } // end function

@@ -1,0 +1,29 @@
+
+PROGRAM = predict
+SRCFILES = predict.c test_bench.c mpi.c ompss.c counters_if.c
+HDRFILES = predict.h vms_const.h vms_tb.h
+OBJFILES += $(SRCFILES:.c=.o)
+
+default: $(PROGRAM)
+
+PROGDEPS = $(OBJFILES) $(HDRFILES) Makefile.common
+
+run: $(PROGRAM)
+	./$(PROGRAM) 2 2
+
+CFLAGS += -O3 -march=native -g
+
+$(PROGRAM): $(PROGDEPS)
+	$(CXX) $(OBJFILES) -o $@ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $^ -o $@ 
+
+%.o: %.cpp
+	$(CXX) $(CFLAGS) -c $^ -o $@ 
+
+.PHONY: clean
+
+clean:
+	rm -f *.o $(PROGRAM)
+

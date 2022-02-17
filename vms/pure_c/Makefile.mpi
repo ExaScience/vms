@@ -1,0 +1,6 @@
+
+CFLAGS += -DUSE_MPI -DVMS_PROFILING
+LDFLAGS += -lmpi
+OBJFILES += counters_impl.o
+
+include Makefile.common
