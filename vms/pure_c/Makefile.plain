@@ -1,0 +1,5 @@
+OUTPUTDIR ?= plain
+CFLAGS += -DVMS_PROFILING
+OBJFILES += $(OUTPUTDIR)/counters_impl.o
+
+include Makefile.common
