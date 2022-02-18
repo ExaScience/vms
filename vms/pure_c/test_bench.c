@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef USE_OPENMP
+#include <omp.h>
+#endif
+
 #include "predict.h"
 #include "vms_tb.h"
 
@@ -112,6 +116,9 @@ int main(int argc, char *argv[])
         printf("  nfeat: %d\n", num_features);
         printf("  nlat:  %d\n", num_latent);
         printf("  nsmpl: %d\n", num_samples);
+#ifdef USE_OPENMP
+        printf("  nthrds: %d\n", omp_get_max_threads());
+#endif
     }
 
     int nerrors = 0;

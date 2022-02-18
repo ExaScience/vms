@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "predict.h"
 
@@ -15,7 +16,9 @@ void mpi_init()
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_world_rank);
 
-    printf("Using mpi (rank %d out of %d)\n", mpi_world_rank, mpi_world_size);
+    char hostname[1024];
+    gethostname(hostname, 1024);
+    printf("Using mpi (rank %d out of %d on %s)\n", mpi_world_rank, mpi_world_size, hostname);
 }
 
 void mpi_finit()
@@ -120,7 +123,9 @@ void mpi_init()
 
     SUCCESS_OR_DIE(gaspi_proc_init(GASPI_BLOCK));
 
-    printf("Using gaspi+mpi (rank %d out of %d)\n", mpi_world_rank, mpi_world_size);
+    char hostname[1024];
+    gethostname(hostname, 1024);
+    printf("Using gaspi+mpi (rank %d out of %d on %s)\n", mpi_world_rank, mpi_world_size, hostname);
 }
 
 void mpi_finit()
