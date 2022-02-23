@@ -52,7 +52,15 @@ int check_result(
     if (mpi_world_rank != 0) return 0;
 
     int nerrors = 0;
+
+#ifdef USE_OPENMP
+#pragma omp parallel for reduction(+:nerrors)
+#endif
     for (int c = 0; c < num_compounds; c++)
+    {
+#ifdef USE_OMPSS
+#pragma oss task in(out[c]) inout(nerrors)
+#endif
         for (int p = 0; p < num_proteins; p++)
         {
             float o = out[c][p];
@@ -68,6 +76,7 @@ int check_result(
                 nerrors++;
             }
         }
+    }
 
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
     return nerrors;
@@ -139,7 +148,6 @@ int main(int argc, char *argv[])
 
         perf_start("main");
 
-
         double start = tick();
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
@@ -147,9 +155,10 @@ int main(int argc, char *argv[])
         if (stop-start < elapsed) elapsed = stop-start;
 
         perf_end("main");
+
+        nerrors += check_result(num_compounds, tb_output_block, tb_ref);
     }
 
-    nerrors += check_result(num_compounds, tb_output_block, tb_ref);
     printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, elapsed, num_compounds / elapsed);
 
     // terra-ops aka 10^12 ops

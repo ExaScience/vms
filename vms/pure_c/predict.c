@@ -77,8 +77,6 @@ void predict_compounds(
 
 #ifdef USE_OMPSS
 	}
-
-#pragma oss taskwait
 #endif
 
 	perf_end("predict_compounds");

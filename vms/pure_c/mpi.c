@@ -173,8 +173,16 @@ void mpi_init() {
 
 void mpi_finit() {}
 
-void mpi_barrier() {}
+void mpi_barrier() {
+#ifdef USE_OMPSS
+#pragma oss taskwait
+#endif
+}
 
-void mpi_send_compound(int compound, P_flx data) {}
+void mpi_send_compound(int compound, P_flx data) 
+{
+
+    
+}
 void mpi_combine_results(int num_compounds,  P_flx predictions) {}
 #endif
