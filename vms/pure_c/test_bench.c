@@ -13,6 +13,9 @@
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
+#ifdef USE_OMPSS
+#pragma oss task out(out[0;num_compounds])
+#endif
 void prepare_tb_input(
     int num_compounds,
     const float in[tb_num_compounds][num_features],
@@ -23,6 +26,9 @@ void prepare_tb_input(
             out[c][p] = in [c%tb_num_compounds][p];
 }
 
+#ifdef USE_OMPSS
+#pragma oss task out(out[0;num_compounds])
+#endif
 void prepare_tb_output(
     int num_compounds,
     P_base out[][num_proteins])
@@ -131,9 +137,9 @@ int main(int argc, char *argv[])
         printf( "%d:  mpi_start: %lu\n",  mpi_world_rank, block_start);
     }
 
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
-    errors_per_compound = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
+    errors_per_compound = (int*)dmalloc(sizeof(int) * num_compounds, errors_seg);
 
     if (mpi_world_rank == 0) 
     {
