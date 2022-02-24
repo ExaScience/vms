@@ -2,8 +2,6 @@
 
 #include "predict.h"
 
-
-
 void *lmalloc(unsigned long size, int segment_id)
 {
 #ifdef USE_OMPSS
@@ -14,5 +12,15 @@ void *lmalloc(unsigned long size, int segment_id)
 #else
     UNUSED(segment_id);
     return malloc(size);
+#endif
+}
+
+
+void *dmalloc(unsigned long size, int segment_id)
+{
+#ifdef OMPSS
+    return nanos6_dmalloc(size, nanos6_equpart_distribution, 0, NULL);
+#else
+    return lmalloc(size, segment_id);
 #endif
 }

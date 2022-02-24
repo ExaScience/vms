@@ -67,5 +67,6 @@ void *gaspi_malloc(int seg, unsigned long size);
 
 /* OmpSS-2 */
 void *lmalloc(unsigned long size, int seg);
+void *dmalloc(unsigned long size, int seg);
 
 #define UNUSED(x) (void)(x)
