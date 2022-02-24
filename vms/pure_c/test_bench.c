@@ -78,6 +78,10 @@ int check_result(
         }
     }
 
+
+#ifdef USE_OMPSS
+#pragma oss task in(nerrors)
+#endif
     printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
     return nerrors;
 }
@@ -151,12 +155,12 @@ int main(int argc, char *argv[])
         double start = tick();
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         mpi_combine_results(num_compounds, tb_output_block);
+        nerrors += check_result(num_compounds, tb_output_block, tb_ref);
         double stop = tick();
         if (stop-start < elapsed) elapsed = stop-start;
 
         perf_end("main");
 
-        nerrors += check_result(num_compounds, tb_output_block, tb_ref);
     }
 
     printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, elapsed, num_compounds / elapsed);
