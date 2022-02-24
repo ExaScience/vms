@@ -69,10 +69,12 @@ void predict_compounds(
 	for (int j=start; j<start+num_compounds; j++)
 #endif
 		{
+			perf_start("predict_one_compound");
 			L_base latents[num_samples][num_latent];
 			features_loop(features[j], latents, m->M, m->B);
 			proteins_loop(predictions[j], latents, m->U);
 			mpi_send_compound(j, predictions);
+			perf_end("predict_one_compound");
 		}
 
 #ifdef USE_OMPSS

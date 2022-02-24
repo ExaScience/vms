@@ -18,7 +18,7 @@ void *lmalloc(unsigned long size, int segment_id)
 
 void *dmalloc(unsigned long size, int segment_id)
 {
-#ifdef OMPSS
+#ifdef USE_OMPSS
     return nanos6_dmalloc(size, nanos6_equpart_distribution, 0, NULL);
 #else
     return lmalloc(size, segment_id);
