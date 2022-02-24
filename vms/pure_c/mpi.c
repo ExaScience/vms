@@ -60,7 +60,7 @@ static int gaspi_free() {
 do  { \
   const gaspi_return_t r = f; \
   if (r != GASPI_SUCCESS) { \
-    printf("Error: " #f "[%s:%d]: %d\n", __FILE__, __LINE__, r);  \
+    printf("Error: " #f "[%s:%d]: %s\n", __FILE__, __LINE__, gaspi_error_str(r));  \
     abort(); \
   } \
 } while (0)
@@ -87,7 +87,7 @@ do  { \
            if (r == GASPI_SUCCESS) ; \
       else if(r == GASPI_QUEUE_FULL) gaspi_wait_for_queue(); \
       else { \
-        printf("Error: " #f "[%s:%d]: %d\n", __FILE__, __LINE__, r);  \
+        printf("Error: " #f "[%s:%d]: %s\n", __FILE__, __LINE__, gaspi_error_str(r));  \
         abort(); \
       } \
   } while (r == GASPI_QUEUE_FULL); \
