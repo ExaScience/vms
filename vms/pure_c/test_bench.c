@@ -77,8 +77,10 @@ int check_result(
 {
     if (mpi_world_rank != 0) return 0;
 
-    int *nerrors;
-    nerrors = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
+    static int *nerrors = 0;
+
+    if (! nerrors)
+        nerrors = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
 #ifdef USE_OPENMP
 #pragma omp parallel for
