@@ -60,7 +60,7 @@ enum {
 	features_seg = 0,
 	predictions_seg = 1, 
 	model_seg = 2,
-	errors_seg 
+	errors_seg = 3
 };
 
 void *gaspi_malloc(int seg, unsigned long size);
