@@ -20,11 +20,25 @@ std::string thread_id_str()
 {
     char hostname[1024];
     gethostname(hostname, 1024);
-    auto myid = std::this_thread::get_id();
+    
+    static std::vector<std::thread::id> thread_numbers;
+
+    auto id = std::this_thread::get_id();
+    auto it = std::find(thread_numbers.begin(), thread_numbers.end(), id);
+    int thread_number;
+
+    if (it == thread_numbers.end()) 
+    {
+        std::mutex insert_mutex;
+        thread_number = thread_numbers.size();
+        thread_numbers.push_back(id);
+    } else {
+        thread_number = it - thread_numbers.begin();
+    }
 
     std::stringstream ss;
 
-    ss << hostname << "/thread_0x" << std::hex << myid;
+    ss << hostname << "/thread_" << thread_number;
     return ss.str();
 }
 
@@ -63,12 +77,13 @@ struct TotalsCounter {
 
         //prints results
         void print() const;
+        void clear() { data.clear(); }
+        bool empty() const { return data.empty(); }
 
         Counter &operator[](const std::string &name) {
             return data[name];
         }
 
-        bool empty() const { return data.empty(); }
 };
 
 static thread_local Counter * active_counter = 0;
@@ -146,8 +161,8 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 
 void TotalsCounter::print() const {
     std::mutex printing_mutex;
-
     if (data.empty()) return;
+
     char hostname[1024];
     gethostname(hostname, 1024);
     std::cout << "\nTotals on " << hostname << " (" << procid << ") ";
@@ -173,7 +188,9 @@ void perf_data_init()
 
 void perf_data_print() {
     hier_perf_data.print();
+    hier_perf_data.clear();
     flat_perf_data.print();
+    flat_perf_data.clear();
 }
 
 void perf_start(const char *name)
