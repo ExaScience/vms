@@ -1,6 +1,10 @@
 
 #include "predict.h"
 
+#ifdef USE_OMPSS
+#include <nanos6.h>
+#endif
+
 
 static void features_loop(
         const F_base features[num_features],
@@ -58,10 +62,13 @@ void predict_compounds(
 
 
 #ifdef USE_OMPSS
+	int num_nodes = nanos6_get_num_cluster_nodes();
+
 	for (int i=start; i<start+num_compounds; i+=block_size)
     {
-#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size])
+#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size]) node(i%num_nodes)
 		for(int j=i; j<i+block_size; j++)
+#pragma oss task in(features[j]) in(*m) out(predictions[j]) node(nanos6_cluster_no_offload)
 #else
 #ifdef USE_OPENMP
     #pragma omp parallel for
