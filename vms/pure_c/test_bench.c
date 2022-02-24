@@ -44,6 +44,32 @@ struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
 
 
 
+int check_compound(
+    int c,
+    P_base out[][num_proteins],
+    const float ref[tb_num_compounds][num_proteins])
+{
+    int nerrors = 0;
+
+    for (int p = 0; p < num_proteins; p++)
+    {
+        float o = out[c][p];
+        float r = ref[c % tb_num_compounds][p];
+        if (fabs(o - r) < epsilon)
+        {
+            //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
+        }
+        else
+        {
+            if (nerrors <= 10) printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
+            if (nerrors == 10) printf("too many errors - stop printing\n");
+            nerrors++;
+        }
+    }
+
+    return nerrors;
+}
+
 int check_result(
     int num_compounds,
     P_base out[][num_proteins],
@@ -51,39 +77,29 @@ int check_result(
 {
     if (mpi_world_rank != 0) return 0;
 
-    int nerrors = 0;
+    int *nerrors;
+    nerrors = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
 #ifdef USE_OPENMP
-#pragma omp parallel for reduction(+:nerrors)
+#pragma omp parallel for
 #endif
     for (int c = 0; c < num_compounds; c++)
     {
 #ifdef USE_OMPSS
-#pragma oss task in(out[c]) inout(nerrors)
+#pragma oss task in(out[c]) out(nerrors[c])
 #endif
-        for (int p = 0; p < num_proteins; p++)
-        {
-            float o = out[c][p];
-            float r = ref[c % tb_num_compounds][p];
-            if (fabs(o - r) < epsilon)
-            {
-                //printf("ok at [%d][%d]: %f == %f\n", c, p, o, r);
-            }
-            else
-            {
-                if (nerrors <= 10) printf("error at [%d][%d]: %f != %f\n", c, p, o, r);
-                if (nerrors == 10) printf("too many errors - stop printing\n");
-                nerrors++;
-            }
-        }
+        nerrors[c] = check_compound(c, out, ref);
     }
 
-
 #ifdef USE_OMPSS
-#pragma oss task in(nerrors)
+//#pragma oss task in(nerrors[0;num_compounds])
+#pragma oss taskwait
 #endif
-    printf("%d errors (out of %d)\n", nerrors, num_compounds * num_proteins);
-    return nerrors;
+
+    int total_errors = 0;
+    for (int c = 0; c < num_compounds; ++c) total_errors += nerrors[c];
+    printf("%d errors (out of %d)\n", total_errors, num_compounds * num_proteins);
+    return total_errors;
 }
 
 int main(int argc, char *argv[])

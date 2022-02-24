@@ -59,7 +59,8 @@ void mpi_send_compound(int compound, P_flx data);
 enum {
 	features_seg = 0,
 	predictions_seg = 1, 
-	model_seg = 2
+	model_seg = 2,
+	errors_seg 
 };
 
 void *gaspi_malloc(int seg, unsigned long size);
