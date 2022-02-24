@@ -18,6 +18,8 @@
 
 std::string thread_id_str()
 {
+    static std::mutex insert_mutex;
+
     char hostname[1024];
     gethostname(hostname, 1024);
     
@@ -29,9 +31,10 @@ std::string thread_id_str()
 
     if (it == thread_numbers.end()) 
     {
-        std::mutex insert_mutex;
+        insert_mutex.lock();
         thread_number = thread_numbers.size();
         thread_numbers.push_back(id);
+        insert_mutex.unlock();
     } else {
         thread_number = it - thread_numbers.begin();
     }
@@ -108,14 +111,18 @@ Counter::Counter()
 }
 
 Counter::~Counter() {
+    static std::mutex update_mutex;
+
     if(total_counter) return;
 
     stop = tick();
     diff = stop - start;
 
-    static std::mutex update_mutex;
+    update_mutex.lock();
     hier_perf_data[fullname] += *this;
     flat_perf_data[name] += *this;
+    update_mutex.unlock();
+
     active_counter = parent;
 }
 
@@ -147,7 +154,10 @@ std::string Counter::as_string(bool hier) const
     return os.str();
 }
 
-TotalsCounter::TotalsCounter(bool h, int p) : procid(p), hierarchical(h) {}
+TotalsCounter::TotalsCounter(bool h, int p) 
+ : procid(p), hierarchical(h)
+{
+}
 
 TotalsCounter::~TotalsCounter()
 {
@@ -161,7 +171,7 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 
 void TotalsCounter::print() const {
     std::mutex printing_mutex;
-    if (data.empty()) return;
+    printing_mutex.lock();
 
     char hostname[1024];
     gethostname(hostname, 1024);
@@ -180,6 +190,8 @@ void TotalsCounter::print() const {
         else
             std::cout << t.second.as_string(hierarchical);
     }
+
+    printing_mutex.unlock();
 }
 
 void perf_data_init()

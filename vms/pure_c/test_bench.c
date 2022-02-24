@@ -194,7 +194,5 @@ int main(int argc, char *argv[])
     
     mpi_finit();
 
-    perf_data_print();
-
     return nerrors;
 }
