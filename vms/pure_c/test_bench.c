@@ -70,17 +70,14 @@ int check_compound(
     return nerrors;
 }
 
+static int *errors_per_compound;
+
 int check_result(
     int num_compounds,
     P_base out[][num_proteins],
     const float ref[tb_num_compounds][num_proteins])
 {
     if (mpi_world_rank != 0) return 0;
-
-    static int *nerrors = 0;
-
-    if (! nerrors)
-        nerrors = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
 #ifdef USE_OPENMP
 #pragma omp parallel for
@@ -90,7 +87,7 @@ int check_result(
 #ifdef USE_OMPSS
 #pragma oss task in(out[c]) out(nerrors[c])
 #endif
-        nerrors[c] = check_compound(c, out, ref);
+        errors_per_compound[c] = check_compound(c, out, ref);
     }
 
 #ifdef USE_OMPSS
@@ -99,7 +96,7 @@ int check_result(
 #endif
 
     int total_errors = 0;
-    for (int c = 0; c < num_compounds; ++c) total_errors += nerrors[c];
+    for (int c = 0; c < num_compounds; ++c) total_errors += errors_per_compound[c];
     printf("%d errors (out of %d)\n", total_errors, num_compounds * num_proteins);
     return total_errors;
 }
@@ -136,6 +133,7 @@ int main(int argc, char *argv[])
 
     P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
     F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
+    errors_per_compound = (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
     if (mpi_world_rank == 0) 
     {
