@@ -169,13 +169,13 @@ int main(int argc, char *argv[])
     for(int n=0; n<num_repeat; n++)
     {
         prepare_tb_output(num_compounds, tb_output_block);
-        mpi_barrier();
+        barrier();
 
         perf_start("main");
 
         double start = tick();
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
-        mpi_combine_results(num_compounds, tb_output_block);
+        combine_results(num_compounds, tb_output_block);
         nerrors += check_result(num_compounds, tb_output_block, tb_ref);
         double stop = tick();
         if (stop-start < elapsed) elapsed = stop-start;

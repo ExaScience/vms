@@ -26,9 +26,9 @@ void mpi_finit()
     MPI_Finalize();
 }
 
-void mpi_send_compound(int compound, const P_base data[num_proteins]) {}
+void send_predictions(int compound, const P_base data[num_proteins]) {}
 
-void mpi_combine_results(int num_compounds, P_flx data)
+void combine_results(int num_compounds, P_flx data)
 {
     perf_start(__FUNCTION__);
     MPI_Allreduce(MPI_IN_PLACE, data, num_compounds * num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
@@ -36,7 +36,7 @@ void mpi_combine_results(int num_compounds, P_flx data)
 }
 
 
-void mpi_barrier() {
+void barrier() {
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -101,7 +101,7 @@ void *gaspi_malloc(int seg, size_t size)
     return ptr;
 }
 
-void mpi_send_compound(int compound, const P_base data[num_proteins])
+void send_predictions(int compound, const P_base data[num_proteins])
 {
     perf_start(__FUNCTION__);
 
@@ -134,7 +134,7 @@ void mpi_finit()
     MPI_Finalize();
 }
 
-void mpi_combine_results(int num_compounds, P_flx data)
+void combine_results(int num_compounds, P_flx data)
 {
     perf_start(__FUNCTION__);
 
@@ -160,7 +160,7 @@ void mpi_combine_results(int num_compounds, P_flx data)
     perf_end(__FUNCTION__);
 }
 
-void mpi_barrier() {
+void barrier() {
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 }
 
@@ -173,16 +173,13 @@ void mpi_init() {
 
 void mpi_finit() {}
 
-void mpi_barrier() {
+void barrier() {
 #ifdef USE_OMPSS
 #pragma oss taskwait
 #endif
 }
 
-void mpi_send_compound(int compound, const P_base data[num_proteins])
-{
+void send_predictions(int compound, const P_base data[num_proteins]) {}
 
-    
-}
-void mpi_combine_results(int num_compounds,  P_flx predictions) {}
+void combine_results(int num_compounds,  P_flx predictions) {}
 #endif
