@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
     P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
     F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
-    errors_per_compound = (int*)dmalloc(sizeof(int) * num_compounds, errors_seg);
+                        errors_per_compound =                     (int*)dmalloc(sizeof(int) * num_compounds, errors_seg);
 
     if (mpi_world_rank == 0) 
     {
@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
         printf("  nsmpl: %d\n", num_samples);
 #ifdef USE_OPENMP
         printf("  nthrds: %d\n", omp_get_max_threads());
+        printf("  nnodes: %d\n", mpi_world_size);
 #endif
     }
 
