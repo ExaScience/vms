@@ -14,8 +14,6 @@
 
 #include "counters.h"
 
-#include "thread_vector.h"
-
 std::string thread_id_str()
 {
     static std::mutex insert_mutex;
