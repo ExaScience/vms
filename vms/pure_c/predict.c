@@ -56,8 +56,10 @@ void predict_one_compound(
 			  P_base predictions[num_proteins],
 		const struct Model *m)
 {
-	perf_start("predict_one_compound");
 	L_base latents[num_samples][num_latent];
+
+	perf_start("predict_one_compound");
+	send_features(compound, features);
 	features_loop(features, latents, m->M, m->B);
 	proteins_loop(predictions, latents, m->U);
 	send_predictions(compound, predictions);

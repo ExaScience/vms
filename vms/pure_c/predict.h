@@ -50,7 +50,10 @@ extern int mpi_world_rank;
 void mpi_init(); 
 void mpi_finit();
 void barrier();
+
 void combine_results(int, P_flx);
+
+void send_features(int compound, const F_base data[num_features]);
 void send_predictions(int compound, const P_base data[num_proteins]);
 
 /* GASPI functions */

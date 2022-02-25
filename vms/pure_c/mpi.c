@@ -27,6 +27,7 @@ void mpi_finit()
 }
 
 void send_predictions(int compound, const P_base data[num_proteins]) {}
+void send_features(int compound, const F_base data[num_features]) {}
 
 void combine_results(int num_compounds, P_flx data)
 {
@@ -99,6 +100,23 @@ void *gaspi_malloc(int seg, size_t size)
     SUCCESS_OR_DIE(gaspi_segment_create(seg, size, GASPI_GROUP_ALL, GASPI_BLOCK, GASPI_MEM_UNINITIALIZED));
     SUCCESS_OR_DIE(gaspi_segment_ptr(seg, &ptr));
     return ptr;
+}
+
+void send_features(int compound, const F_base data[num_features]) 
+{
+    /*
+    perf_start(__FUNCTION__);
+
+    if (mpi_world_rank == 0)
+    {
+        int offset = compound * num_features * sizeof(F_base);
+        int size = num_features * sizeof(F_base);
+        int node = 
+        SUCCESS_OR_RETRY(gaspi_write(features_seg, offset, node, features_seg, offset, size, 0, GASPI_BLOCK));
+    }
+
+    perf_end(__FUNCTION__);
+*/
 }
 
 void send_predictions(int compound, const P_base data[num_proteins])
@@ -180,6 +198,7 @@ void barrier() {
 }
 
 void send_predictions(int compound, const P_base data[num_proteins]) {}
+void send_features(int compound, const F_base data[num_features]) {}
 
 void combine_results(int num_compounds,  P_flx predictions) {}
 #endif
