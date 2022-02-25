@@ -49,7 +49,20 @@ static void proteins_loop(
 	} // end proteins
 }
 
-int block_size = 100;
+
+void predict_one_compound(
+		int compound,
+        const F_base features[num_features],
+			  P_base predictions[num_proteins],
+		const struct Model *m)
+{
+	perf_start("predict_one_compound");
+	L_base latents[num_samples][num_latent];
+	features_loop(features, latents, m->M, m->B);
+	proteins_loop(predictions, latents, m->U);
+	mpi_send_compound(compound, predictions);
+	perf_end("predict_one_compound");
+}
 
 void predict_compounds(
 		int start,
@@ -60,32 +73,30 @@ void predict_compounds(
 {
 	perf_start("predict_compounds");
 
-
 #ifdef USE_OMPSS
 	int num_nodes = nanos6_get_num_cluster_nodes();
+	int block_size = 1000;
+	int end = start+num_compounds;
+	for (int i=start; i<end; i+=block_size)
+	{
+		int block = i / block_size;
+		int bs = block_size;
+		if (i+bs > end) bs = end - i;
 
-	for (int i=start; i<start+num_compounds; i+=block_size)
-    {
-#pragma oss task in(features[i;block_size]) in(*m) out(predictions[i;block_size]) node(i%num_nodes)
-		for(int j=i; j<i+block_size; j++)
-#pragma oss task in(features[j]) in(*m) out(predictions[j]) node(nanos6_cluster_no_offload)
-#else
-#ifdef USE_OPENMP
-    #pragma omp parallel for
-#endif
-	for (int j=start; j<start+num_compounds; j++)
-#endif
+#pragma oss task in(features[i;bs]) in(*m) out(predictions[i;bs]) node(block%num_nodes)
+		for(int j=i; j<i+bs; j++)
 		{
-			perf_start("predict_one_compound");
-			L_base latents[num_samples][num_latent];
-			features_loop(features[j], latents, m->M, m->B);
-			proteins_loop(predictions[j], latents, m->U);
-			mpi_send_compound(j, predictions);
-			perf_end("predict_one_compound");
+#pragma oss task in(features[j]) in(*m) out(predictions[j]) node(nanos6_cluster_no_offload)
+			predict_one_compound(j, features[j], predictions[j], m);
 		}
-
-#ifdef USE_OMPSS
 	}
+#endif
+
+/*  OpenMP impl */
+#ifdef USE_OPENMP
+    #pragma omp parallel for schedule(guided)
+	for (int j=start; j<start+num_compounds; j++)
+		predict_one_compound(j, features[j], predictions[j], m);
 #endif
 
 	perf_end("predict_compounds");

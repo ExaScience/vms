@@ -4,8 +4,6 @@
 
 #include "vms_const.h"
 
-extern int block_size;
-
 #define DT_NAME "float"
 
 typedef float U_base;
@@ -53,7 +51,7 @@ void mpi_init();
 void mpi_finit();
 void mpi_barrier();
 void mpi_combine_results(int, P_flx);
-void mpi_send_compound(int compound, P_flx data);
+void mpi_send_compound(int compound, const P_base data[num_proteins]);
 
 /* GASPI functions */
 enum {

@@ -26,7 +26,7 @@ void mpi_finit()
     MPI_Finalize();
 }
 
-void mpi_send_compound(int compound, P_flx data) {}
+void mpi_send_compound(int compound, const P_base data[num_proteins]) {}
 
 void mpi_combine_results(int num_compounds, P_flx data)
 {
@@ -101,7 +101,7 @@ void *gaspi_malloc(int seg, size_t size)
     return ptr;
 }
 
-void mpi_send_compound(int compound, P_flx data)
+void mpi_send_compound(int compound, const P_base data[num_proteins])
 {
     perf_start(__FUNCTION__);
 
@@ -179,7 +179,7 @@ void mpi_barrier() {
 #endif
 }
 
-void mpi_send_compound(int compound, P_flx data) 
+void mpi_send_compound(int compound, const P_base data[num_proteins])
 {
 
     

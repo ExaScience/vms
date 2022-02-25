@@ -110,7 +110,7 @@ int check_result(
 int main(int argc, char *argv[])
 {
     int num_repeat = 1;
-    int num_blocks = 2;
+    int num_compounds = 2;
 
     mpi_init();
 
@@ -121,13 +121,12 @@ int main(int argc, char *argv[])
 
     if (argc > 2 && atoi(argv[2]))
     {
-        num_blocks = atoi(argv[2]);
+        num_compounds = atoi(argv[2]);
     }
 
-    if (num_blocks % mpi_world_size)
-        num_blocks = ((num_blocks / mpi_world_size) + 1) * mpi_world_size;
+    if (num_compounds % mpi_world_size)
+        num_compounds = ((num_compounds / mpi_world_size) + 1) * mpi_world_size;
 
-    size_t num_compounds = num_blocks * block_size;
     size_t num_compounds_per_rank = num_compounds / mpi_world_size;
     size_t block_start = num_compounds_per_rank * mpi_world_rank;
 
@@ -147,7 +146,6 @@ int main(int argc, char *argv[])
         printf("  nrep:  %d\n", num_repeat);
         printf("  nprot: %d\n", num_proteins);
         printf("  ncmpd: %lu\n", num_compounds);
-        printf("  blks:  %d\n", block_size);
         printf("  nfeat: %d\n", num_features);
         printf("  nlat:  %d\n", num_latent);
         printf("  nsmpl: %d\n", num_samples);
