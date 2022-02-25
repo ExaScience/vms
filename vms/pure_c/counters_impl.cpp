@@ -11,6 +11,8 @@
 #include <cmath>
 #include <cassert>
 #include <map>
+#include <vector>
+#include <algorithm>
 
 #include "counters.h"
 
