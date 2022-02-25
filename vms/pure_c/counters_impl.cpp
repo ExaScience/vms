@@ -4,6 +4,7 @@
 
 #include <thread>
 #include <mutex>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -16,12 +17,16 @@
 
 #include "counters.h"
 
+std::string hostname()
+{
+    char hostname[1024];
+    gethostname(hostname, 1024);
+    return std::string(hostname);
+}
+
 std::string thread_id_str()
 {
     static std::mutex insert_mutex;
-
-    char hostname[1024];
-    gethostname(hostname, 1024);
     
     static std::vector<std::thread::id> thread_numbers;
 
@@ -41,7 +46,7 @@ std::string thread_id_str()
 
     std::stringstream ss;
 
-    ss << hostname << "/thread_" << thread_number;
+    ss << hostname() << "/thread_" << thread_number;
     return ss.str();
 }
 
@@ -170,13 +175,11 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 }
 
 void TotalsCounter::print() const {
-    std::mutex printing_mutex;
-    printing_mutex.lock();
+    std::string fname = std::string("vms_") + hostname() + std::string("_prof.out");
+    std::ofstream os(fname.c_str());
 
-    char hostname[1024];
-    gethostname(hostname, 1024);
-    std::cout << "\nTotals on " << hostname << " (" << procid << ") ";
-    std::cout << (hierarchical ? "hierarchical\n" : "flat\n");
+    os << "\nTotals on " << hostname() << " (" << procid << ") ";
+    os << (hierarchical ? "hierarchical\n" : "flat\n");
 
     const auto total = data.find("main");
     for(auto &t : data)
@@ -184,14 +187,12 @@ void TotalsCounter::print() const {
         auto parent_name = t.first.substr(0, t.first.find_last_of("/"));
         const auto parent = data.find(parent_name);
         if (hierarchical && parent != data.end())
-            std::cout << t.second.as_string(parent->second, hierarchical);
+            os << t.second.as_string(parent->second, hierarchical);
         else if (!hierarchical && total != data.end())
-            std::cout << t.second.as_string(total->second, hierarchical);
+            os << t.second.as_string(total->second, hierarchical);
         else
-            std::cout << t.second.as_string(hierarchical);
+            os << t.second.as_string(hierarchical);
     }
-
-    printing_mutex.unlock();
 }
 
 void perf_data_init()
