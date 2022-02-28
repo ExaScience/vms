@@ -72,8 +72,8 @@ def patch_file(fname, pattern, repl):
     with open(fname, "w") as f:
         f.write(new_content)
 
-def resource_utilization(dir = "."):
-    report_files = glob.glob(f'{dir}/**/*_csynth.xml', recursive=True)
+def resource_utilization(dir = ".", kernel = "predict_one_block"):
+    report_files = glob.glob(f'{dir}/**/{kernel}_csynth.xml', recursive=True)
     for report_file in report_files:
         root = cET.parse(report_file).getroot()
         area = root.find('AreaEstimates')
@@ -91,17 +91,19 @@ def resource_utilization(dir = "."):
             ]
         )
 
-        build_logger().info("Resource utilization of %s:\n%s\n%s", report_file, header, as_string)
+        build_logger().info("Resource utilization of %s:\n%s:\n%s\n%s", report_file, kernel, header, as_string)
 
     return merged
 
-def latency_estimation(dir = "."):
-    report_files = glob.glob(f'{dir}/**/*_csynth.xml', recursive=True)
+def latency_estimation(dir = ".", kernel = "predict_one_block"):
+    report_files = glob.glob(f'{dir}/**/{kernel}_csynth.xml', recursive=True)
     for report_file in report_files:
         root = cET.parse(report_file).getroot()
         latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
-        latency = int(latency_node.text)
-        build_logger().info("Average latency of %s:\n%d", report_file, latency)
+        cycles = int(latency_node.text) 
+        latency_milliseconds_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseRealTimeLatency')
+        milliseconds = latency_milliseconds_node.text
+        build_logger().info("Average latency of %s:\n%s: %d cycles - %s", report_file, kernel, cycles, milliseconds)
 
 def log_xtasks_config(dir = "."):
     config_files = glob.glob(f'{dir}/**/*xtasks.config', recursive=True) 
@@ -135,7 +137,9 @@ def action_report(builddir):
     if builddir is None:
         builddir = "."
 
-    hlsdir = os.path.join(builddir, "hls")
+    hlsdir = os.path.join(builddir, "opencl", "hw_emu", "**", "hls.app")
+    hlsdir = glob.glob(hlsdir, recursive=True).pop()
+    hlsdir = os.path.dirname(hlsdir)
     resource_utilization(hlsdir)
     latency_estimation(hlsdir)
 
