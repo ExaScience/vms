@@ -82,7 +82,7 @@ clean:
 	$(MAKE) -C fpga-zcu102 cleancommon
 	$(MAKE) -C opencl clean
 
-report: hls opencl-hwemu
+report: opencl-hwemu
 	python3 $(SRCDIR)/scripts/build.py --builddir . report
 
 updatelinks:
