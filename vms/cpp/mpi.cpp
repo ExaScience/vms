@@ -1,13 +1,11 @@
 
+#include "predict.h"
 
 #ifdef USE_MPI
 
 #include <cassert>
 #include <cstdio>
 #include <mpi.h>
-
-#include "predict.h"
-
 
 void mpi_init(int &mpi_world_size, int &mpi_world_rank) 
 {
