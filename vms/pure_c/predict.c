@@ -77,19 +77,21 @@ void predict_compounds(
 
 #ifdef USE_OMPSS
 	int num_nodes = nanos6_get_num_cluster_nodes();
-	int block_size = num_compounds / num_nodes;
+	int per_node = num_compounds / num_nodes;
 	int end = start+num_compounds;
-	for (int i=start; i<end; i+=block_size)
+	for (int i=start; i<end; i+=per_node)
 	{
-		int block = i / block_size;
-		int bs = block_size;
-		if (i+bs > end) bs = end - i;
+		int node_id = (i / per_node) % num_nodes ;
+		if (i+per_node > end) per_node = end - i;
 
-#pragma oss task in(features[i;bs]) in(*m) out(predictions[i;bs]) node(block%num_nodes)
-		for(int j=i; j<i+bs; j++)
+#pragma oss task in(features[i;per_node]) in(*m) out(predictions[i;per_node]) node(node_id)
 		{
-#pragma oss task in(features[j]) in(*m) out(predictions[j]) node(nanos6_cluster_no_offload)
-			predict_one_compound(j, features[j], predictions[j], m);
+
+/* #pragma oss task in(features[j;per_task]) in(*m) out(predictions[j;per_task]) node(nanos6_cluster_no_offload) */
+#pragma oss task for in(features[i;per_node]) in(*m) out(predictions[i;per_node]) \
+	node(nanos6_cluster_no_offload) chunksize(10)
+			for(int k=i; k<i+per_node; k++)
+				predict_one_compound(k, features[k], predictions[k], m);
 		}
 	}
 #endif
