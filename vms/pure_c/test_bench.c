@@ -88,16 +88,16 @@ int check_result(
 #ifdef USE_OPENMP
 #pragma omp parallel for
 #endif
+#ifdef USE_OMPSS
+#pragma oss task for in(out[0;num_compounds]) out(errors_per_compound[0;num_compounds]) \
+                     node(nanos6_cluster_no_offload) chunksize(100)
+#endif
     for (int c = 0; c < num_compounds; c++)
     {
-#ifdef USE_OMPSS
-#pragma oss task in(out[c]) out(errors_per_compound[c])
-#endif
         errors_per_compound[c] = check_compound(c, out, ref);
     }
 
 #ifdef USE_OMPSS
-//#pragma oss task in(errors_per_compound[0;num_compounds])
 #pragma oss taskwait
 #endif
 

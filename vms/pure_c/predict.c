@@ -87,13 +87,14 @@ void predict_compounds(
 #pragma oss task in(features[i;per_node]) in(*m) out(predictions[i;per_node]) node(node_id)
 		{
 
-/* #pragma oss task in(features[j;per_task]) in(*m) out(predictions[j;per_task]) node(nanos6_cluster_no_offload) */
 #pragma oss task for in(features[i;per_node]) in(*m) out(predictions[i;per_node]) \
-	node(nanos6_cluster_no_offload) chunksize(10)
+	node(nanos6_cluster_no_offload) chunksize(100)
 			for(int k=i; k<i+per_node; k++)
 				predict_one_compound(k, features[k], predictions[k], m);
 		}
 	}
+
+#pragma oss taskwait
 #endif
 
 /*  OpenMP impl */
