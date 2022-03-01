@@ -29,5 +29,5 @@ $(OUTPUTDIR)/%.o: %.cpp
 .PHONY: clean
 
 clean:
-	rm -f */*.o */$(PROGRAM)
+	rm -f */*.o */predict mcc_*.c
 
