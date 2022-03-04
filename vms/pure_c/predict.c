@@ -98,7 +98,7 @@ void predict_compounds(
 	}
 
 #pragma oss taskwait
-#endif
+#else
 
 /*  OpenMP / plain impl */
 #ifdef USE_OPENMP
@@ -106,6 +106,7 @@ void predict_compounds(
 #endif
 	for (int j=start; j<start+num_compounds; j++)
 		predict_one_compound(j, features[j], predictions[j], m);
+#endif
 
 	perf_end("predict_compounds");
 } // end function
