@@ -41,11 +41,11 @@ void send_inputs(int num_compounds, F_flx features)
         for(int rank=1; rank<mpi_world_size; rank++)
         {
             void *send_ptr = &features[rank * num_compounds_per_rank];
-            MPI_Send(send_ptr, count, MPI_FLOAT, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Send(send_ptr, count, MPI_FLOAT, rank, 1, MPI_COMM_WORLD);
         }
     } else {
         void *recv_ptr = &features[mpi_world_rank * num_compounds_per_rank];
-        MPI_Recv(recv_ptr, count, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
+        MPI_Recv(recv_ptr, count, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     perf_end(__FUNCTION__);
