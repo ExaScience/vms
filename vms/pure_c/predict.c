@@ -79,6 +79,7 @@ void predict_compounds(
 #ifdef USE_OMPSS
 	int num_nodes = nanos6_get_num_cluster_nodes();
 	int per_node = num_compounds / num_nodes / 100;
+	if (per_node == 0) per_node = 1;
 	printf("per node: %d\n", per_node);
 	int end = start+num_compounds;
 	for (int i=start; i<end; i+=per_node)
