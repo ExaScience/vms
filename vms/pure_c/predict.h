@@ -51,6 +51,7 @@ void mpi_init();
 void mpi_finit();
 void barrier();
 
+void send_inputs(int, F_flx);
 void combine_results(int, P_flx);
 
 void send_features(int compound, const F_base data[num_features]);

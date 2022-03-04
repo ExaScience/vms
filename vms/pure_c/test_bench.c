@@ -140,12 +140,17 @@ int main(int argc, char *argv[])
     F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
                         errors_per_compound =                     (int*)dmalloc(sizeof(int) * num_compounds, errors_seg);
 
+    int nerrors = 0;
+
+    printf("Prepare model\n");
+    struct Model *m = prepare_model(U, M, B);
+
     if (mpi_world_rank == 0) 
     {
         printf("  dt:    %s\n", DT_NAME);
         printf("  nrep:  %d\n", num_repeat);
         printf("  nprot: %d\n", num_proteins);
-        printf("  ncmpd: %lu\n", num_compounds);
+        printf("  ncmpd: %d\n", num_compounds);
         printf("  nfeat: %d\n", num_features);
         printf("  nlat:  %d\n", num_latent);
         printf("  nsmpl: %d\n", num_samples);
@@ -153,27 +158,24 @@ int main(int argc, char *argv[])
         printf("  nthrds: %d\n", omp_get_max_threads());
         printf("  nnodes: %d\n", mpi_world_size);
 #endif
+
+        printf("Prepare input\n");
+        prepare_tb_input(num_compounds, tb_input, tb_input_block);
+        printf("Prepare output\n");
+        prepare_tb_output(num_compounds, tb_output_block);
+
+        printf("Predicting\n");
     }
-
-    int nerrors = 0;
-
-    if (mpi_world_rank == 0) printf("Prepare input\n");
-    prepare_tb_input(num_compounds, tb_input, tb_input_block);
-
-    if (mpi_world_rank == 0) printf("Prepare model\n");
-    struct Model *m = prepare_model(U, M, B);
-
-    if (mpi_world_rank == 0) printf("Predicting\n");
 
     double elapsed = 1e6;
     for(int n=0; n<num_repeat; n++)
     {
-        prepare_tb_output(num_compounds, tb_output_block);
         barrier();
 
         perf_start("main");
 
         double start = tick();
+        send_inputs(num_compounds, tb_input_block);
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         combine_results(num_compounds, tb_output_block);
         nerrors += check_result(num_compounds, tb_output_block, tb_ref);

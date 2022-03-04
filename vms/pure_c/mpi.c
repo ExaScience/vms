@@ -29,15 +29,48 @@ void mpi_finit()
 void send_predictions(int compound, const P_base data[num_proteins]) {}
 void send_features(int compound, const F_base data[num_features]) {}
 
-void combine_results(int num_compounds, P_flx data)
+void send_inputs(int num_compounds, F_flx features)
 {
     perf_start(__FUNCTION__);
-    int block_size = 1000;
-    for(int i=0; i<num_compounds;i+=block_size)
+
+    size_t num_compounds_per_rank = num_compounds / mpi_world_size;
+    size_t count = num_compounds_per_rank * num_features;
+
+    if (mpi_world_rank == 0)
     {
-        if (i+block_size > num_compounds) block_size = num_compounds - i;
-        MPI_Allreduce(MPI_IN_PLACE, data[i], block_size*num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+        for(int rank=1; rank<mpi_world_size; rank++)
+        {
+            void *send_ptr = &features[rank * num_compounds_per_rank];
+            MPI_Send(send_ptr, count, MPI_FLOAT, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+    } else {
+        void *recv_ptr = &features[mpi_world_rank * num_compounds_per_rank];
+        MPI_Recv(recv_ptr, count, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
     }
+
+    perf_end(__FUNCTION__);
+}
+
+
+void combine_results(int num_compounds, P_flx predictions)
+{
+    perf_start(__FUNCTION__);
+
+    size_t num_compounds_per_rank = num_compounds / mpi_world_size;
+    size_t count = num_compounds_per_rank * num_proteins;
+
+    if (mpi_world_rank == 0)
+    {
+        for(int rank=1; rank<mpi_world_size; rank++)
+        {
+            void *recv_ptr = &predictions[rank * num_compounds_per_rank];
+            MPI_Recv(recv_ptr, count, MPI_UNSIGNED_CHAR, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+    } else {
+        void *send_ptr = &predictions[mpi_world_rank * num_compounds_per_rank];
+        MPI_Send(send_ptr, count, MPI_UNSIGNED_CHAR, 0, 1, MPI_COMM_WORLD);
+    }
+
     perf_end(__FUNCTION__);
 }
 
@@ -205,5 +238,6 @@ void barrier() {
 void send_predictions(int compound, const P_base data[num_proteins]) {}
 void send_features(int compound, const F_base data[num_features]) {}
 
+void send_inputs(int num_compounds,  F_flx features) {}
 void combine_results(int num_compounds,  P_flx predictions) {}
 #endif
