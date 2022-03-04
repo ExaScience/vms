@@ -146,6 +146,13 @@ void send_features(int compound, const F_base data[num_features])
 {
     if (mpi_world_rank == 0) return;
 
+
+    if (compound_received >= compound)
+    {
+        // printf("%d: features: not waiting for compound %d, already received up to %d\n", mpi_world_rank, compound, compound_received);
+        return;
+    }
+
     perf_start(__FUNCTION__);
 
 #ifdef USE_OPENMP
@@ -153,14 +160,14 @@ void send_features(int compound, const F_base data[num_features])
 #endif
     {
 
-        printf("%d: features: waiting for compound %d, already received up to %d\n", mpi_world_rank, compound, compound_received);
+        // printf("%d: features: waiting for compound %d, already received up to %d\n", mpi_world_rank, compound, compound_received);
         while (compound_received < compound)
         {
             gaspi_notification_id_t id;
             gaspi_notification_t val = 0;
             SUCCESS_OR_DIE(gaspi_notify_waitsome(features_seg, 1, 1, &id, GASPI_BLOCK));
             SUCCESS_OR_DIE(gaspi_notify_reset(features_seg, id, &val));
-            printf("%d: features: Received notification with id %d and value %d\n", mpi_world_rank, id, val);
+            // printf("%d: features: Received notification with id %d and value %d\n", mpi_world_rank, id, val);
             if (compound_received < val)
                 compound_received = val;
         }
@@ -171,14 +178,14 @@ void send_features(int compound, const F_base data[num_features])
 
 void send_predictions(int compound, const P_base data[num_proteins])
 {
+    if (mpi_world_rank == 0)
+        return;
+
     perf_start(__FUNCTION__);
 
-    if (mpi_world_rank != 0)
-    {
-        int offset = compound * num_proteins * sizeof(P_base);
-        int size = num_proteins * sizeof(P_base);
-        SUCCESS_OR_RETRY(gaspi_write(predictions_seg, offset, 0, predictions_seg, offset, size, 0, GASPI_BLOCK));
-    }
+    int offset = compound * num_proteins * sizeof(P_base);
+    int size = num_proteins * sizeof(P_base);
+    SUCCESS_OR_RETRY(gaspi_write(predictions_seg, offset, 0, predictions_seg, offset, size, 0, GASPI_BLOCK));
 
     perf_end(__FUNCTION__);
 }
@@ -224,7 +231,7 @@ void send_inputs(int num_compounds, F_flx features)
                 int size = num_features * sizeof(F_base);
                 SUCCESS_OR_RETRY(gaspi_write_notify(features_seg, offset, rank, features_seg, offset, size, 
                     1, compound, 0, GASPI_BLOCK));
-                printf("%d: features: Sent notification with id %d and value %d to %d\n", mpi_world_rank, 1, compound, rank);
+                // printf("%d: features: Sent notification with id %d and value %d to %d\n", mpi_world_rank, 1, compound, rank);
             }
         }
     }
@@ -241,7 +248,7 @@ void combine_results(int num_compounds, P_flx data)
     if (mpi_world_rank != 0)
     {
         SUCCESS_OR_RETRY(gaspi_notify(predictions_seg, 0, mpi_world_rank, 1, 0, GASPI_BLOCK));
-        printf("%d: predictions: Sent notification with id %d and value %d\n", mpi_world_rank, mpi_world_rank, 1);
+        // printf("%d: predictions: Sent notification with id %d and value %d\n", mpi_world_rank, mpi_world_rank, 1);
     }
     else
     {
@@ -251,7 +258,7 @@ void combine_results(int num_compounds, P_flx data)
             gaspi_notification_t val = 0;
             SUCCESS_OR_DIE(gaspi_notify_waitsome(predictions_seg, 1, mpi_world_size-1, &id, GASPI_BLOCK));
             SUCCESS_OR_DIE(gaspi_notify_reset(predictions_seg, id, &val));
-            printf("%d: predictions: Collected %d-th notification with id %d and value %d\n", mpi_world_rank, k, id, val);
+            // printf("%d: predictions: Collected %d-th notification with id %d and value %d\n", mpi_world_rank, k, id, val);
         }
     }
 
