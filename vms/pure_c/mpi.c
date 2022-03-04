@@ -190,6 +190,28 @@ void mpi_finit()
     MPI_Finalize();
 }
 
+void send_inputs(int num_compounds, F_flx features)
+{
+    perf_start(__FUNCTION__);
+
+    size_t num_compounds_per_rank = num_compounds / mpi_world_size;
+    size_t count = num_compounds_per_rank * num_features;
+
+    if (mpi_world_rank == 0)
+    {
+        for(int rank=1; rank<mpi_world_size; rank++)
+        {
+            void *send_ptr = &features[rank * num_compounds_per_rank];
+            MPI_Send(send_ptr, count, MPI_FLOAT, rank, 1, MPI_COMM_WORLD);
+        }
+    } else {
+        void *recv_ptr = &features[mpi_world_rank * num_compounds_per_rank];
+        MPI_Recv(recv_ptr, count, MPI_FLOAT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    perf_end(__FUNCTION__);
+}
+
 void combine_results(int num_compounds, P_flx data)
 {
     perf_start(__FUNCTION__);
