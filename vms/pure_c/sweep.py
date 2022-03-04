@@ -7,7 +7,7 @@ import shutil
 import logging
 import itertools
 import datetime
-from subprocess import check_call, STDOUT
+from subprocess import CalledProcessError, check_call, STDOUT
 import re
 
 SCRIPT=os.path.realpath(__file__)
@@ -131,11 +131,14 @@ def run(basedir, name, nodes, args):
     dir = os.path.dirname(script)
 
     logging.debug("Executing '%s'", script)
-    check_call(script)
+    try:
+        check_call(script)
 
-    #0: 149.2480 giga-ops; 59.7004 giga-ops/second (32-bit floating point ops)
-    giga_ops = float(find_re(join(dir, "vms.out"), "^0:.+ ([0-9.]+) giga-ops/second"))
-    logging.info(f" env = {name}, nodes = {nodes}, args = {args}, perf = {giga_ops} giga-ops/second") 
+        #0: 149.2480 giga-ops; 59.7004 giga-ops/second (32-bit floating point ops)
+        giga_ops = float(find_re(join(dir, "vms.out"), "^0:.+ ([0-9.]+) giga-ops/second"))
+        logging.info(f" env = {name}, nodes = {nodes}, args = {args}, perf = {giga_ops} giga-ops/second") 
+    except CalledProcessError as e:
+        logging.info(f" env = {name}, nodes = {nodes}, args = {args}, FAILED = {e}") 
 
 def main():
     parser = argparse.ArgumentParser(description="Explore multiple datasets, spack envs and #nodes")
