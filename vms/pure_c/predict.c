@@ -100,12 +100,12 @@ void predict_compounds(
 #pragma oss taskwait
 #endif
 
-/*  OpenMP impl */
+/*  OpenMP / plain impl */
 #ifdef USE_OPENMP
     #pragma omp parallel for schedule(guided)
+#endif
 	for (int j=start; j<start+num_compounds; j++)
 		predict_one_compound(j, features[j], predictions[j], m);
-#endif
 
 	perf_end("predict_compounds");
 } // end function
