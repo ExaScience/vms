@@ -32,9 +32,11 @@ void send_features(int compound, const F_base data[num_features]) {}
 void combine_results(int num_compounds, P_flx data)
 {
     perf_start(__FUNCTION__);
-    for(int i=0; i<num_compounds;++i)
+    int block_size = 1000;
+    for(int i=0; i<num_compounds;i+=block_size)
     {
-        MPI_Allreduce(MPI_IN_PLACE, data[i], num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+        if (i+block_size > num_compounds) block_size = num_compounds - i;
+        MPI_Allreduce(MPI_IN_PLACE, data[i], block_size*num_proteins, MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
     }
     perf_end(__FUNCTION__);
 }
