@@ -196,11 +196,11 @@
 	# Possible values: "disabled", "mpi-2sided", "argodsm"
 	communication = "argodsm"
 	# Choose the distributed memory for Cluster mode. Default is 2GB
-	distributed_memory = "128G"
+	distributed_memory = "64G"
 	# Choose the local memory for Cluster mode. Default is none (not set), which means that the
 	# runtime will allocate minimum between 2GB and the 5% of the total physical memory of the
 	# machine
-	local_memory = "64G"
+	local_memory = "4G"
 	# Indicate the scheduling policy for Cluster mode. Default is "locality"
 	# Possible values: "locality", "random"
 	scheduling_policy = "locality"

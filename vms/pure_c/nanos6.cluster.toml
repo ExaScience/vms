@@ -16,7 +16,7 @@
 	dependencies = "regions"
 	# Choose the instrumentation variant to run. Default is "none"
 	# Possible values: "none", "ctf", "extrae", "graph", "lint", "stats", "verbose"
-	instrument = "extrae"
+	instrument = "none"
 
 [turbo]
 	# Choose whether enabling floating-point unit optimizations in all Nanos6 threads. Enabling this
@@ -194,7 +194,7 @@
 	# Choose the communication layer to be used for Cluster communication between processes. The
 	# "disabled" value disables the Cluster mode. Default is "disabled"
 	# Possible values: "disabled", "mpi-2sided"
-	communication = "disabled"
+	communication = "mpi-2sided"
 	# Choose the distributed memory for Cluster mode. Default is 2GB
 	distributed_memory = "128G"
 	# Choose the local memory for Cluster mode. Default is none (not set), which means that the
