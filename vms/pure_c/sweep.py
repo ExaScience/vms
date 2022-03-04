@@ -27,7 +27,6 @@ SPECS = {
    "mpi"           : (True,  "impl=mpi" + MPI, ),
    "gpi"           : (True,  "impl=gpi" + GPI + MPI, ),
    "ompss-cluster" : (True,  "impl=ompss ^nanos6@cluster " + MPI, ),
-   "ompss-argo"    : (True,  "impl=ompss ^nanos6@argodsm " + MPI, ),
 }
 
 ENVS = SPECS.keys()
