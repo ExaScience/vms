@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from glob import glob
 from os.path import join
 import shutil
 import logging
@@ -137,12 +138,22 @@ def run(basedir, name, nodes, args):
     except CalledProcessError as e:
         logging.info(f" env = {name}, nodes = {nodes}, args = {args}, FAILED = {e}") 
 
+def report(basedir):
+    output_files = glob(join(basedir,'*', '*', 'vms.out'), recursive=True)
+    for file in output_files:
+        name, nodes = file.split("/")[-3:-1]
+        #0: 149.2480 giga-ops; 59.7004 giga-ops/second (32-bit floating point ops)
+        giga_ops = float(find_re(file, "^0:.+ ([0-9.]+) giga-ops/second"))
+        logging.info(f" env = {name}, nodes = {nodes}, perf = {giga_ops} giga-ops/second") 
+
+
+
 def main():
     parser = argparse.ArgumentParser(description="Explore multiple datasets, spack envs and #nodes")
     parser.add_argument("--nodes", default="1,2,4,8,16")
     parser.add_argument("--envs", default=",".join(ENVS))
     parser.add_argument("--basedir", default="run_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S"))
-    parser.add_argument("command", default="run", choices=["install", "populate", "run", "spec"])
+    parser.add_argument("command", default="run", choices=["install", "populate", "run", "spec", "report"])
     parser.add_argument("args", nargs="*", default="2 1000000")
 
     args = parser.parse_args()
@@ -150,13 +161,16 @@ def main():
     basedir = os.path.realpath(args.basedir)
     envs = args.envs.split(",")
     nodes = map(int, args.nodes.split(","))
-    func_map = { "run" : run, "populate" : populate, "install" : install, "spec" : spec }
+    func_map = { "run" : run, "populate" : populate, "install" : install, "spec" : spec, "report" : report }
     func = func_map[args.command]
 
     if args.command in [ "run",  "populate" ]:
-        logging.info(f"basedir = {args.basedir}")
+        logging.info(f"basedir = {basedir}")
         for env, nodes in itertools.product(envs, nodes):
             func(basedir, env, nodes, args.args)
+    elif args.command in [ "report" ]:
+        logging.info(f"basedir = {basedir}")
+        func(basedir)
     else:
         for e in envs:
             func(e)
