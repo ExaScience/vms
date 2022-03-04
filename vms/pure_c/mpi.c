@@ -64,11 +64,11 @@ void combine_results(int num_compounds, P_flx predictions)
         for(int rank=1; rank<mpi_world_size; rank++)
         {
             void *recv_ptr = &predictions[rank * num_compounds_per_rank];
-            MPI_Recv(recv_ptr, count, MPI_UNSIGNED_CHAR, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(recv_ptr, count, MPI_FLOAT, rank, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
     } else {
         void *send_ptr = &predictions[mpi_world_rank * num_compounds_per_rank];
-        MPI_Send(send_ptr, count, MPI_UNSIGNED_CHAR, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(send_ptr, count, MPI_FLOAT, 0, 1, MPI_COMM_WORLD);
     }
 
     perf_end(__FUNCTION__);
