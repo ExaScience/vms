@@ -1,3 +1,4 @@
+#include <stdio.h>
 
 #include "predict.h"
 
@@ -77,7 +78,8 @@ void predict_compounds(
 
 #ifdef USE_OMPSS
 	int num_nodes = nanos6_get_num_cluster_nodes();
-	int per_node = num_compounds / num_nodes;
+	int per_node = num_compounds / num_nodes / 100;
+	printf("per node: %d\n", per_node);
 	int end = start+num_compounds;
 	for (int i=start; i<end; i+=per_node)
 	{
@@ -91,7 +93,7 @@ void predict_compounds(
 	node(nanos6_cluster_no_offload) chunksize(100)
 			for(int k=i; k<i+per_node; k++)
 				predict_one_compound(k, features[k], predictions[k], m);
-		}
+		} /* end weak task */
 	}
 
 #pragma oss taskwait
