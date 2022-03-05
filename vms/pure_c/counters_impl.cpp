@@ -72,13 +72,12 @@ struct Counter {
 struct TotalsCounter {
     private:
         std::map<std::string, Counter> data;
-        int procid;
         bool hierarchical;
         void print_body(const std::string &, bool) const;
 
     public:
         //c-tor starts PAPI
-        TotalsCounter(bool = true, int p = 0);
+        TotalsCounter(bool = true);
         ~TotalsCounter();
 
         void operator+=(const TotalsCounter &other);
@@ -159,8 +158,8 @@ std::string Counter::as_string(bool hier) const
     return os.str();
 }
 
-TotalsCounter::TotalsCounter(bool h, int p) 
- : procid(p), hierarchical(h)
+TotalsCounter::TotalsCounter(bool h) 
+ : hierarchical(h)
 {
 }
 
@@ -175,10 +174,11 @@ void TotalsCounter::operator+=(const TotalsCounter &other)
 }
 
 void TotalsCounter::print() const {
-    std::string fname = std::string("vms_") + hostname() + std::string("_prof.out");
+    std::string mode = (hierarchical ? "hier" : "flat");
+    std::string fname = std::string("vms_") + hostname() + "_" + std::to_string(getpid()) + "_" + mode + std::string("_prof.out");
     std::ofstream os(fname.c_str());
 
-    os << "\nTotals on " << hostname() << " (" << procid << ") ";
+    os << "\nTotals on " << hostname() << " (" << getpid() << ") ";
     os << (hierarchical ? "hierarchical\n" : "flat\n");
 
     const auto total = data.find("main");
