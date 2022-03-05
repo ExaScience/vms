@@ -168,8 +168,7 @@ void send_features(int compound, const F_base data[num_features])
             SUCCESS_OR_DIE(gaspi_notify_waitsome(features_seg, 1, 1, &id, GASPI_BLOCK));
             SUCCESS_OR_DIE(gaspi_notify_reset(features_seg, id, &val));
             // printf("%d: features: Received notification with id %d and value %d\n", mpi_world_rank, id, val);
-            if (compound_received < val)
-                compound_received = val;
+            compound_received = val;
         }
     }
 
@@ -219,18 +218,20 @@ void send_inputs(int num_compounds, F_flx features)
 
     size_t num_compounds_per_rank = num_compounds / mpi_world_size;
     size_t count = num_compounds_per_rank * num_features;
+    size_t block_size = 1000;
 
     if (mpi_world_rank == 0)
     {
         for(int rank=1; rank<mpi_world_size; rank++)
         {
-            for(int c=0; c<num_compounds_per_rank; ++c)
+            for(int c=0; c<num_compounds_per_rank; c+=block_size)
             {
                 int compound = c + rank*num_compounds_per_rank;
                 int offset = compound * num_features * sizeof(F_base);
-                int size = num_features * sizeof(F_base);
+                if (compound + block_size > num_compounds) block_size = num_compounds - compound;
+                int size = num_features * sizeof(F_base) * block_size;
                 SUCCESS_OR_RETRY(gaspi_write_notify(features_seg, offset, rank, features_seg, offset, size, 
-                    1, compound, 0, GASPI_BLOCK));
+                    1, compound + block_size, 0, GASPI_BLOCK));
                 // printf("%d: features: Sent notification with id %d and value %d to %d\n", mpi_world_rank, 1, compound, rank);
             }
         }
