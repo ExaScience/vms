@@ -10,6 +10,8 @@ import itertools
 import datetime
 from subprocess import CalledProcessError, check_call, STDOUT
 import re
+import pandas as pd
+
 
 SCRIPT=os.path.realpath(__file__)
 SCRIPTPATH=os.path.dirname(SCRIPT)
@@ -140,11 +142,26 @@ def run(basedir, name, nodes, args):
 
 def report(basedir):
     output_files = glob(join(basedir,'*', '*', 'vms.out'), recursive=True)
+    results = []
     for file in output_files:
         name, nodes = file.split("/")[-3:-1]
+        nodes = int(re.search("nodes_(\d+)", nodes).group(1))
         #0: 149.2480 giga-ops; 59.7004 giga-ops/second (32-bit floating point ops)
         giga_ops = float(find_re(file, "^0:.+ ([0-9.]+) giga-ops/second"))
         logging.info(f" env = {name}, nodes = {nodes}, perf = {giga_ops} giga-ops/second") 
+        results.append([name, nodes, giga_ops])
+
+    df = pd.DataFrame(results, columns=["name", "nodes", "giga-ops"])
+
+    import matplotlib.pyplot as plt
+
+    df.set_index('nodes', inplace=True)
+    df.sort_index(inplace=True)
+    df.groupby("name")['giga-ops'].plot(legend=True)
+
+    plt.savefig("giga_ops.svg")
+
+    return results
 
 
 
