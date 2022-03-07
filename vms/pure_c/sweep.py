@@ -16,7 +16,7 @@ import pandas as pd
 SCRIPT=os.path.realpath(__file__)
 SCRIPTPATH=os.path.dirname(SCRIPT)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # MPI = " ^openmpi+pmix+thread_multiple fabrics=ofi,ucx schedulers=tm ^openpbs ^ucx+mlx5-dv"
 MPI = " ^intel-oneapi-mpi"
