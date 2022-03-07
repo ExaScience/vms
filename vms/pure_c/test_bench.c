@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
         combine_results(num_compounds, tb_output_block);
         nerrors += check_result(num_compounds, tb_output_block, tb_ref);
         double stop = tick();
-        printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, stop-start, num_compounds / (stop-start));
+        printf("%d: iteration %d took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, n, stop-start, num_compounds / (stop-start));
         if (stop-start < elapsed) elapsed = stop-start;
 
         perf_end("main");
