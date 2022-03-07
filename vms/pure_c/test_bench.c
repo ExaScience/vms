@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #ifdef USE_OPENMP
 #include <omp.h>
 #endif
+
+
 
 #include "predict.h"
 #include "vms_tb.h"
@@ -158,18 +161,22 @@ int main(int argc, char *argv[])
         printf("  nthrds: %d\n", omp_get_max_threads());
         printf("  nnodes: %d\n", mpi_world_size);
 #endif
-
-        printf("Prepare input\n");
-        prepare_tb_input(num_compounds, tb_input, tb_input_block);
-        printf("Prepare output\n");
-        prepare_tb_output(num_compounds, tb_output_block);
-
-        printf("Predicting\n");
     }
 
     double elapsed = 1e6;
     for(int n=0; n<num_repeat; n++)
     {
+        barrier();
+
+        if (mpi_world_rank == 0) 
+        {
+        printf("Prepare input\n");
+        prepare_tb_input(num_compounds, tb_input, tb_input_block);
+        printf("Prepare output\n");
+        prepare_tb_output(num_compounds, tb_output_block);
+        printf("Predicting\n");
+    }
+
         barrier();
 
         perf_start("main");
@@ -180,13 +187,13 @@ int main(int argc, char *argv[])
         combine_results(num_compounds, tb_output_block);
         nerrors += check_result(num_compounds, tb_output_block, tb_ref);
         double stop = tick();
+        printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, stop-start, num_compounds / (stop-start));
         if (stop-start < elapsed) elapsed = stop-start;
 
         perf_end("main");
 
     }
 
-    printf("%d: took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, elapsed, num_compounds / elapsed);
 
     // terra-ops aka 10^12 ops
     double tops = (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
