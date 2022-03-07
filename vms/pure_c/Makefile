@@ -1,6 +1,16 @@
 
-.PHONY: test all
+.PHONY: test all TRACE
 
+trace: predict.prv
+
+predict.prv: ompss/predict
+	export NANOS6_CONFIG_OVERRIDE=version.instrument=extrae && \
+	unset EXTRAE_CONFIG_FILE && \
+		mpirun -np 2 taskset -c 0-8 ./ompss/predict 2 10000
+	mpi2prv set-0/*
+
+ompss/predict:
+	$(MAKE) -f Makefile.ompss
 
 all:
 	$(MAKE) -f Makefile.plain
@@ -16,4 +26,9 @@ test:
 	taskset -c 0-3 ./ompss/predict 2 20000
 	taskset -c 0-3 ./omp/predict 2 20000
 
-include Makefile.common
+.PHONY: clean
+
+clean:
+	rm -f */*.o */predict mcc_*.c *out
+	rm -f *.mpits *.prv *.pcf *.row
+	rm -rf set-0

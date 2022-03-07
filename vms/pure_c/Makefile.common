@@ -26,8 +26,3 @@ $(OUTPUTDIR)/%.o: %.cpp
 	@mkdir -p $(OUTPUTDIR)
 	$(CXX) $(CFLAGS) -c $^ -o $@ 
 
-.PHONY: clean
-
-clean:
-	rm -f */*.o */predict mcc_*.c
-
