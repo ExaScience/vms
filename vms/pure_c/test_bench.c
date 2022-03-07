@@ -14,7 +14,7 @@ const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
 #ifdef USE_OMPSS
-#pragma oss task out(out[0;num_compounds])
+#pragma oss task out(out[0;num_compounds]) label("prepare_tb_input")
 #endif
 void prepare_tb_input(
     int num_compounds,
@@ -27,7 +27,7 @@ void prepare_tb_input(
 }
 
 #ifdef USE_OMPSS
-#pragma oss task out(out[0;num_compounds])
+#pragma oss task out(out[0;num_compounds]) label("prepare_tb_output")
 #endif
 void prepare_tb_output(
     int num_compounds,
@@ -90,7 +90,7 @@ int check_result(
 #endif
 #ifdef USE_OMPSS
 #pragma oss task for in(out[0;num_compounds]) out(errors_per_compound[0;num_compounds]) \
-                     node(nanos6_cluster_no_offload) chunksize(100)
+                        node(nanos6_cluster_no_offload) chunksize(100) label("check_results")
 #endif
     for (int c = 0; c < num_compounds; c++)
     {

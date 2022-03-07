@@ -87,11 +87,12 @@ void predict_compounds(
 		int node_id = (i / per_node) % num_nodes ;
 		if (i+per_node > end) per_node = end - i;
 
-#pragma oss task weakin(features[i;per_node]) weakin(*m) weakout(predictions[i;per_node]) node(node_id)
+#pragma oss task weakin(features[i;per_node]) weakin(*m) weakout(predictions[i;per_node]) node(node_id) \
+	label("outer_predict_task")
 		{
 
 #pragma oss task for in(features[i;per_node]) in(*m) out(predictions[i;per_node]) \
-	node(nanos6_cluster_no_offload) chunksize(100)
+	node(nanos6_cluster_no_offload) chunksize(100) label("inner_predict_task")
 			for(int k=i; k<i+per_node; k++)
 				predict_one_compound(k, features[k], predictions[k], m);
 		} /* end weak task */
