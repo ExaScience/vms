@@ -4,9 +4,7 @@
 trace: predict.prv
 
 predict.prv: ompss/predict
-	export NANOS6_CONFIG_OVERRIDE=version.instrument=extrae && \
-	unset EXTRAE_CONFIG_FILE && \
-		mpirun -np 2 taskset -c 0-8 ./ompss/predict 2 10000
+	mpirun -np 2 taskset -c 0-8 ./trace.sh ./ompss/predict 2 10000
 	mpi2prv set-0/*
 
 ompss/predict:
