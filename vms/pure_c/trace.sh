@@ -19,23 +19,22 @@
 export EXTRAE_ON=1
 export EXTRAE_CONFIG_FILE=extrae.xml
 
-# export NANOS6_CONFIG=/gpfs/projects/bsc28/bsc28860/nanos6-cluster-benchmarks/build_release_extrae/nanos6.toml
 export NANOS6_CONFIG_OVERRIDE="version.debug=false,version.instrument="extrae",cluster.disable_remote=false"
 
-# Remove previous traces
-if  [ -z ${MPI_LOCALRANKID} ] || [ $MPI_LOCALRANKID -eq 0 ]; then
-	echo "Deleting old traces"
-	rm -rf TRACE.* set-0/ *.prv *.row *.pcf
+echo "Deleting old traces"
+rm -rf TRACE.* set-0/ *.prv *.row *.pcf
+
+if [[ "$1" == *"mpi/"* ]]; then
+	echo "Preloading libompitrace.so" >&1
+	export LD_PRELOAD=${EXTRAE_HOME}/lib/libompitrace.so
+	export OMP_NUM_THREADS=4
+elif [[ "$1" == *"ompss/"* ]]; then
+	echo "Preloading libnanosmpitrace.so" >&1
+	export LD_PRELOAD=${EXTRAE_HOME}/lib/libnanosmpitrace.so
+else
+	echo "error: Could not deterimine what library to preload" >&1
+	exit -1
 fi
 
-#export LD_PRELOAD=${EXTRAE_HOME}/lib/libnanosmpitrace.so
-export LD_PRELOAD=${EXTRAE_HOME}/lib/libompitrace.so
 $@
 unset LD_PRELOAD
-
-# Create the mpits; in IMPI the MPI_LOCALRANKID is not what we expect.
-# So we have to create the trace manually
-# if  [ -z ${MPI_LOCALRANKID} ] || [ $MPI_LOCALRANKID -eq 0 ]; then
-# 	echo "Creating mpits file manually"
-# 	ls ${PWD}/set-0/*.mpit | sed 's/$/ named/' > TRACE.mpits
-# fi

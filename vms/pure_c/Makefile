@@ -1,14 +1,23 @@
 
 .PHONY: test all trace
 
-trace: predict.prv
+trace: ompss/predict.prv mpi/predict.prv
 
-predict.prv: ompss/predict
-	mpirun -np 2 taskset -c 0-8 ./trace.sh ./ompss/predict 2 10000
+ompss/predict.prv: ompss/predict
+	mpirun -np 2 ./trace.sh ompss/predict 2 10000
 	mpi2prv set-0/*
+	mv predict.prv predict.pcf predict.row ompss/
+
+mpi/predict.prv: mpi/predict
+	mpirun -np 2 ./trace.sh mpi/predict 2 10000
+	mpi2prv set-0/*
+	mv predict.prv predict.pcf predict.row mpi/
 
 ompss/predict:
 	$(MAKE) -f Makefile.ompss
+
+mpi/predict:
+	$(MAKE) -f Makefile.mpi
 
 all:
 	$(MAKE) -f Makefile.plain
