@@ -15,7 +15,7 @@ const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
 #ifdef USE_OMPSS
-#pragma oss task out(out[0;num_compounds]) label("prepare_tb_input")
+#pragma oss task out(out[0;num_compounds]) node(0) label("prepare_tb_input")
 #endif
 void prepare_tb_input(
     int num_compounds,
@@ -31,21 +31,6 @@ void prepare_tb_input(
     perf_end(__FUNCTION__);
 }
 
-#ifdef USE_OMPSS
-#pragma oss task out(out[0;num_compounds]) label("prepare_tb_output")
-#endif
-void prepare_tb_output(
-    int num_compounds,
-    P_base out[][num_proteins])
-{
-    perf_start(__FUNCTION__);
-
-    for (int c = 0; c < num_compounds; c++)
-        for (int p = 0; p < num_proteins; p++)
-            out[c][p] = 0;
-
-    perf_end(__FUNCTION__);
-}
 
 struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
 {
@@ -182,8 +167,6 @@ int main(int argc, char *argv[])
         {
             printf("Prepare input\n");
             prepare_tb_input(num_compounds, tb_input, tb_input_block);
-            printf("Prepare output\n");
-            prepare_tb_output(num_compounds, tb_output_block);
             printf("Predicting\n");
         }
 
