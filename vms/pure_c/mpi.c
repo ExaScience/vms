@@ -155,13 +155,17 @@ void send_features(int compound, const F_base data[num_features])
 
     perf_start(__FUNCTION__);
 
-#ifdef USE_OPENMP
-#pragma omp critical
-#endif
-    {
 
-        // printf("%d: features: waiting for compound %d, already received up to %d\n", mpi_world_rank, compound, compound_received);
-        while (compound_received < compound)
+    // printf("%d: features: waiting for compound %d, already received up to %d\n", mpi_world_rank, compound, compound_received);
+
+#ifdef USE_OPENMP
+#pragma omp flush (compound_received)
+#endif
+    while (compound_received < compound)
+    {
+#ifdef USE_OPENMP
+#pragma omp master
+#endif
         {
             gaspi_notification_id_t id;
             gaspi_notification_t val = 0;
@@ -170,6 +174,9 @@ void send_features(int compound, const F_base data[num_features])
             // printf("%d: features: Received notification with id %d and value %d\n", mpi_world_rank, id, val);
             compound_received = val;
         }
+#ifdef USE_OPENMP
+#pragma omp flush (compound_received)
+#endif      
     }
 
     perf_end(__FUNCTION__);
