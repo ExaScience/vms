@@ -8,8 +8,6 @@
 #include <omp.h>
 #endif
 
-
-
 #include "predict.h"
 #include "vms_tb.h"
 
@@ -24,9 +22,13 @@ void prepare_tb_input(
     const float in[tb_num_compounds][num_features],
     F_base out[][num_features])
 {
+    perf_start(__FUNCTION__);
+
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
             out[c][p] = in [c%tb_num_compounds][p];
+
+    perf_end(__FUNCTION__);
 }
 
 #ifdef USE_OMPSS
@@ -36,9 +38,13 @@ void prepare_tb_output(
     int num_compounds,
     P_base out[][num_proteins])
 {
+    perf_start(__FUNCTION__);
+
     for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_proteins; p++)
             out[c][p] = 0;
+
+    perf_end(__FUNCTION__);
 }
 
 struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
@@ -139,9 +145,9 @@ int main(int argc, char *argv[])
         printf( "%d:  mpi_start: %lu\n",  mpi_world_rank, block_start);
     }
 
-    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
-                        errors_per_compound =                     (int*)dmalloc(sizeof(int) * num_compounds, errors_seg);
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
+                        errors_per_compound =                     (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
     int nerrors = 0;
 
@@ -163,7 +169,7 @@ int main(int argc, char *argv[])
 #endif
     }
 
-    double elapsed = 1e6;
+    double min_time = 1e6;
     for(int n=0; n<num_repeat; n++)
     {
         barrier();
@@ -186,8 +192,9 @@ int main(int argc, char *argv[])
         combine_results(num_compounds, tb_output_block);
         nerrors += check_result(num_compounds, tb_output_block, tb_ref);
         double stop = tick();
-        printf("%d: iteration %d took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, n, stop-start, num_compounds / (stop-start));
-        if (stop-start < elapsed) elapsed = stop-start;
+        double elapsed = stop - start;
+        printf("%d: iteration %d took %.2f sec; %.2f compounds/sec\n", mpi_world_rank, n, elapsed, num_compounds / elapsed);
+        if (elapsed < min_time) min_time = stop-start;
 
         perf_end("main");
 
@@ -196,8 +203,9 @@ int main(int argc, char *argv[])
 
     // terra-ops aka 10^12 ops
     double tops = (double)num_samples * (double)num_compounds * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
-    printf("%d: %.4f tera-ops; %.4f tera-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, tops, tops/elapsed, float_size);
-    printf("%d: %.4f giga-ops; %.4f giga-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, 1e3 * tops, 1e3 * tops/elapsed, float_size);
+    printf("%d: min time was %.2f sec; %.2f compounds/sec\n", mpi_world_rank, min_time, num_compounds / min_time);
+    printf("%d: %.4f tera-ops; %.4f tera-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, tops, tops/min_time, float_size);
+    printf("%d: %.4f giga-ops; %.4f giga-ops/second (%d-bit floating point ops)\n",  mpi_world_rank, 1e3 * tops, 1e3 * tops/min_time, float_size);
     
     mpi_finit();
 
