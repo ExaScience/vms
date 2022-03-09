@@ -1,5 +1,5 @@
 
-.PHONY: test all TRACE
+.PHONY: test all trace
 
 trace: predict.prv
 
