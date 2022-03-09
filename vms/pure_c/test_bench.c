@@ -168,20 +168,19 @@ int main(int argc, char *argv[])
     {
         barrier();
 
-        if (mpi_world_rank == 0) 
-        {
-        printf("Prepare input\n");
-        prepare_tb_input(num_compounds, tb_input, tb_input_block);
-        printf("Prepare output\n");
-        prepare_tb_output(num_compounds, tb_output_block);
-        printf("Predicting\n");
-    }
-
-        barrier();
-
         perf_start("main");
 
         double start = tick();
+
+        if (mpi_world_rank == 0)
+        {
+            printf("Prepare input\n");
+            prepare_tb_input(num_compounds, tb_input, tb_input_block);
+            printf("Prepare output\n");
+            prepare_tb_output(num_compounds, tb_output_block);
+            printf("Predicting\n");
+        }
+
         send_inputs(num_compounds, tb_input_block);
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);
         combine_results(num_compounds, tb_output_block);
