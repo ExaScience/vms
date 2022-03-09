@@ -171,7 +171,7 @@ def main():
     parser.add_argument("--envs", default=",".join(ENVS))
     parser.add_argument("--basedir", default="run_" + datetime.datetime.today().strftime("%Y%m%d-%H%M%S"))
     parser.add_argument("command", default="run", choices=["install", "populate", "run", "spec", "report"])
-    parser.add_argument("args", nargs="*", default="2 1000000")
+    parser.add_argument("args", nargs="*", default="3 1000000")
 
     args = parser.parse_args()
 
