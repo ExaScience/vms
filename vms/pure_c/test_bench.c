@@ -14,6 +14,26 @@
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
+
+
+void binary_file_into(const char *fname, size_t nelem, void *ptr)
+{
+    FILE *f;
+    int n;
+
+    f = fopen(fname, "rb");
+    assert(f);
+    n = fread(ptr, float_size, nelem, f);
+    assert(n == nelem);
+}
+
+float *binary_file(const char *fname, size_t nelem)
+{
+    void *ptr = malloc(float_size * nelem);
+    binary_file_into(fname, nelem, ptr);
+    return (float*)ptr;
+}
+
 #ifdef USE_OMPSS
 #pragma oss task out(out[0;num_compounds]) node(0) label("prepare_tb_input")
 #endif
