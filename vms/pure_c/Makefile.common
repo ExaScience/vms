@@ -1,7 +1,7 @@
 
 PROGRAM = $(OUTPUTDIR)/predict
 SRCFILES = predict.c test_bench.c mpi.c ompss.c counters_if.c
-HDRFILES = predict.h vms_const.h vms_tb.h
+HDRFILES = predict.h vms_const.h 
 OBJFILES += $(addprefix $(OUTPUTDIR)/,$(SRCFILES:.c=.o))
 
 default: $(PROGRAM)
@@ -12,8 +12,8 @@ run: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
 CFLAGS += -O3 -march=native -g
+#CFLAGS += -O0 -g
 CXXFLAGS += -std=c++11
-# CFLAGS += -O0 -g
 LINK ?= $(CXX)
 
 $(PROGRAM): $(PROGDEPS)
