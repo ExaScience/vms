@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 
 #ifdef USE_OPENMP
@@ -9,12 +10,9 @@
 #endif
 
 #include "predict.h"
-#include "vms_tb.h"
 
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
-
-
 
 void binary_file_into(const char *fname, size_t nelem, void *ptr)
 {
@@ -23,13 +21,13 @@ void binary_file_into(const char *fname, size_t nelem, void *ptr)
 
     f = fopen(fname, "rb");
     assert(f);
-    n = fread(ptr, float_size, nelem, f);
+    n = fread(ptr, sizeof(float), nelem, f);
     assert(n == nelem);
 }
 
 float *binary_file(const char *fname, size_t nelem)
 {
-    void *ptr = malloc(float_size * nelem);
+    void *ptr = malloc(sizeof(float) * nelem);
     binary_file_into(fname, nelem, ptr);
     return (float*)ptr;
 }
@@ -52,22 +50,14 @@ void prepare_tb_input(
 }
 
 
-float *read_tb_input()
-{
-    return  binary_file("vms_tb_in.bin", tb_num_compounds * num_features);
-}
 
-float *read_tb_ref()
-{
-    return  binary_file("vms_tb_ref.bin", tb_num_compounds * num_features);
-}
 
 struct Model *read_model()
 {
     struct Model *m = lmalloc(sizeof(struct Model), model_seg);
-    binary_file_into("vms_U.bin", sizeof(m->U) / float_size, (&m->U));
-    binary_file_into("vms_M.bin", sizeof(m->M) / float_size, (&m->M));
-    binary_file_into("vms_B.bin", sizeof(m->B) / float_size, (&m->B));
+    binary_file_into("vms_U.bin", sizeof(m->U) / sizeof(float), (&m->U));
+    binary_file_into("vms_M.bin", sizeof(m->M) / sizeof(float), (&m->M));
+    binary_file_into("vms_B.bin", sizeof(m->B) / sizeof(float), (&m->B));
 
     return m;
 }
@@ -166,8 +156,10 @@ int main(int argc, char *argv[])
 
     int nerrors = 0;
 
-    printf("Prepare model\n");
-    struct Model *m = prepare_model(U, M, B);
+    printf("Reading binary files\n");
+    struct Model *m = read_model();
+    float (*tb_input)[num_features] = (float (*)[num_features])binary_file("vms_tb_in.bin", tb_num_compounds * num_features);
+    float (*tb_ref)[num_proteins]   = (float (*)[num_proteins])binary_file("vms_tb_ref.bin", tb_num_compounds * num_proteins);
 
     if (mpi_world_rank == 0) 
     {
