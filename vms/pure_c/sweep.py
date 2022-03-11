@@ -155,10 +155,11 @@ def report(basedir):
 
     import matplotlib.pyplot as plt
 
-    df.set_index('nodes', inplace=True)
+    df = df.pivot(index='nodes', columns='name')
     df.sort_index(inplace=True)
-    df.groupby("name")['giga-ops'].plot(legend=True)
+    logging.info(df)    
 
+    df['giga-ops'].plot(legend=True)
     plt.savefig("giga_ops.svg")
 
     return results
