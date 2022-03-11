@@ -85,6 +85,9 @@ def populate(basedir, name, nodes, args):
     if name == "ompss-cluster":
         shutil.copyfile(join(SCRIPTPATH, "nanos6.toml"), join(dir, "nanos6.toml"))
 
+    for bin in glob(join(SCRIPTPATH, "*.bin")):
+        shutil.copyfile(bin, dir)
+
     mpirun = f"mpirun -np {nodes} " if nodes > 1 else ""
     time = "/usr/bin/time -v -o vms_resource_$(hostname -s).out"
     spec = get_spec(name)
