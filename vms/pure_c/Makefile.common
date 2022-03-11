@@ -12,6 +12,7 @@ run: $(PROGRAM)
 	./$(PROGRAM) 2 2
 
 CFLAGS += -O3 -march=native -g
+CXXFLAGS += -std=c++11
 # CFLAGS += -O0 -g
 LINK ?= $(CXX)
 
@@ -24,5 +25,5 @@ $(OUTPUTDIR)/%.o: %.c
 
 $(OUTPUTDIR)/%.o: %.cpp
 	@mkdir -p $(OUTPUTDIR)
-	$(CXX) $(CFLAGS) -c $^ -o $@ 
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -c $^ -o $@ 
 
