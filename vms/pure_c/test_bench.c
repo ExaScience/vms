@@ -52,12 +52,22 @@ void prepare_tb_input(
 }
 
 
-struct Model *prepare_model(const U_arr U, const M_arr M, const B_arr B)
+float *read_tb_input()
+{
+    return  binary_file("vms_tb_in.bin", tb_num_compounds * num_features);
+}
+
+float *read_tb_ref()
+{
+    return  binary_file("vms_tb_ref.bin", tb_num_compounds * num_features);
+}
+
+struct Model *read_model()
 {
     struct Model *m = lmalloc(sizeof(struct Model), model_seg);
-    memcpy(&m->U, U, sizeof(m->U));
-    memcpy(&m->M, M, sizeof(m->M));
-    memcpy(&m->B, B, sizeof(m->B));
+    binary_file_into("vms_U.bin", sizeof(m->U) / float_size, (&m->U));
+    binary_file_into("vms_M.bin", sizeof(m->M) / float_size, (&m->M));
+    binary_file_into("vms_B.bin", sizeof(m->B) / float_size, (&m->B));
 
     return m;
 }
