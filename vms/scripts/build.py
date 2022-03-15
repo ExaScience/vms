@@ -74,6 +74,7 @@ def patch_file(fname, pattern, repl):
 
 def resource_utilization(dir = ".", kernel = "predict_one_block"):
     report_files = glob.glob(f'{dir}/**/{kernel}_csynth.xml', recursive=True)
+    reports = {}
     for report_file in report_files:
         root = cET.parse(report_file).getroot()
         area = root.find('AreaEstimates')
@@ -92,11 +93,13 @@ def resource_utilization(dir = ".", kernel = "predict_one_block"):
         )
 
         build_logger().info("Resource utilization of %s:\n%s:\n%s\n%s", report_file, kernel, header, as_string)
+        reports[report_file] = merged
 
-    return merged
+    return reports
 
 def latency_estimation(dir = ".", kernel = "predict_one_block"):
     report_files = glob.glob(f'{dir}/**/{kernel}_csynth.xml', recursive=True)
+    reports = {}
     for report_file in report_files:
         root = cET.parse(report_file).getroot()
         latency_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseLatency')
@@ -104,6 +107,9 @@ def latency_estimation(dir = ".", kernel = "predict_one_block"):
         latency_milliseconds_node = root.find('PerformanceEstimates/SummaryOfOverallLatency/Average-caseRealTimeLatency')
         milliseconds = latency_milliseconds_node.text
         build_logger().info("Average latency of %s:\n%s: %d cycles - %s", report_file, kernel, cycles, milliseconds)
+        reports[report_file] = [ cycles, milliseconds ]
+
+    return reports
 
 def log_xtasks_config(dir = "."):
     config_files = glob.glob(f'{dir}/**/*xtasks.config', recursive=True) 
@@ -133,15 +139,36 @@ def to_table(list_of_lists):
     row_format = "{:>20}" * len(list_of_lists[0])
     return "\n".join([ row_format.format(*row) for row in list_of_lists ])
 
+def read_config(builddir):
+    config = ConfigParser()
+    with open(os.path.join(builddir, "config.mk")) as stream:
+        config.read_string("[top]\n" + stream.read())  # add [top] section
+    return config["top"]
+
 def action_report(builddir):
     if builddir is None:
         builddir = "."
 
+    config = read_config(builddir)
+
     hlsdir = os.path.join(builddir, "opencl", "hw_emu", "**", "hls.app")
     hlsdir = glob.glob(hlsdir, recursive=True).pop()
     hlsdir = os.path.dirname(hlsdir)
-    resource_utilization(hlsdir)
-    latency_estimation(hlsdir)
+    resource_reports = resource_utilization(hlsdir)
+    latency_reports = latency_estimation(hlsdir)
+
+    cycles, milliseconds = list(latency_reports.values()).pop()
+
+    num_latent = int(config["NUM_LATENT"])
+    num_samples = int(config["NUM_SAMPLES"])
+    block_size = int(config["BLOCK_SIZE"])
+    num_proteins = 114 # FIXME
+    num_features = 469 # FIXME
+    hz = 100e6
+
+    gops = num_samples * block_size * num_latent * (num_features + num_proteins) / 1e9;
+    secs = cycles / hz
+    build_logger().info("%.2f giga-ops; %.2f giga-ops/second\n", gops, gops/secs);
 
     opencl_summary_file = os.path.join(builddir, "opencl/hw_emu/opencl_summary.csv")
     opencl_summary = read_summary_csv(opencl_summary_file)
@@ -152,10 +179,8 @@ def action_update(builddir):
     if builddir is None:
         builddir = "."
 
-    config = ConfigParser()
-    with open(os.path.join(builddir, "config.mk")) as stream:
-        config.read_string("[top]\n" + stream.read())  # add [top] section
-    sourcedir = config["top"]["srcdir"]
+    config = read_config(builddir)
+    sourcedir = config["srcdir"]
     makefiles_dir = os.path.abspath(os.path.join(sourcedir, "makefiles"))
 
     def update_symlink(src, dst):
