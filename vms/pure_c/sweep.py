@@ -143,6 +143,33 @@ def run(basedir, name, nodes, args):
     except CalledProcessError as e:
         logging.info(f" env = {name}, nodes = {nodes}, args = {args}, FAILED = {e}") 
 
+def plot(df):
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
+    import matplotlib.style as style
+
+    plt.rcParams["font.family"] = "serif"
+    plt.style.use('ggplot')
+
+    df = df.pivot(index='nodes', columns='name')
+    df.sort_index(inplace=True)
+    logging.info(df)    
+
+    ax = df['giga-ops'].plot(legend=True)
+
+    plt.xscale('log', base=2)
+    plt.yscale('log', base=10)
+        
+    ax.set_xlabel("Number of Nodes")
+    k_formatter = ticker.FuncFormatter(lambda s, x: str(s) if s < 1024 else str(int(s/1024)) + "K")
+    ax.xaxis.set_major_formatter(k_formatter)
+    ax.xaxis.set_ticks([pow(2,i) for i in range(0,8)])
+        
+    ax.set_ylabel("Giga-Ops/sec")
+
+    plt.savefig("giga_ops.svg")
+    plt.savefig("giga_ops.pgf")
+
 def report(basedir):
     output_files = glob(join(basedir,'*', '*', 'vms.out'), recursive=True)
     results = []
@@ -156,14 +183,7 @@ def report(basedir):
 
     df = pd.DataFrame(results, columns=["name", "nodes", "giga-ops"])
 
-    import matplotlib.pyplot as plt
-
-    df = df.pivot(index='nodes', columns='name')
-    df.sort_index(inplace=True)
-    logging.info(df)    
-
-    df['giga-ops'].plot(legend=True)
-    plt.savefig("giga_ops.svg")
+    plot(df)
 
     return results
 
