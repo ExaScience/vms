@@ -68,7 +68,7 @@ def gen_array(M, typename, varname, indent = "", format = "%+.8f"):
 
     return hdr + gen_body(0, M, indent, format) + ftr
 
-def gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_latent, num_samples, block_size, F_vec_len):
+def gen_const(tb_num_compounds, datatype, dataflow, patterns, num_proteins, num_features, num_latent, num_samples, block_size, F_vec_len):
     const_output = "#pragma once\n\n"
 
     const_output += f"#define VMS_DT_{datatype.upper()}\n"
@@ -79,6 +79,8 @@ def gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_late
     const_output += "\n"
 
 
+    const_output += gen_int("tb_num_compounds",
+                                             tb_num_compounds)
     const_output += gen_int("num_proteins",  num_proteins)
     const_output += gen_int("num_features",  num_features)
     const_output += gen_int("num_latent",    num_latent)
@@ -167,8 +169,7 @@ def gen_session(root, outputdir, config_file):
 
     format = "%.4f"
     tb_output = \
-        gen_int("tb_num_compounds", tb_num_compounds)  \
-        + gen_array(U,  "float", "U", "  ", format = format) + "\n" \
+          gen_array(U,  "float", "U", "  ", format = format) + "\n" \
         + gen_array(mu, "float", "M", indent = "  ",  format = format) + "\n" \
         + gen_array(B,  "float", "B", "  ", format = format) + "\n"
 
@@ -176,12 +177,18 @@ def gen_session(root, outputdir, config_file):
     tb_output += gen_array(Pavg, "float", "tb_ref", format = format) + "\n"
     gen_file(outputdir, "tb.h", tb_output)
 
+    U.astype(np.float32).tofile(pth.join(outputdir, "vms_U.bin"))
+    mu.astype(np.float32).tofile(pth.join(outputdir, "vms_M.bin"))
+    B.astype(np.float32).tofile(pth.join(outputdir, "vms_B.bin"))
+    tb_in_matrix.astype(np.float32).tofile(pth.join(outputdir, "vms_tb_in.bin"))
+    Pavg.astype(np.float32).tofile(pth.join(outputdir, "vms_tb_ref.bin"))
+
     assert tb_num_features == num_features
 
     num_samples = len(samples)
     assert num_samples == config.getint("num_samples")
 
-    const_output = gen_const(datatype, dataflow, patterns, num_proteins, num_features, num_latent, len(samples), block_size, F_vec_len) + "\n"
+    const_output = gen_const(tb_num_compounds, datatype, dataflow, patterns, num_proteins, num_features, num_latent, len(samples), block_size, F_vec_len) + "\n"
 
     types = {
         8 : "signed char",
