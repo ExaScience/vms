@@ -154,8 +154,8 @@ def gen_session(root, outputdir, config_file):
         samples.append((U, mu, F))
 
     U, mu, B = [ np.stack(s) for s in zip(*samples) ]
-    U = np.transpose(U, axes = (0,2,1))
-    B = np.transpose(B, axes = (0,2,1))
+    U = np.transpose(U, axes = (2,0,1)) # proteins, samples, latents
+    B = np.transpose(B, axes = (2,0,1)) # features, samples, latents
 
     #generate testbench
     Pavg = np.mean(np.stack(P), axis=0)
