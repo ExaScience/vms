@@ -7,7 +7,7 @@ class TestMultiPredict(unittest.TestCase):
         results = multipredict(
             "test_data/small/sideinfo.mm", "test_data/small/test.mm", modeldir="test_data/small/model")
         reference = {'macau in matrix    ': 0.9637726940027302, 'macau out-of-matrix': 0.9346726169938081, 'smurff_cmd ': 0.934672616993808,
-                     'thanh      ': 0.934672616993808, 'tf         ': 0.9670494454501363, 'np         ': 0.9670494399014289}
+                     'tf         ': 0.9670494454501363, 'np         ': 0.9670494399014289}
 
         for name in reference.keys():
             res = results[name]

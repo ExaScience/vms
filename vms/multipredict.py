@@ -41,7 +41,6 @@ def multipredict(sideinfo_file, test_file, modeldir = None, train_file = None):
 
     other_methods = {
         "smurff_cmd ": sf.smurff_predict_cmd,
-        "thanh      ": sf.thanh_predict,
         "tf         ": sf.tf_predict,
         "np         ": sf.np_predict,
     }
