@@ -1,0 +1,7 @@
+**/vms_const.h
+**/vms_model.h
+**/vms_tb.h
+build/
+ci_*
+dask-worker-space
+__pycache__

@@ -1,0 +1,4 @@
+builddir/ompss_at_fpga.tar.gz
+dockfpga
+*.tar.gz
+ompss_at_fpga_*

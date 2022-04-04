@@ -1,0 +1,861 @@
+2020-07-23 16:56:24,085 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=8 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_8_8_float
+2020-07-23 16:56:24,086 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float"
+2020-07-23 16:56:26,818 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 16:56:26,819 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 16:56:26,820 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-23 16:56:26,820 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-23 16:56:26,821 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec"
+2020-07-23 16:56:27,420 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 16:56:27,420 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec"
+2020-07-23 16:56:31,705 - root - INFO - Command "make model" exited with code 0
+2020-07-23 16:56:31,706 - root - INFO - Loading modules "ompss"
+2020-07-23 16:56:31,706 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec/native"
+2020-07-23 16:56:34,086 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 16:56:34,087 - root - INFO - Loading modules "ompss"
+2020-07-23 16:56:34,087 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 16:56:46,298 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 16:56:46,299 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 16:56:46,299 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 16:57:07,230 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 16:57:07,230 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 16:57:07,231 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec"
+2020-07-23 17:05:56,543 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 17:05:56,545 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 128), 'DSP48E': (2520, 162), 'FF': (548160, 37013), 'LUT': (274080, 34560), 'URAM': (0, 0)}
+2020-07-23 17:05:56,566 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-23 17:05:56,567 - root - INFO - Loading modules "autoVivado"
+2020-07-23 17:05:56,567 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-23 17:40:37,319 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-23 17:40:37,319 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-23 17:40:37,320 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=8 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_8_8_fixed
+2020-07-23 17:40:37,321 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_fixed"
+2020-07-23 17:40:39,778 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 17:40:39,779 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 17:40:39,780 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-23 17:40:39,780 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-23 17:40:39,781 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_fixed/repo/vms/data/chem2vec"
+2020-07-23 17:40:40,369 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 17:40:40,369 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_fixed/repo/vms/data/chem2vec"
+2020-07-23 17:40:44,689 - root - INFO - Command "make model" exited with code 0
+2020-07-23 17:40:44,690 - root - INFO - Loading modules "ompss"
+2020-07-23 17:40:44,690 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_fixed/repo/vms/data/chem2vec/native"
+2020-07-23 17:40:47,466 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-23 17:40:47,466 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-23 17:40:47,467 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=8 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed
+2020-07-23 17:40:47,467 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed"
+2020-07-23 17:40:48,607 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 17:40:48,607 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 17:40:48,608 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-23 17:40:48,609 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-23 17:40:48,609 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec"
+2020-07-23 17:40:48,928 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 17:40:48,928 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec"
+2020-07-23 17:40:52,438 - root - INFO - Command "make model" exited with code 0
+2020-07-23 17:40:52,438 - root - INFO - Loading modules "ompss"
+2020-07-23 17:40:52,438 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec/native"
+2020-07-23 17:40:54,117 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 17:40:54,117 - root - INFO - Loading modules "ompss"
+2020-07-23 17:40:54,118 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 17:41:09,767 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 17:41:09,767 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 17:41:09,767 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 17:41:37,458 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 17:41:37,458 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 17:41:37,458 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec"
+2020-07-23 17:48:52,765 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 17:48:52,766 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 128), 'DSP48E': (2520, 391), 'FF': (548160, 65122), 'LUT': (274080, 88875), 'URAM': (0, 0)}
+2020-07-23 17:48:52,788 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-23 17:48:52,789 - root - INFO - Loading modules "autoVivado"
+2020-07-23 17:48:52,790 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-23 18:43:10,051 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-23 18:43:10,052 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-23 18:43:10,052 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=8 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_8_8_half
+2020-07-23 18:43:10,053 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_half"
+2020-07-23 18:43:12,845 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 18:43:12,845 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 18:43:12,846 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-23 18:43:12,847 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-23 18:43:12,847 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_half/repo/vms/data/chem2vec"
+2020-07-23 18:43:13,440 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 18:43:13,440 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_half/repo/vms/data/chem2vec"
+2020-07-23 18:43:17,696 - root - INFO - Command "make model" exited with code 0
+2020-07-23 18:43:17,697 - root - INFO - Loading modules "ompss"
+2020-07-23 18:43:17,697 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_8_half/repo/vms/data/chem2vec/native"
+2020-07-23 18:43:20,512 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-23 18:43:20,513 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-23 18:43:20,513 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=16 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_8_16_float
+2020-07-23 18:43:20,514 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float"
+2020-07-23 18:43:21,763 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 18:43:21,764 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 18:43:21,765 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-23 18:43:21,765 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-23 18:43:21,765 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec"
+2020-07-23 18:43:22,259 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 18:43:22,260 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec"
+2020-07-23 18:43:26,554 - root - INFO - Command "make model" exited with code 0
+2020-07-23 18:43:26,554 - root - INFO - Loading modules "ompss"
+2020-07-23 18:43:26,555 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec/native"
+2020-07-23 18:43:28,520 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 18:43:28,521 - root - INFO - Loading modules "ompss"
+2020-07-23 18:43:28,521 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 18:43:43,627 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 18:43:43,627 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 18:43:43,627 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 18:44:05,416 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 18:44:05,416 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 18:44:05,417 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec"
+2020-07-23 19:00:40,575 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 19:00:40,576 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 312), 'FF': (548160, 72454), 'LUT': (274080, 69098), 'URAM': (0, 0)}
+2020-07-23 19:00:40,613 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-23 19:00:40,615 - root - INFO - Loading modules "autoVivado"
+2020-07-23 19:00:40,615 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-23 20:26:32,729 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-23 20:26:32,730 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-23 20:26:32,731 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=16 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed
+2020-07-23 20:26:32,731 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed"
+2020-07-23 20:26:35,181 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 20:26:35,181 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 20:26:35,182 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-23 20:26:35,183 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-23 20:26:35,183 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec"
+2020-07-23 20:26:35,746 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 20:26:35,747 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec"
+2020-07-23 20:26:40,816 - root - INFO - Command "make model" exited with code 0
+2020-07-23 20:26:40,816 - root - INFO - Loading modules "ompss"
+2020-07-23 20:26:40,817 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec/native"
+2020-07-23 20:26:43,855 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 20:26:43,855 - root - INFO - Loading modules "ompss"
+2020-07-23 20:26:43,856 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 20:27:02,476 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 20:27:02,477 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 20:27:02,477 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 20:27:35,267 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 20:27:35,267 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 20:27:35,267 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec"
+2020-07-23 20:32:37,517 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 20:32:37,518 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 258), 'FF': (548160, 36032), 'LUT': (274080, 48095), 'URAM': (0, 0)}
+2020-07-23 20:32:37,565 - root - INFO - Average latency of dataflow_in_loop: 474
+2020-07-23 20:32:37,567 - root - INFO - Loading modules "autoVivado"
+2020-07-23 20:32:37,568 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-23 21:23:53,985 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-23 21:23:53,986 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-23 21:23:53,987 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=16 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed
+2020-07-23 21:23:53,988 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed"
+2020-07-23 21:23:56,342 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 21:23:56,343 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 21:23:56,344 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-23 21:23:56,345 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-23 21:23:56,345 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec"
+2020-07-23 21:23:56,918 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 21:23:56,919 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec"
+2020-07-23 21:24:01,496 - root - INFO - Command "make model" exited with code 0
+2020-07-23 21:24:01,497 - root - INFO - Loading modules "ompss"
+2020-07-23 21:24:01,498 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec/native"
+2020-07-23 21:24:04,584 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 21:24:04,585 - root - INFO - Loading modules "ompss"
+2020-07-23 21:24:04,585 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 21:24:24,140 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 21:24:24,140 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 21:24:24,141 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 21:24:57,716 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 21:24:57,717 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 21:24:57,717 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec"
+2020-07-23 21:40:17,745 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 21:40:17,747 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 774), 'FF': (548160, 129513), 'LUT': (274080, 175595), 'URAM': (0, 0)}
+2020-07-23 21:40:17,788 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-23 21:40:17,791 - root - INFO - Loading modules "autoVivado"
+2020-07-23 21:40:17,791 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-23 23:07:03,698 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-23 23:07:03,699 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-23 23:07:03,700 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=16 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_8_16_half
+2020-07-23 23:07:03,700 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_half"
+2020-07-23 23:07:06,182 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 23:07:06,183 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 23:07:06,184 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-23 23:07:06,184 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-23 23:07:06,185 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_half/repo/vms/data/chem2vec"
+2020-07-23 23:07:06,744 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 23:07:06,745 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_half/repo/vms/data/chem2vec"
+2020-07-23 23:07:11,309 - root - INFO - Command "make model" exited with code 0
+2020-07-23 23:07:11,310 - root - INFO - Loading modules "ompss"
+2020-07-23 23:07:11,310 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_16_half/repo/vms/data/chem2vec/native"
+2020-07-23 23:07:13,962 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-23 23:07:13,962 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-23 23:07:13,963 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=32 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_8_32_float
+2020-07-23 23:07:13,963 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float"
+2020-07-23 23:07:14,886 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-23 23:07:14,886 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-23 23:07:14,887 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-23 23:07:14,888 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-23 23:07:14,888 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec"
+2020-07-23 23:07:15,192 - root - INFO - Command "python make.py" exited with code 0
+2020-07-23 23:07:15,192 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec"
+2020-07-23 23:07:20,395 - root - INFO - Command "make model" exited with code 0
+2020-07-23 23:07:20,395 - root - INFO - Loading modules "ompss"
+2020-07-23 23:07:20,396 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec/native"
+2020-07-23 23:07:23,212 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 23:07:23,213 - root - INFO - Loading modules "ompss"
+2020-07-23 23:07:23,213 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-23 23:07:41,989 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-23 23:07:41,989 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-23 23:07:41,989 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-23 23:08:08,140 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-23 23:08:08,141 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-23 23:08:08,141 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec"
+2020-07-23 23:53:46,299 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-23 23:53:46,301 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 640), 'DSP48E': (2520, 617), 'FF': (548160, 140306), 'LUT': (274080, 130590), 'URAM': (0, 0)}
+2020-07-23 23:53:46,372 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-23 23:53:46,375 - root - INFO - Loading modules "autoVivado"
+2020-07-23 23:53:46,375 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 07:15:03,554 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 07:15:03,555 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 07:15:03,556 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=32 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed
+2020-07-24 07:15:03,557 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed"
+2020-07-24 07:15:06,954 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 07:15:06,955 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-24 07:15:06,956 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-24 07:15:06,957 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-24 07:15:06,958 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec"
+2020-07-24 07:15:07,567 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 07:15:07,567 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec"
+2020-07-24 07:15:13,385 - root - INFO - Command "make model" exited with code 0
+2020-07-24 07:15:13,386 - root - INFO - Loading modules "ompss"
+2020-07-24 07:15:13,386 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec/native"
+2020-07-24 07:15:17,678 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 07:15:17,679 - root - INFO - Loading modules "ompss"
+2020-07-24 07:15:17,680 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 07:15:40,854 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 07:15:40,855 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 07:15:40,855 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 07:16:23,167 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 07:16:23,168 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 07:16:23,168 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec"
+2020-07-24 07:31:18,581 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 07:31:18,583 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 514), 'FF': (548160, 72355), 'LUT': (274080, 95497), 'URAM': (0, 0)}
+2020-07-24 07:31:18,660 - root - INFO - Average latency of dataflow_in_loop: 474
+2020-07-24 07:31:18,664 - root - INFO - Loading modules "autoVivado"
+2020-07-24 07:31:18,664 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 09:15:12,410 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 09:15:12,411 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 09:15:12,412 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=32 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed
+2020-07-24 09:15:12,412 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed"
+2020-07-24 09:15:15,541 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 09:15:15,542 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-24 09:15:15,543 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-24 09:15:15,544 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-24 09:15:15,545 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec"
+2020-07-24 09:15:16,091 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 09:15:16,092 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec"
+2020-07-24 09:15:21,699 - root - INFO - Command "make model" exited with code 0
+2020-07-24 09:15:21,700 - root - INFO - Loading modules "ompss"
+2020-07-24 09:15:21,700 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec/native"
+2020-07-24 09:15:25,110 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 09:15:25,111 - root - INFO - Loading modules "ompss"
+2020-07-24 09:15:25,111 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 09:15:49,041 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 09:15:49,041 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 09:15:49,042 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 09:16:32,727 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 09:16:32,728 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 09:16:32,728 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec"
+2020-07-24 10:05:29,390 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 10:05:29,392 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 1543), 'FF': (548160, 258287), 'LUT': (274080, 351057), 'URAM': (0, 0)}
+2020-07-24 10:05:29,470 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-24 10:05:29,473 - root - INFO - Loading modules "autoVivado"
+2020-07-24 10:05:29,474 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 10:18:50,137 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-24 10:18:50,138 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-24 10:18:50,139 - root - INFO - Starting dataset=chem2vec num_latent=8 num_samples=32 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_8_32_half
+2020-07-24 10:18:50,140 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_half"
+2020-07-24 10:18:52,717 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 10:18:52,718 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 8' 
+2020-07-24 10:18:52,719 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-24 10:18:52,720 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-24 10:18:52,721 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_half/repo/vms/data/chem2vec"
+2020-07-24 10:18:53,329 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 10:18:53,330 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_half/repo/vms/data/chem2vec"
+2020-07-24 10:18:59,851 - root - INFO - Command "make model" exited with code 0
+2020-07-24 10:18:59,852 - root - INFO - Loading modules "ompss"
+2020-07-24 10:18:59,853 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_8_32_half/repo/vms/data/chem2vec/native"
+2020-07-24 10:19:02,770 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-24 10:19:02,771 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-24 10:19:02,772 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=8 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_16_8_float
+2020-07-24 10:19:02,773 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float"
+2020-07-24 10:19:03,988 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 10:19:03,989 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 10:19:03,990 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-24 10:19:04,126 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-24 10:19:04,127 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec"
+2020-07-24 10:19:04,611 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 10:19:04,612 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec"
+2020-07-24 10:19:09,167 - root - INFO - Command "make model" exited with code 0
+2020-07-24 10:19:09,168 - root - INFO - Loading modules "ompss"
+2020-07-24 10:19:09,169 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec/native"
+2020-07-24 10:19:10,792 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 10:19:10,793 - root - INFO - Loading modules "ompss"
+2020-07-24 10:19:10,794 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 10:19:24,250 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 10:19:24,251 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 10:19:24,252 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 10:19:45,586 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 10:19:45,586 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 10:19:45,586 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec"
+2020-07-24 10:36:05,930 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 10:36:05,932 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 312), 'FF': (548160, 72444), 'LUT': (274080, 69040), 'URAM': (0, 0)}
+2020-07-24 10:36:05,972 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-24 10:36:05,974 - root - INFO - Loading modules "autoVivado"
+2020-07-24 10:36:05,974 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 12:04:16,802 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 12:04:16,803 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 12:04:16,804 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=8 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed
+2020-07-24 12:04:16,805 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed"
+2020-07-24 12:04:19,403 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 12:04:19,404 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 12:04:19,405 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-24 12:04:19,406 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-24 12:04:19,407 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec"
+2020-07-24 12:04:20,016 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 12:04:20,017 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec"
+2020-07-24 12:04:24,807 - root - INFO - Command "make model" exited with code 0
+2020-07-24 12:04:24,808 - root - INFO - Loading modules "ompss"
+2020-07-24 12:04:24,809 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec/native"
+2020-07-24 12:04:28,210 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 12:04:28,211 - root - INFO - Loading modules "ompss"
+2020-07-24 12:04:28,212 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 12:04:46,625 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 12:04:46,625 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 12:04:46,626 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 12:05:20,229 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 12:05:20,230 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 12:05:20,230 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec"
+2020-07-24 12:10:25,773 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 12:10:25,775 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 258), 'FF': (548160, 36022), 'LUT': (274080, 48036), 'URAM': (0, 0)}
+2020-07-24 12:10:25,817 - root - INFO - Average latency of dataflow_in_loop: 474
+2020-07-24 12:10:25,819 - root - INFO - Loading modules "autoVivado"
+2020-07-24 12:10:25,820 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 13:01:10,740 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 13:01:10,741 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 13:01:10,742 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=8 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed
+2020-07-24 13:01:10,743 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed"
+2020-07-24 13:01:13,126 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 13:01:13,127 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 13:01:13,128 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-24 13:01:13,129 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-24 13:01:13,130 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec"
+2020-07-24 13:01:13,705 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 13:01:13,706 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec"
+2020-07-24 13:01:18,738 - root - INFO - Command "make model" exited with code 0
+2020-07-24 13:01:18,739 - root - INFO - Loading modules "ompss"
+2020-07-24 13:01:18,740 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec/native"
+2020-07-24 13:01:21,720 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 13:01:21,721 - root - INFO - Loading modules "ompss"
+2020-07-24 13:01:21,721 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 13:01:40,122 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 13:01:40,123 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 13:01:40,123 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 13:02:13,068 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 13:02:13,069 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 13:02:13,069 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec"
+2020-07-24 13:17:11,577 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 13:17:11,579 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 256), 'DSP48E': (2520, 774), 'FF': (548160, 129503), 'LUT': (274080, 175536), 'URAM': (0, 0)}
+2020-07-24 13:17:11,626 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-24 13:17:11,628 - root - INFO - Loading modules "autoVivado"
+2020-07-24 13:17:11,628 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 14:41:16,830 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 14:41:16,831 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 14:41:16,833 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=8 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_16_8_half
+2020-07-24 14:41:16,834 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_half"
+2020-07-24 14:41:19,314 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 14:41:19,316 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 14:41:19,317 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-24 14:41:19,318 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-24 14:41:19,319 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_half/repo/vms/data/chem2vec"
+2020-07-24 14:41:19,900 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 14:41:19,901 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_half/repo/vms/data/chem2vec"
+2020-07-24 14:41:24,978 - root - INFO - Command "make model" exited with code 0
+2020-07-24 14:41:24,979 - root - INFO - Loading modules "ompss"
+2020-07-24 14:41:24,980 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_8_half/repo/vms/data/chem2vec/native"
+2020-07-24 14:41:27,567 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-24 14:41:27,568 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-24 14:41:27,569 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=16 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_16_16_float
+2020-07-24 14:41:27,570 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float"
+2020-07-24 14:41:28,637 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 14:41:28,638 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 14:41:28,639 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-24 14:41:28,640 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-24 14:41:28,641 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec"
+2020-07-24 14:41:28,947 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 14:41:28,948 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec"
+2020-07-24 14:41:33,840 - root - INFO - Command "make model" exited with code 0
+2020-07-24 14:41:33,841 - root - INFO - Loading modules "ompss"
+2020-07-24 14:41:33,841 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec/native"
+2020-07-24 14:41:36,025 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 14:41:36,026 - root - INFO - Loading modules "ompss"
+2020-07-24 14:41:36,027 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 14:41:54,835 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 14:41:54,836 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 14:41:54,836 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 14:42:20,242 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 14:42:20,243 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 14:42:20,243 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec"
+2020-07-24 15:26:40,844 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 15:26:40,846 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 640), 'DSP48E': (2520, 617), 'FF': (548160, 140280), 'LUT': (274080, 130455), 'URAM': (0, 0)}
+2020-07-24 15:26:40,926 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-24 15:26:40,930 - root - INFO - Loading modules "autoVivado"
+2020-07-24 15:26:40,931 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-24 22:55:23,127 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-24 22:55:23,130 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-24 22:55:23,131 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=16 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed
+2020-07-24 22:55:23,132 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed"
+2020-07-24 22:55:25,813 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-24 22:55:25,814 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-24 22:55:25,815 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-24 22:55:25,819 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-24 22:55:25,821 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec"
+2020-07-24 22:55:26,458 - root - INFO - Command "python make.py" exited with code 0
+2020-07-24 22:55:26,459 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec"
+2020-07-24 22:55:33,186 - root - INFO - Command "make model" exited with code 0
+2020-07-24 22:55:33,186 - root - INFO - Loading modules "ompss"
+2020-07-24 22:55:33,187 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec/native"
+2020-07-24 22:55:38,780 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 22:55:38,782 - root - INFO - Loading modules "ompss"
+2020-07-24 22:55:38,782 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-24 22:56:02,356 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-24 22:56:02,357 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-24 22:56:02,357 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-24 22:56:44,866 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-24 22:56:44,867 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-24 22:56:44,867 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec"
+2020-07-24 23:11:14,814 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-24 23:11:14,817 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 514), 'FF': (548160, 72073), 'LUT': (274080, 95361), 'URAM': (0, 0)}
+2020-07-24 23:11:14,896 - root - INFO - Average latency of dataflow_in_loop: 474
+2020-07-24 23:11:14,899 - root - INFO - Loading modules "autoVivado"
+2020-07-24 23:11:14,899 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-25 00:43:32,689 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-25 00:43:32,691 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-25 00:43:32,692 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=16 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed
+2020-07-25 00:43:32,693 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed"
+2020-07-25 00:43:35,089 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-25 00:43:35,091 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-25 00:43:35,092 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-25 00:43:35,094 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-25 00:43:35,095 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec"
+2020-07-25 00:43:35,678 - root - INFO - Command "python make.py" exited with code 0
+2020-07-25 00:43:35,679 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec"
+2020-07-25 00:43:41,097 - root - INFO - Command "make model" exited with code 0
+2020-07-25 00:43:41,099 - root - INFO - Loading modules "ompss"
+2020-07-25 00:43:41,099 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec/native"
+2020-07-25 00:43:44,577 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-25 00:43:44,579 - root - INFO - Loading modules "ompss"
+2020-07-25 00:43:44,580 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-25 00:44:06,180 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-25 00:44:06,181 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-25 00:44:06,182 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-25 00:44:50,593 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-25 00:44:50,593 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-25 00:44:50,594 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec"
+2020-07-25 01:32:27,478 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-25 01:32:27,479 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 1543), 'FF': (548160, 258261), 'LUT': (274080, 350921), 'URAM': (0, 0)}
+2020-07-25 01:32:27,538 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-25 01:32:27,541 - root - INFO - Loading modules "autoVivado"
+2020-07-25 01:32:27,542 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-25 01:45:29,343 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-25 01:45:29,345 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-25 01:45:29,346 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=16 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_16_16_half
+2020-07-25 01:45:29,347 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_half"
+2020-07-25 01:45:31,790 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-25 01:45:31,791 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-25 01:45:31,793 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-25 01:45:31,794 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-25 01:45:31,795 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_half/repo/vms/data/chem2vec"
+2020-07-25 01:45:32,347 - root - INFO - Command "python make.py" exited with code 0
+2020-07-25 01:45:32,349 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_half/repo/vms/data/chem2vec"
+2020-07-25 01:45:37,930 - root - INFO - Command "make model" exited with code 0
+2020-07-25 01:45:37,931 - root - INFO - Loading modules "ompss"
+2020-07-25 01:45:37,932 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_16_half/repo/vms/data/chem2vec/native"
+2020-07-25 01:45:41,352 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-25 01:45:41,354 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-25 01:45:41,355 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=32 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_16_32_float
+2020-07-25 01:45:41,357 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float"
+2020-07-25 01:45:42,560 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-25 01:45:42,561 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-25 01:45:42,562 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-25 01:45:42,563 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-25 01:45:42,565 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec"
+2020-07-25 01:45:43,051 - root - INFO - Command "python make.py" exited with code 0
+2020-07-25 01:45:43,052 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec"
+2020-07-25 01:45:49,684 - root - INFO - Command "make model" exited with code 0
+2020-07-25 01:45:49,685 - root - INFO - Loading modules "ompss"
+2020-07-25 01:45:49,686 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec/native"
+2020-07-25 01:45:52,614 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-25 01:45:52,615 - root - INFO - Loading modules "ompss"
+2020-07-25 01:45:52,616 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-25 01:46:19,340 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-25 01:46:19,341 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-25 01:46:19,342 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-25 01:46:53,026 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-25 01:46:53,027 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-25 01:46:53,027 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec"
+2020-07-25 06:12:30,003 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-25 06:12:30,006 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 1920), 'DSP48E': (2520, 1227), 'FF': (548160, 269149), 'LUT': (274080, 237498), 'URAM': (0, 0)}
+2020-07-25 06:12:30,136 - root - INFO - Average latency of dataflow_in_loop: 4455
+2020-07-25 06:12:30,142 - root - INFO - Loading modules "autoVivado"
+2020-07-25 06:12:30,142 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-29 16:50:26,871 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-29 16:50:26,874 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-29 16:50:26,876 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=32 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed
+2020-07-29 16:50:26,877 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed"
+2020-07-29 16:50:29,878 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-29 16:50:29,879 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-29 16:50:29,881 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-29 16:50:29,882 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-29 16:50:29,883 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec"
+2020-07-29 16:50:31,182 - root - INFO - Command "python make.py" exited with code 0
+2020-07-29 16:50:31,184 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec"
+2020-07-29 16:50:41,924 - root - INFO - Command "make model" exited with code 0
+2020-07-29 16:50:41,925 - root - INFO - Loading modules "ompss"
+2020-07-29 16:50:41,926 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec/native"
+2020-07-29 16:50:46,907 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-29 16:50:46,908 - root - INFO - Loading modules "ompss"
+2020-07-29 16:50:46,909 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-29 16:51:19,864 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-29 16:51:19,865 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-29 16:51:19,865 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-29 16:52:30,682 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-29 16:52:30,683 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-29 16:52:30,684 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec"
+2020-07-29 17:53:46,620 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-29 17:53:46,622 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 1024), 'DSP48E': (2520, 1026), 'FF': (548160, 144953), 'LUT': (274080, 196365), 'URAM': (0, 0)}
+2020-07-29 17:53:46,728 - root - INFO - Average latency of dataflow_in_loop: 519
+2020-07-29 17:53:46,733 - root - INFO - Loading modules "autoVivado"
+2020-07-29 17:53:46,734 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-29 23:27:50,497 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-29 23:27:50,508 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-29 23:27:50,511 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=32 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed
+2020-07-29 23:27:50,512 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed"
+2020-07-29 23:28:04,176 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-29 23:28:04,177 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-29 23:28:04,179 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-29 23:28:04,180 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-29 23:28:04,181 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec"
+2020-07-29 23:28:07,566 - root - INFO - Command "python make.py" exited with code 0
+2020-07-29 23:28:07,567 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec"
+2020-07-29 23:28:22,993 - root - INFO - Command "make model" exited with code 0
+2020-07-29 23:28:22,994 - root - INFO - Loading modules "ompss"
+2020-07-29 23:28:22,994 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec/native"
+2020-07-29 23:28:32,645 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-29 23:28:32,647 - root - INFO - Loading modules "ompss"
+2020-07-29 23:28:32,647 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-29 23:29:08,305 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-29 23:29:08,306 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-29 23:29:08,306 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-29 23:30:21,089 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-29 23:30:21,089 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-29 23:30:21,090 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec"
+2020-07-30 03:02:05,167 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-30 03:02:05,211 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 1024), 'DSP48E': (2520, 3078), 'FF': (548160, 516321), 'LUT': (274080, 705936), 'URAM': (0, 0)}
+2020-07-30 03:02:05,351 - root - INFO - Average latency of dataflow_in_loop: 541
+2020-07-30 03:02:05,356 - root - INFO - Loading modules "autoVivado"
+2020-07-30 03:02:05,356 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-30 04:04:25,385 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-30 04:04:25,386 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-30 04:04:25,387 - root - INFO - Starting dataset=chem2vec num_latent=16 num_samples=32 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_16_32_half
+2020-07-30 04:04:25,388 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_half"
+2020-07-30 04:04:28,773 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 04:04:28,775 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 16' 
+2020-07-30 04:04:28,777 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-07-30 04:04:28,778 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-30 04:04:28,780 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_half/repo/vms/data/chem2vec"
+2020-07-30 04:04:29,407 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 04:04:29,408 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_half/repo/vms/data/chem2vec"
+2020-07-30 04:04:36,721 - root - INFO - Command "make model" exited with code 0
+2020-07-30 04:04:36,723 - root - INFO - Loading modules "ompss"
+2020-07-30 04:04:36,723 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_16_32_half/repo/vms/data/chem2vec/native"
+2020-07-30 04:04:41,315 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-30 04:04:41,317 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-30 04:04:41,319 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=8 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_32_8_float
+2020-07-30 04:04:41,320 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float"
+2020-07-30 04:04:43,582 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 04:04:43,583 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-07-30 04:04:43,586 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-30 04:04:43,587 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-30 04:04:43,588 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec"
+2020-07-30 04:04:44,125 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 04:04:44,126 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec"
+2020-07-30 04:04:50,584 - root - INFO - Command "make model" exited with code 0
+2020-07-30 04:04:50,586 - root - INFO - Loading modules "ompss"
+2020-07-30 04:04:50,586 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec/native"
+2020-07-30 04:04:52,808 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 04:04:52,810 - root - INFO - Loading modules "ompss"
+2020-07-30 04:04:52,811 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-30 04:05:10,860 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 04:05:10,862 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-30 04:05:10,862 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-30 04:05:36,591 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-30 04:05:36,593 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-30 04:05:36,593 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec"
+2020-07-30 04:49:38,928 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-30 04:49:38,933 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 640), 'DSP48E': (2520, 617), 'FF': (548160, 140270), 'LUT': (274080, 130388), 'URAM': (0, 0)}
+2020-07-30 04:49:39,025 - root - INFO - Average latency of dataflow_in_loop: 3298
+2020-07-30 04:49:39,028 - root - INFO - Loading modules "autoVivado"
+2020-07-30 04:49:39,029 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-30 13:10:55,343 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-30 13:10:55,344 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-30 13:10:55,345 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=8 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed
+2020-07-30 13:10:55,346 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed"
+2020-07-30 13:10:58,464 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 13:10:58,466 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-07-30 13:10:58,467 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-30 13:10:58,470 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-07-30 13:10:58,471 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec"
+2020-07-30 13:10:59,055 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 13:10:59,057 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec"
+2020-07-30 13:11:05,673 - root - INFO - Command "make model" exited with code 0
+2020-07-30 13:11:05,675 - root - INFO - Loading modules "ompss"
+2020-07-30 13:11:05,677 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec/native"
+2020-07-30 13:11:09,099 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 13:11:09,100 - root - INFO - Loading modules "ompss"
+2020-07-30 13:11:09,101 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-30 13:11:32,130 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 13:11:32,131 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-30 13:11:32,131 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-30 13:12:16,235 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-30 13:12:16,238 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-30 13:12:16,239 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec"
+2020-07-30 13:26:50,455 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-30 13:26:50,459 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 514), 'FF': (548160, 72319), 'LUT': (274080, 95293), 'URAM': (0, 0)}
+2020-07-30 13:26:50,534 - root - INFO - Average latency of dataflow_in_loop: 474
+2020-07-30 13:26:50,537 - root - INFO - Loading modules "autoVivado"
+2020-07-30 13:26:50,538 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_fixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-30 15:03:30,068 - root - INFO - Command "module load autoVivado && make bitstream" exited with code 0
+2020-07-30 15:03:30,070 - root - INFO - predict.xtasks.config:
+Acc type	#instances	Function name	Actual frequency
+454881815	1	predict_or_update_model	187.481
+
+2020-07-30 15:03:30,074 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=8 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed
+2020-07-30 15:03:30,076 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed"
+2020-07-30 15:03:32,923 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 15:03:32,926 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-07-30 15:03:32,928 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-30 15:03:32,929 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-07-30 15:03:32,931 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec"
+2020-07-30 15:03:33,559 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 15:03:33,560 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec"
+2020-07-30 15:03:40,045 - root - INFO - Command "make model" exited with code 0
+2020-07-30 15:03:40,047 - root - INFO - Loading modules "ompss"
+2020-07-30 15:03:40,048 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec/native"
+2020-07-30 15:03:43,753 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 15:03:43,754 - root - INFO - Loading modules "ompss"
+2020-07-30 15:03:43,754 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec/smp-x86"
+2020-07-30 15:04:06,414 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 15:04:06,415 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-30 15:04:06,417 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec/smp-arm64"
+2020-07-30 15:04:51,018 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-30 15:04:51,019 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-30 15:04:51,020 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec"
+2020-07-30 15:50:23,973 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-30 15:50:23,976 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 512), 'DSP48E': (2520, 1543), 'FF': (548160, 258251), 'LUT': (274080, 350853), 'URAM': (0, 0)}
+2020-07-30 15:50:24,056 - root - INFO - Average latency of dataflow_in_loop: 484
+2020-07-30 15:50:24,059 - root - INFO - Loading modules "autoVivado"
+2020-07-30 15:50:24,060 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_mixed/repo/vms/data/chem2vec/fpga-zcu102"
+2020-07-30 16:03:47,945 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-07-30 16:03:47,947 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-07-30 16:03:47,949 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=8 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_32_8_half
+2020-07-30 16:03:47,950 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_half"
+2020-07-30 16:03:50,557 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 16:03:50,561 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-07-30 16:03:50,562 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 8' 
+2020-07-30 16:03:50,564 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-07-30 16:03:50,565 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_half/repo/vms/data/chem2vec"
+2020-07-30 16:03:51,210 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 16:03:51,212 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_half/repo/vms/data/chem2vec"
+2020-07-30 16:03:57,806 - root - INFO - Command "make model" exited with code 0
+2020-07-30 16:03:57,808 - root - INFO - Loading modules "ompss"
+2020-07-30 16:03:57,809 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_8_half/repo/vms/data/chem2vec/native"
+2020-07-30 16:04:00,873 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-07-30 16:04:00,874 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-07-30 16:04:00,876 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=16 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_32_16_float
+2020-07-30 16:04:00,877 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float"
+2020-07-30 16:04:02,324 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-07-30 16:04:02,326 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-07-30 16:04:02,328 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-07-30 16:04:02,330 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-07-30 16:04:02,332 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec"
+2020-07-30 16:04:02,883 - root - INFO - Command "python make.py" exited with code 0
+2020-07-30 16:04:02,885 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec"
+2020-07-30 16:04:10,251 - root - INFO - Command "make model" exited with code 0
+2020-07-30 16:04:10,253 - root - INFO - Loading modules "ompss"
+2020-07-30 16:04:10,255 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec/native"
+2020-07-30 16:04:13,117 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 16:04:13,119 - root - INFO - Loading modules "ompss"
+2020-07-30 16:04:13,120 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec/smp-x86"
+2020-07-30 16:04:37,932 - root - INFO - Command "module load ompss && make" exited with code 0
+2020-07-30 16:04:37,934 - root - INFO - Loading modules "QEMU petalinux/2016.4 mcxx-arm64"
+2020-07-30 16:04:37,935 - root - INFO - Command: "module load QEMU petalinux/2016.4 mcxx-arm64 && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec/smp-arm64"
+2020-07-30 16:05:11,679 - root - INFO - Command "module load QEMU petalinux/2016.4 mcxx-arm64 && make" exited with code 0
+2020-07-30 16:05:11,679 - root - INFO - Loading modules "Vivado/2017.4"
+2020-07-30 16:05:11,680 - root - INFO - Command: "module load Vivado/2017.4 && make hls" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec"
+2020-07-30 20:21:03,394 - root - INFO - Command "module load Vivado/2017.4 && make hls" exited with code 0
+2020-07-30 20:21:03,399 - root - INFO - Resource utilization of predict_or_update_model:
+{'BRAM_18K': (1824, 1920), 'DSP48E': (2520, 1227), 'FF': (548160, 269123), 'LUT': (274080, 237354), 'URAM': (0, 0)}
+2020-07-30 20:21:03,533 - root - INFO - Average latency of dataflow_in_loop: 4455
+2020-07-30 20:21:03,538 - root - INFO - Loading modules "autoVivado"
+2020-07-30 20:21:03,539 - root - INFO - Command: "module load autoVivado && make bitstream" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_float/repo/vms/data/chem2vec/fpga-zcu102"
+2020-08-04 03:04:26,366 - root - ERROR - Command "module load autoVivado && make bitstream" exited with code 2
+2020-08-04 03:04:26,369 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load autoVivado && make bitstream' returned non-zero exit status 2.
+2020-08-04 03:04:26,371 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=16 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_32_16_fixed
+2020-08-04 03:04:26,372 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_fixed"
+2020-08-04 03:04:29,102 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:04:29,104 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:04:29,106 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-08-04 03:04:29,107 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-08-04 03:04:29,109 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_fixed/repo/vms/data/chem2vec"
+2020-08-04 03:04:30,229 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:04:30,231 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_fixed/repo/vms/data/chem2vec"
+2020-08-04 03:05:19,855 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:05:19,858 - root - INFO - Loading modules "ompss"
+2020-08-04 03:05:19,859 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_fixed/repo/vms/data/chem2vec/native"
+2020-08-04 03:05:24,178 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:05:24,180 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:05:24,182 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=16 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_32_16_mixed
+2020-08-04 03:05:24,184 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_mixed"
+2020-08-04 03:05:25,695 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:05:25,699 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:05:25,701 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-08-04 03:05:25,703 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-08-04 03:05:25,705 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_mixed/repo/vms/data/chem2vec"
+2020-08-04 03:05:26,150 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:05:26,152 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_mixed/repo/vms/data/chem2vec"
+2020-08-04 03:06:13,880 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:06:13,882 - root - INFO - Loading modules "ompss"
+2020-08-04 03:06:13,882 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_mixed/repo/vms/data/chem2vec/native"
+2020-08-04 03:06:14,811 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:06:14,812 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:06:14,814 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=16 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_32_16_half
+2020-08-04 03:06:14,815 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_half"
+2020-08-04 03:06:16,773 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:06:16,775 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:06:16,777 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 16' 
+2020-08-04 03:06:16,779 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-08-04 03:06:16,781 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_half/repo/vms/data/chem2vec"
+2020-08-04 03:06:17,268 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:06:17,270 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_half/repo/vms/data/chem2vec"
+2020-08-04 03:07:04,288 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:07:04,290 - root - INFO - Loading modules "ompss"
+2020-08-04 03:07:04,291 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_16_half/repo/vms/data/chem2vec/native"
+2020-08-04 03:07:05,710 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:07:05,712 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:07:05,714 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=32 datatype=float in /scratch/vms/ci_20200723-165624/chem2vec_32_32_float
+2020-08-04 03:07:05,715 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_float"
+2020-08-04 03:07:07,051 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:07:07,052 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:07:07,054 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-08-04 03:07:07,055 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FLOAT\n' 
+2020-08-04 03:07:07,057 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_float/repo/vms/data/chem2vec"
+2020-08-04 03:07:07,367 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:07:07,369 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_float/repo/vms/data/chem2vec"
+2020-08-04 03:08:10,054 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:08:10,057 - root - INFO - Loading modules "ompss"
+2020-08-04 03:08:10,058 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_float/repo/vms/data/chem2vec/native"
+2020-08-04 03:08:11,596 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:08:11,598 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:08:11,600 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=32 datatype=fixed in /scratch/vms/ci_20200723-165624/chem2vec_32_32_fixed
+2020-08-04 03:08:11,601 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_fixed"
+2020-08-04 03:08:14,452 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:08:14,454 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:08:14,456 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-08-04 03:08:14,458 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_FIXED\n' 
+2020-08-04 03:08:14,459 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_fixed/repo/vms/data/chem2vec"
+2020-08-04 03:08:14,990 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:08:14,992 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_fixed/repo/vms/data/chem2vec"
+2020-08-04 03:09:16,230 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:09:16,233 - root - INFO - Loading modules "ompss"
+2020-08-04 03:09:16,235 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_fixed/repo/vms/data/chem2vec/native"
+2020-08-04 03:09:18,004 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:09:18,006 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:09:18,008 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=32 datatype=mixed in /scratch/vms/ci_20200723-165624/chem2vec_32_32_mixed
+2020-08-04 03:09:18,009 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_mixed"
+2020-08-04 03:09:20,659 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:09:20,661 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:09:20,663 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-08-04 03:09:20,665 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_MIXED\n' 
+2020-08-04 03:09:20,666 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_mixed/repo/vms/data/chem2vec"
+2020-08-04 03:09:21,152 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:09:21,154 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_mixed/repo/vms/data/chem2vec"
+2020-08-04 03:10:22,994 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:10:22,997 - root - INFO - Loading modules "ompss"
+2020-08-04 03:10:22,999 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_mixed/repo/vms/data/chem2vec/native"
+2020-08-04 03:10:24,668 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:10:24,670 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.
+2020-08-04 03:10:24,671 - root - INFO - Starting dataset=chem2vec num_latent=32 num_samples=32 datatype=half in /scratch/vms/ci_20200723-165624/chem2vec_32_32_half
+2020-08-04 03:10:24,673 - root - INFO - Command: "git clone /home/vanderaa/euroexa/eurosmurff repo" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_half"
+2020-08-04 03:10:27,420 - root - INFO - Command "git clone /home/vanderaa/euroexa/eurosmurff repo" exited with code 0
+2020-08-04 03:10:27,423 - root - INFO - patching data/chem2vec/options.ini: 'num_latent = \\d+' -> 'num_latent = 32' 
+2020-08-04 03:10:27,424 - root - INFO - patching data/chem2vec/options.ini: 'nsamples = \\d+' -> 'nsamples = 32' 
+2020-08-04 03:10:27,426 - root - INFO - patching c++/predict.h: '#define DT_FLOAT\\s*\n' -> '#define DT_HALF\n' 
+2020-08-04 03:10:27,427 - root - INFO - Command: "python make.py" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_half/repo/vms/data/chem2vec"
+2020-08-04 03:10:27,969 - root - INFO - Command "python make.py" exited with code 0
+2020-08-04 03:10:27,971 - root - INFO - Command: "make model" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_half/repo/vms/data/chem2vec"
+2020-08-04 03:11:32,365 - root - INFO - Command "make model" exited with code 0
+2020-08-04 03:11:32,367 - root - INFO - Loading modules "ompss"
+2020-08-04 03:11:32,369 - root - INFO - Command: "module load ompss && make" in dir "/scratch/vms/ci_20200723-165624/chem2vec_32_32_half/repo/vms/data/chem2vec/native"
+2020-08-04 03:11:34,100 - root - ERROR - Command "module load ompss && make" exited with code 2
+2020-08-04 03:11:34,102 - root - ERROR - Failed with <class 'subprocess.CalledProcessError'>: Command 'module load ompss && make' returned non-zero exit status 2.

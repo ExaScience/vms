@@ -1,0 +1,92 @@
+.PHONY += help check
+
+DEVICE := xilinx_u200_gen3x16_xdma_1_202110_1
+KERNEL_NAME := predict_one_block
+EXECUTABLE := predict
+
+.PHONY: all clean cleanall docs kill
+all: $(EXECUTABLE) Makefile
+
+DSA := $(call device2sandsa, $(DEVICE))
+
+# The C++ Compiler to use: g++
+CXX := g++
+
+# The kernel Compiler to use : V++
+VPP := v++
+
+#CPP files
+HOST_IF = ocl
+SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(SELF_DIR)/../Makefile.common
+
+# Enable Profiling
+PROFILE:= no
+
+# Host compiler global settings
+CXXFLAGS += -g -I$(XILINX_XRT)/include -I$(XILINX_VIVADO)/include -Wall -O0 -g -std=c++11
+CXXFLAGS += -I$(MODELDIR)
+CXXFLAGS += -fmessage-length=0
+CXXFLAGS += -DVMS_HOSTIF_OPENCL
+
+LDFLAGS += -L$(XILINX_XRT)/lib -lOpenCL -lpthread
+LDFLAGS += -lrt -lstdc++
+
+# Kernel compiler global settings
+CLFLAGS += -t $(TARGET) --config ../design.cfg
+CLFLAGS += -I$(MODELDIR)
+CLFLAGS += -g
+
+
+KERNEL_OBJ  = $(KERNEL_NAME).xo
+KERNEL_BIN  = $(KERNEL_NAME).xclbin
+KERNEL_BIN_OBJ  = $(KERNEL_BIN).o
+KERNEL_VAR  = $(subst .,_,$(subst /,_,$(KERNEL_BIN)))
+
+CXXFLAGS += -DEMULATION_MODE=\"$(TARGET)\"
+# CXXFLAGS += -DKERNEL_VAR=_binary_$(KERNEL_VAR)_start -DKERNEL_VAR_LEN=_binary_$(KERNEL_VAR)_size
+CXXFLAGS += -DKERNEL_FILENAME=\"$(KERNEL_BIN)\"
+
+# Building kernel
+$(KERNEL_OBJ): $(FULLKERNELFILES) $(FULLHDRFILES)
+	$(VPP) $(CLFLAGS) -c -k $(KERNEL_NAME) -I. -I$(<D) -o$@ $<
+
+$(KERNEL_BIN): $(KERNEL_OBJ)
+	$(VPP) $(CLFLAGS) -l $(LDCLFLAGS) -o$@ $(+)
+
+$(KERNEL_BIN_OBJ): $(KERNEL_BIN)
+	ld -r -b binary -o $@ $<
+
+$(EXECUTABLE): $(FULLSRCFILES) $(FULLHDRFILES) $(KERNEL_BIN_OBJ)
+	$(CXX) $(CXXFLAGS) $(FULLSRCFILES) $(KERNEL_BIN_OBJ) -o $@ $(LDFLAGS)
+
+xrt.ini: ../xrt.ini
+	ln -s ../xrt.ini
+
+emconfig.json:
+	emconfigutil --platform $(DEVICE) --od .
+
+check: opencl_summary.csv
+
+opencl_summary.csv: emconfig.json xrt.ini $(EXECUTABLE) 
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+else
+	./$(EXECUTABLE)
+endif
+
+# Cleaning stuff
+RMDIR = rm -rf
+
+clean:
+	-$(RMDIR) $(EXECUTABLE) *.xo *.xclbin *.xclbin.o *.inc
+	-$(RMDIR) TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) *.protoinst _v++_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou
+	-$(RMDIR) *summary *.info *.csv *.wcfg *.wdb *.ltx
+	-$(RMDIR) xrt.ini dsa.xml ext_metadata.json
+	-$(RMDIR) _x .ipcache .run
+
+kill:
+	killall xsim xsimk
+
+ECHO := @echo

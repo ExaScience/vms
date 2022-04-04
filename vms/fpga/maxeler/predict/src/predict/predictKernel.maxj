@@ -1,0 +1,94 @@
+package predict;
+
+import org.la4j.Matrix;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEFix;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEFix.SignMode;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVector;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.composite.DFEVectorType;
+
+public class predictKernel extends Kernel {
+	
+    public static final int num_bits = 16; // no. of bits for input/output data types
+    public static final int acc_bits = 24; // no. of bits for accumulator types
+    
+	public predictKernel(final KernelParameters parameters,
+			Matrix U,
+			Matrix B
+			) {
+		super(parameters);
+
+		int num_features = B.columns();
+		int num_latent = B.rows();
+		int num_proteins = U.columns();
+
+		System.out.format("num_features = %d\n", num_features);
+		System.out.format("num_latent = %d\n", num_latent);
+		System.out.format("num_proteins = %d\n", num_proteins);
+
+	
+		// One feature element        
+		DFEFix FType = dfeFixOffset(num_bits, -12, SignMode.TWOSCOMPLEMENT);
+
+		// One element of link matrix
+		DFEFix BType = dfeFixOffset(num_bits, -12, SignMode.TWOSCOMPLEMENT);
+		
+		// One element of link matrix
+		DFEFix UType = dfeFixOffset(num_bits, -12, SignMode.TWOSCOMPLEMENT);
+
+		// Accumulator type
+		DFEFix SType = dfeFixOffset(acc_bits, -12, SignMode.TWOSCOMPLEMENT);
+
+		// One prediction output
+		DFEFix TType = dfeFixOffset(num_bits, -12, SignMode.TWOSCOMPLEMENT);
+
+		// vector types
+		DFEVectorType<DFEVar> InType = new DFEVectorType<DFEVar>(FType, num_features);
+		DFEVectorType<DFEVar> OutType = new DFEVectorType<DFEVar>(TType, num_proteins);
+
+		DFEVector<DFEVar> features_in = io.input("features", InType);
+		DFEVector<DFEVar> predictions_out = OutType.newInstance(this);
+
+		features_in.simWatch("f_in");
+				
+		DFEVar tmp[] = new DFEVar[num_latent];
+		System.out.println(tmp.length);
+		System.out.println(tmp[0]);
+		
+		for (int k = 0; k < num_latent; k++)
+		{
+			DFEVar sum1 = constant.var(SType, .1);
+			
+			for (int f = 0; f < num_features; f++)
+			{
+				DFEVar prod = features_in[f] * constant.var(BType, B.get(k, f)); 
+				sum1 = sum1 + prod.cast(SType);
+
+			}
+			sum1.simWatch("sum1");
+
+			tmp[k] = sum1.cast(UType);
+		}
+	
+		
+		// Output
+		for (int d = 0; d < num_proteins; d++)
+		{
+			DFEVar sum2 = constant.var(SType, .2);
+			for (int k = 0; k < num_latent; k++)
+			{
+				DFEVar prod = tmp[k] * constant.var(UType, U.get(k, d)); 
+				sum2 = sum2 + prod.cast(SType);
+			}
+
+			sum2.simWatch("sum2");
+
+			predictions_out[d] <== sum2.cast(TType);
+		}
+
+		io.output("predictions", predictions_out, OutType);
+	}
+}

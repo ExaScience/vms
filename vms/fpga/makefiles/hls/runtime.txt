@@ -1,0 +1,4 @@
+fixed:515
+float:4453
+half:4463
+mixed:535

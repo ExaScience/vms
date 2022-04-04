@@ -1,0 +1,34 @@
+default: bitstream 
+
+include ../Makefile.common
+include ../Makefile.ompss
+
+MCXX   = aarch64-linux-gnu-fpgacxx
+CFLAGS_ += -DOMPSS_FPGA -std=c++11
+
+AVDIR = $(PWD)/$(BOARD)
+BITSTREAM = $(AVDIR)/$(PROGRAM_)_ait/$(PROGRAM_).bit
+BITSTREAM_FLAGS=--bitstream-generation --Wf,"--name=$(PROGRAM_),--dir=$(AVDIR),--board=$(BOARD),--clock=100,--hwruntime=som,--interconnect_opt=performance"
+
+bitstream: $(BITSTREAM)
+
+.PHONY: bitstream default
+
+$(PROGRAM_): $(OBJFILES)
+
+$(PROGRAM_): $(ALLCODE)
+	ln -sf $(ALLCODE) .
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(SRCFILES) -o $@ $(LDFLAGS_)
+
+$(BITSTREAM): $(ALLCODE)
+	ln -sf $(ALLCODE) .
+	rm -f *mcxx.cpp aarch64-linux-gnu-fpgacxx*cpp
+	mkdir -p $(AVDIR)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCC_FLAGS_D_) $(BITSTREAM_FLAGS) $(SRCFILES) -o $(PROGRAM_) $(LDFLAGS_)
+
+clean:
+	rm -f *.log $(LOCALFILES)
+	rm -f *mcxx.cpp aarch64-linux-gnu-fpgacxx*cpp
+	rm -f *.json
+	rm -f *.o $(PROGS_) $(PROGRAM_) $(PROGRAM_)_fp $(PROGRAM_)_fx
+	rm -rf zcu102 euroexa_crdb euroexa_maxilink

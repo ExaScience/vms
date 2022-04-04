@@ -1,0 +1,33 @@
+
+HOST_IF = ompss
+
+MCXX_FLAGS_   = --ompss --variable=disable_final_clause_transformation:1 
+MCXX_FLAGS_   += -k # --verbose
+MCXX_FLAGS_   += -Wno-unused-local-typedefs -Wno-unknown-pragmas
+MCXX_FLAGS_I_ = --instrument
+MCXX_FLAGS_D_ = --debug -g
+
+ifeq ($(USE_MPI),1)
+MPI_BASE=/opt/bsc/arm64/mpich-3.3
+MCXX_FLAGS_  += -I$(MPI_BASE)/include
+MCXX_FLAGS_  += -L$(MPI_BASE)/lib -lmpi
+endif
+
+PROGS_   = $(PROGRAM_)-p $(PROGRAM_)-i $(PROGRAM_)-d
+
+run: $(addsuffix .out,$(PROGS_))
+
+%.out: %
+	$(QEMU_CMD) ./$< >$<.out
+
+$(PROGRAM_)-p: $(ALLCODE)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-i: $(ALLCODE)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_I_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+$(PROGRAM_)-d: $(ALLCODE)
+	$(MCXX) $(CFLAGS_) $(MCXX_FLAGS_) $(MCXX_FLAGS_D_) $(FULLSRCFILES) -o $@ $(LDFLAGS_)
+
+clean: cleancommon
+	rm -f mcxx*.cpp

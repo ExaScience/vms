@@ -1,0 +1,121 @@
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><div id="siteheader">
+    <title>
+      jumax
+    </title>
+    <div id="content" class="wiki">
+      <div class="wikipage searchable">
+          <div id="wikipage" class="trac-content"><h1 id="ReconfigurableComputing:PublicWikiSection">Reconfigurable Computing: Public Wiki Section<a class="anchor" href="https://trac.version.fz-juelich.de/reconfigurable/wiki/Public#ReconfigurableComputing:PublicWikiSection" title="Link to this section"> ¶</a></h1>
+<h2 id="ObtainingAccesstoSystems">Obtaining Access to Systems<a class="anchor" href="https://trac.version.fz-juelich.de/reconfigurable/wiki/Public#ObtainingAccesstoSystems" title="Link to this section"> ¶</a></h2>
+<p>
+To obtain an account please proceed as follows:
+</p>
+<ul><li>Go to our central <a class="ext-link" href="https://dispatch.fz-juelich.de:8812/nic_account_ident/back=/RESOURCES&amp;xxlang=english"><span class="icon">​</span>account request page</a>
+and select project "jumax00".
+</li><li>After completing all forms you will receive a PDF document comprising of an application form and a usage agreement.
+</li><li>Sign both, the application form and the usage agreement, and return a PDF scan to the given address.
+</li></ul><h2 id="PRACE-3IPPCPPilotSystemfromMaxeler">PRACE-3IP PCP Pilot System from Maxeler<a class="anchor" href="https://trac.version.fz-juelich.de/reconfigurable/wiki/Public#PRACE-3IPPCPPilotSystemfromMaxeler" title="Link to this section"> ¶</a></h2>
+<p>
+For an overview see this <a href="https://trac.version.fz-juelich.de/reconfigurable/attachment/wiki/Public/pcp-technical-results-v04-maxeler.pdf">slide deck</a>.
+</p>
+<h2 id="MinimalTutorial:">Minimal Tutorial:<a class="anchor" href="https://trac.version.fz-juelich.de/reconfigurable/wiki/Public#MinimalTutorial:" title="Link to this section"> ¶</a></h2>
+<p>
+<strong>3 parts of the Source code:</strong>
+</p>
+<ul><li>Java Kernel Code
+</li><li>Java Manager Code
+</li><li>C/C++ CPU-side code
+</li></ul><p>
+<strong>assuming following directory structure:</strong>
+</p>
+<ul><li>$PWD/<a href="https://trac.version.fz-juelich.de/reconfigurable/attachment/wiki/Public/StreamFMACpuCode.cpp">StreamFMACpuCode.cpp</a>
+</li><li>$PWD/streamfma/<a href="https://trac.version.fz-juelich.de/reconfigurable/attachment/wiki/Public/StreamFMAManager.maxj">StreamFMAManager.maxj</a>
+</li><li>$PWD/streamfma/<a href="https://trac.version.fz-juelich.de/reconfigurable/attachment/wiki/Public/StreamFMAKernel.maxj">StreamFMAKernel.maxj</a>
+</li></ul><p>
+<strong>
+load the environment settings for the newest maxcompiler version (maxcompiler-2017.2.2 as of this writing):</strong>
+</p>
+<pre class="wiki">. /opt/maxcompiler-2017.2.2/settings.d/MaxCompiler.sh
+</pre><p>
+Version 2017.2.2 of the Maxeler Tools requires Vivado 2017.1. If compilation for the actual hardware is required, the environment for this version has to be loaded:
+</p>
+<pre class="wiki">. /home/xilinx/Vivado/Vivado/2017.1/settings64.sh
+</pre><p>
+<strong>
+Load GCC 7</strong>
+</p>
+<pre class="wiki">. /opt/rh/devtoolset-7/enable
+</pre><p>
+<strong>Building the JAVA program:</strong>
+</p>
+<pre class="wiki">maxjc -1.7 -cp /opt/maxcompiler-2017.2.2/lib/Max5Platform.jar:/opt/maxcompiler-2017.2.2/lib/MaxCompiler.jar streamfma/
+</pre><p>
+<strong>Running the Java program to generate maxfile and slic headers (simulation):</strong>
+</p>
+<pre class="wiki">java -XX:+UseSerialGC -Xmx2048m -cp /opt/maxcompiler-2017.2.2/lib/MaxCompiler.jar:/opt/maxcompiler-2017.2.2/lib/Max5Platform.jar:. streamfma.StreamFMAManager DFEModel=MAIA maxFileName=StreamFMA target=DFE_SIM  enableMPCX=true
+</pre><p>
+This will create the maxfile and SLiC header for the program. The parameter DFEModel is mandatory, although it is not used by the Max5LimaManager. DFEModel=LIMA is therefore an invalid value, but DFEModel still has to be set to something, so MAIA is used in this example.
+In order to build for actual hardware, specify target=DFE.
+</p>
+<p>
+<strong>Running the Java program to generate maxfile and slic headers (hardware):</strong>
+</p>
+<pre class="wiki">java -XX:+UseSerialGC -Xmx2048m -cp /opt/maxcompiler-2017.2.2/lib/MaxCompiler.jar:/opt/maxcompiler-2017.2.2/lib/Max5Platform.jar:. streamfma.StreamFMAManager DFEModel=MAIA maxFileName=StreamFMA target=DFE  enableMPCX=true
+</pre><p>
+This <strong>WILL</strong> take a <strong>VERY long time</strong>, approx. 2 hours even for this very small example. If you just want to test out the DFE version of this tutorial, you can find the prebuilt StreamFMA.max and StreamFMA.h files in /opt/maxeler-StreamFMAtutorial/ on jumax
+</p>
+<p>
+<strong>Copy simulation maxfile and header:</strong>
+</p>
+<pre class="wiki">mkdir simulation
+cp StreamFMA_MAIA_DFE_SIM/results/*{.max,.h} simulation/
+</pre><p>
+<strong>Copy DFE maxfile and header:</strong>
+</p>
+<pre class="wiki">mkdir hardware
+cp StreamFMA_MAIA_DFE/results/*{.max,.h} hardware/
+or
+cp /opt/maxeler-StreamFMAtutorial/*{.max,.h} hardware/
+</pre><p>
+<strong>build the slic object file (simulation):</strong>
+</p>
+<pre class="wiki">sliccompile simulation/StreamFMA.max
+</pre><p>
+<strong>build the slic object file (hardware):</strong>
+</p>
+<pre class="wiki">sliccompile hardware/StreamFMA.max
+</pre><p>
+<strong>build the binary (simulation):</strong>
+</p>
+<pre class="wiki">eval g++ -o StreamFMA -Isimulation/  StreamFMACpuCode.cpp slic_StreamFMA.o $(slic-config --cflags --libs)
+</pre><p>
+<strong>build the binary (hardware):</strong>
+</p>
+<pre class="wiki">eval g++ -o StreamFMA -Ihardware/  StreamFMACpuCode.cpp slic_StreamFMA.o $(slic-config --cflags --libs)
+</pre><p>
+(eval is required because of $(slic-config --libs --cflags), this for some reason works only in a Makefile or when using eval)
+</p>
+<p>
+<strong>start the simulation:</strong>
+</p>
+<pre class="wiki">export MAXELEROSDIR=/opt/maxcompiler-2017.2.2/lib/maxeleros-sim
+maxcompilersim -c LIMA -n StreamFMA restart
+</pre><p>
+<strong>run the binary (simulation):</strong>
+</p>
+<pre class="wiki">export LD_LIBRARY_PATH=/opt/maxcompiler-2017.2.2/lib/maxeleros-sim/lib:$LD_LIBRARY_PATH
+export SLIC_CONF="use_simulation=StreamFMA"
+./StreamFMA
+</pre><p>
+<strong>stop the simulation:</strong>
+</p>
+<pre class="wiki">maxcompilersim -c LIMA -n StreamFMA stop
+</pre><p>
+<strong>run the binary (hardware):</strong>
+</p>
+<p>
+You have to ssh onto jumax-cpu for this
+</p>
+<pre class="wiki">export LD_LIBRARY_PATH=/opt/maxeler/maxeleros/lib:$LD_LIBRARY_PATH
+./StreamFMA
+</pre></div>
+</body></html>

@@ -1,0 +1,1 @@
+../../makefiles/smp-x86/Makefile

@@ -1,0 +1,90 @@
+package predict;
+
+import java.io.IOException;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
+import com.maxeler.platform.max5.manager.Max5LimaManager;
+
+import org.la4j.Matrix;
+
+import predict.DimensionMismatchException;
+
+public class predictManager extends Max5LimaManager {
+
+	public static final String kernelName = "predictKernel";
+	public static final int align_to_bits = 128;
+
+	static String readFile(String path, Charset encoding) 
+			throws IOException 
+	{
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+
+	static Matrix readMM(String path)
+			throws IOException 
+	{
+		String Us = readFile(path, StandardCharsets.UTF_8);
+		return Matrix.fromMatrixMarket(Us);
+	}
+	
+	static Matrix padCols(Matrix M)
+	{
+		int align_to_cols = align_to_bits / predictKernel.num_bits;
+		int cols_to_pad = align_to_cols - (M.columns() % align_to_cols);
+		
+		return M.copyOfColumns(M.columns() + cols_to_pad);
+	}
+	
+	public predictManager(EngineParameters params) 
+			throws IOException, DimensionMismatchException
+	{
+		super(params);
+
+		Matrix U = readMM("data/sample-1-U1-latents.mtx");
+		System.out.format("U: %d x %d - max: %e, min: %e\n", U.rows(), U.columns(), U.max(), U.min());
+		
+		Matrix B = readMM("data/sample-1-F0-link.mtx");
+		System.out.format("B: %d x %d- max: %e, min: %e\n", B.rows(), B.columns(), B.max(), B.min());
+
+		if (U.rows() != B.rows()) 
+		{
+			throw new DimensionMismatchException();
+		}
+		
+		// pad to 128 bits
+		U = padCols(U);
+		B = padCols(B);
+
+		
+		final KernelBlock kernel = addKernel(new
+				predictKernel(makeKernelParameters(kernelName),
+						U, // latent model (num latent x num proteins)
+						B  // link matrix  (num latent x num features)
+						));
+
+		//-- features go in
+		final DFELink f = addStreamFromCPU("features");
+		kernel.getInput("features") <== f;
+
+		//-- predictions come out
+		final DFELink p = addStreamToCPU("predictions");
+		p <== kernel.getOutput("predictions");
+	}
+
+	public static void main(final String[] argv)
+			throws IOException, DimensionMismatchException
+	{
+		final EngineParameters params = new EngineParameters(argv);
+		final predictManager manager = new predictManager(params);
+		manager.build();
+	}
+
+}
