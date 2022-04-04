@@ -11,6 +11,12 @@
 
 #include "predict.h"
 
+#define mpi_world_rank_0_print(...) \
+do { \
+    if (mpi_world_rank == 0) \
+        printf(__VA_ARGS__); \
+} while (0)
+
 const float epsilon = 0.5;
 const int float_size = sizeof(float) * 8;
 
@@ -42,7 +48,18 @@ void prepare_tb_input(
 {
     perf_start(__FUNCTION__);
 
-    for (int c = 0; c < num_compounds; c++)
+#ifndef USE_ARGO
+    const int lo = 0;
+    const int hi = num_compounds;
+#else
+    const int num_compounds_per_rank = num_compounds / mpi_world_size;
+    const int block_start = num_compounds_per_rank * mpi_world_rank;
+
+    const int lo = block_start;
+    const int hi = block_start + num_compounds_per_rank;
+#endif
+
+    for (int c = lo; c < hi; c++)
         for (int p = 0; p < num_features; p++)
             out[c][p] = in [c%tb_num_compounds][p];
 
@@ -150,8 +167,13 @@ int main(int argc, char *argv[])
         printf( "%d:  mpi_start: %lu\n",  mpi_world_rank, block_start);
     }
 
+#ifndef USE_ARGO
     P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])lmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
-    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg); 
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])lmalloc(sizeof(F_base) * num_compounds * num_features, features_seg);
+#else
+    P_base (*tb_output_block)[num_proteins] = (P_base (*)[num_proteins])dmalloc(sizeof(P_base) * num_compounds * num_proteins, predictions_seg);
+    F_base (*tb_input_block)[num_features]  = (F_base (*)[num_features])dmalloc(sizeof(F_base) * num_compounds * num_features, features_seg);
+#endif
                         errors_per_compound =                     (int*)lmalloc(sizeof(int) * num_compounds, errors_seg);
 
     int nerrors = 0;
@@ -161,20 +183,17 @@ int main(int argc, char *argv[])
     float (*tb_input)[num_features] = (float (*)[num_features])binary_file("vms_tb_in.bin", tb_num_compounds * num_features);
     float (*tb_ref)[num_proteins]   = (float (*)[num_proteins])binary_file("vms_tb_ref.bin", tb_num_compounds * num_proteins);
 
-    if (mpi_world_rank == 0) 
-    {
-        printf("  dt:    %s\n", DT_NAME);
-        printf("  nrep:  %d\n", num_repeat);
-        printf("  nprot: %d\n", num_proteins);
-        printf("  ncmpd: %d\n", num_compounds);
-        printf("  nfeat: %d\n", num_features);
-        printf("  nlat:  %d\n", num_latent);
-        printf("  nsmpl: %d\n", num_samples);
+    mpi_world_rank_0_print("  dt:    %s\n", DT_NAME);
+    mpi_world_rank_0_print("  nrep:  %d\n", num_repeat);
+    mpi_world_rank_0_print("  nprot: %d\n", num_proteins);
+    mpi_world_rank_0_print("  ncmpd: %d\n", num_compounds);
+    mpi_world_rank_0_print("  nfeat: %d\n", num_features);
+    mpi_world_rank_0_print("  nlat:  %d\n", num_latent);
+    mpi_world_rank_0_print("  nsmpl: %d\n", num_samples);
 #ifdef USE_OPENMP
-        printf("  nthrds: %d\n", omp_get_max_threads());
-        printf("  nnodes: %d\n", mpi_world_size);
+    mpi_world_rank_0_print("  nthrds: %d\n", omp_get_max_threads());
+    mpi_world_rank_0_print("  nnodes: %d\n", mpi_world_size);
 #endif
-    }
 
     double min_time = 1e6;
     for(int n=0; n<num_repeat; n++)
@@ -185,12 +204,12 @@ int main(int argc, char *argv[])
 
         double start = tick();
 
+        mpi_world_rank_0_print("Prepare input\n");
+#ifndef USE_ARGO
         if (mpi_world_rank == 0)
-        {
-            printf("Prepare input\n");
+#endif
             prepare_tb_input(num_compounds, tb_input, tb_input_block);
-            printf("Predicting\n");
-        }
+        mpi_world_rank_0_print("Predicting\n");
 
         send_inputs(num_compounds, tb_input_block);
         predict_compounds(block_start, num_compounds_per_rank, tb_input_block, tb_output_block, m);

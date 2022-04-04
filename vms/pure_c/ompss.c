@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
+
+#ifdef USE_ARGO
+#include "argo.h"
+#endif
+
 #include "predict.h"
 
 static const char     *sizes[]   = { "EiB", "PiB", "TiB", "GiB", "MiB", "KiB", "B" };
@@ -57,6 +62,8 @@ void *dmalloc(unsigned long size, int segment_id)
     printf("dmalloc of %s\n", sizestr);
     free(sizestr);
     return nanos6_dmalloc(size, nanos6_equpart_distribution, 0, NULL);
+#elif defined(USE_ARGO)
+    return collective_alloc(size);
 #else
     return lmalloc(size, segment_id);
 #endif

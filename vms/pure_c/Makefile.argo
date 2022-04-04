@@ -1,0 +1,14 @@
+
+ifndef ARGO_ROOT
+$(error Set ARGO_ROOT to the ArgoDSM install dir)
+endif
+
+CFLAGS    += -DUSE_ARGO -DVMS_PROFILING
+CFLAGS    += -I$(ARGO_ROOT)/include/argo
+LDFLAGS   += -L$(ARGO_ROOT)/lib
+LDFLAGS   += -Wl,-rpath=${ARGO_ROOT}/lib
+LDFLAGS   += -largo -largobackend-mpi -lnuma -lrt
+OBJFILES  += counters_impl.o
+OUTPUTDIR ?= argo
+
+include Makefile.omp

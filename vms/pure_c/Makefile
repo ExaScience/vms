@@ -19,12 +19,16 @@ ompss/predict:
 mpi/predict:
 	$(MAKE) -f Makefile.mpi
 
+argo/predict:
+	${MAKE} -f Makefile.argo
+
 all:
 	$(MAKE) -f Makefile.plain
 	$(MAKE) -f Makefile.omp
 	$(MAKE) -f Makefile.gpi
 	$(MAKE) -f Makefile.mpi
 	$(MAKE) -f Makefile.ompss
+	$(MAKE) -f Makefile.argo
 
 test:
 	$(MAKE) -f Makefile.ompss

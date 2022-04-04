@@ -277,6 +277,32 @@ void barrier() {
     gaspi_barrier(GASPI_GROUP_ALL, GASPI_BLOCK);
 }
 
+#elif defined(USE_ARGO)
+
+#include "argo.h"
+
+void mpi_init() {
+    argo_init(256*1024*1024UL,
+              256*1024*1024UL);
+
+    mpi_world_size = argo_number_of_nodes();
+    mpi_world_rank = argo_node_id();
+}
+
+void mpi_finit() {
+    argo_finalize();
+}
+
+void barrier() {
+    argo_barrier(1);
+}
+
+void send_predictions(int compound, const P_base data[num_proteins]) {}
+void send_features(int compound, const F_base data[num_features]) {}
+
+void send_inputs(int num_compounds,  F_flx features) { /*barrier();*/ }
+void combine_results(int num_compounds,  P_flx predictions) { barrier(); }
+
 #else
 
 void mpi_init() {
