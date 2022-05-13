@@ -300,7 +300,7 @@ void barrier() {
 void send_predictions(int compound, const P_base data[num_proteins]) {}
 void send_features(int compound, const F_base data[num_features]) {}
 
-void send_inputs(int num_compounds,  F_flx features) { /*barrier();*/ }
+void send_inputs(int num_compounds,  F_flx features) { barrier(); }
 void combine_results(int num_compounds,  P_flx predictions) { barrier(); }
 
 #else
