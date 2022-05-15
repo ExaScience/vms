@@ -48,18 +48,7 @@ void prepare_tb_input(
 {
     perf_start(__FUNCTION__);
 
-#ifndef USE_ARGO
-    const int lo = 0;
-    const int hi = num_compounds;
-#else
-    const int num_compounds_per_rank = num_compounds / mpi_world_size;
-    const int block_start = num_compounds_per_rank * mpi_world_rank;
-
-    const int lo = block_start;
-    const int hi = block_start + num_compounds_per_rank;
-#endif
-
-    for (int c = lo; c < hi; c++)
+    for (int c = 0; c < num_compounds; c++)
         for (int p = 0; p < num_features; p++)
             out[c][p] = in [c%tb_num_compounds][p];
 
@@ -205,9 +194,7 @@ int main(int argc, char *argv[])
         double start = tick();
 
         mpi_world_rank_0_print("Prepare input\n");
-#ifndef USE_ARGO
         if (mpi_world_rank == 0)
-#endif
             prepare_tb_input(num_compounds, tb_input, tb_input_block);
         mpi_world_rank_0_print("Predicting\n");
 
