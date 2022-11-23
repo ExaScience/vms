@@ -18,7 +18,7 @@
 	in(features[:block_size]) \
 	out(predictions[:block_size])
 #else
-#error Either define OMPSS_SMP or OMPSS_OPENACC
+#warning Not using OMPSS (define either OMPSS_SMP or OMPSS_OPENACC)
 #endif
 void predict_block(
 		const F_blk features, 
