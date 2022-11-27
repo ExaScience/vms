@@ -10,8 +10,8 @@
 // call this function to end a timer, returning nanoseconds elapsed as a long
 double tick() {
     struct timespec t;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
-    return (double)(t.tv_sec) +  (double)(t.tv_nsec) / 1e9; 
+    clock_gettime(CLOCK_REALTIME, &t);
+    return (double)(t.tv_sec) +  (double)(t.tv_nsec) / 1e9;
 }
 
 void prepare_tb_input(
@@ -111,8 +111,8 @@ int
 main (int argc, char **argv)
 {
     struct arguments args;
-    args.num_repeat = 1;
-    args.num_blocks = 1;
+    args.num_repeat = 3;
+    args.num_blocks = 10;
     args.check = 1;
 
     /* Parse our arguments; every option seen by parse_opt will
