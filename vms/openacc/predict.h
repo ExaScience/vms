@@ -24,3 +24,5 @@ void predict_blocks(
 		const M_arr M,
 		const B_arr B
 );
+
+#define UNUSED(x) (void)(x)

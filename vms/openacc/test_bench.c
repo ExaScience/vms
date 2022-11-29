@@ -22,6 +22,16 @@ int atoi(const char *nptr);
 #include "predict.h"
 #include "vms_tb.h"
 
+void *device_alloc(unsigned long size, int device)
+{
+#ifdef OMPSS_OPENACC
+    return nanos6_device_alloc(size, device);
+#else
+    UNUSED(device);
+    return malloc(size);
+#endif
+}
+
 // call this function to end a timer, returning nanoseconds elapsed as a long
 double tick() {
     struct timespec t;
@@ -149,11 +159,12 @@ main (int argc, char **argv)
 
     struct predict_data *device_data =  (struct predict_data *) malloc(sizeof(struct predict_data) * args.num_devices);
 
+
     for (int i=0; i<args.num_devices; ++i) {
         size_t total_input_size = args.num_blocks*block_size*num_features*sizeof(float);
-        device_data[i].input = (float *) malloc(total_input_size);
+        device_data[i].input = (float *) device_alloc(total_input_size, i);
         size_t total_output_size = args.num_blocks*block_size*num_proteins*sizeof(float);
-        device_data[i].output = (float *) malloc(total_output_size);
+        device_data[i].output = (float *) device_alloc(total_output_size, i);
 
         prepare_tb_input(args.num_blocks, tb_input, device_data[i].input);
     }
@@ -168,7 +179,7 @@ main (int argc, char **argv)
         predict_blocks(args.num_blocks, args.num_devices, device_data, U, M, B);
         double stop = tick();
         if (stop-start < elapsed) elapsed = stop-start;
-        printf("%d: took %.2f sec; %.2f compounds/sec\n", i, stop-start, block_size * args.num_blocks / elapsed);
+        printf("%d: took %.2f sec; %.2f compounds/sec\n", i, stop-start, block_size * args.num_blocks * args.num_devices / elapsed);
     }
 
     if (args.check) {
@@ -177,7 +188,7 @@ main (int argc, char **argv)
         }
     }
 
-    printf("minimum time %.2f sec; %.2f compounds/sec\n", elapsed, block_size * args.num_blocks / elapsed);
+    printf("minimum time %.2f sec; %.2f compounds/sec\n", elapsed, block_size * args.num_blocks * args.num_devices / elapsed);
 
     // terra-ops aka 10^12 ops
     double tops = (double) args.num_devices * (double)args.num_blocks * (double)num_samples * (double)block_size * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
