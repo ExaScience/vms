@@ -1,6 +1,21 @@
 #include <stdio.h>
-#include <math.h>
+
+/* ugly hack to avoid float128 error */
+#ifdef OMPSS_OPENACC
+
+void *malloc(size_t size);
+void free(void *ptr);
+
+double fabs(double x);
+int atoi(const char *nptr);
+
+#else
+
 #include <stdlib.h>
+#include <math.h>
+
+#endif /* ugly hack */
+
 #include <time.h>
 #include <argp.h>
 
