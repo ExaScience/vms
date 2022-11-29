@@ -21,11 +21,11 @@
 #warning Not using OMPSS (define either OMPSS_SMP or OMPSS_OPENACC)
 #endif
 void predict_block(
-		const F_blk features, 
+		const F_blk features,
 		      P_blk predictions,
 		const U_arr U,
 		const M_arr M,
-		const B_arr B 
+		const B_arr B
 )
 {
 #pragma acc data \
@@ -35,7 +35,7 @@ void predict_block(
 		B[:num_features][:num_samples][:num_latent], \
 		features[:block_size][:num_features]) \
 	copyout(predictions[:block_size][:num_proteins])
-#pragma acc parallel loop 
+#pragma acc parallel loop
 		for (int i = 0; i < block_size; ++i)
 		{
 			float latents[num_samples][num_latent];
@@ -58,7 +58,7 @@ void predict_block(
 				for (int d = 0; d < num_proteins; d++)
 				{
 					float sum = .0F;
-#pragma acc loop collapse(2) vector 
+#pragma acc loop collapse(2) vector
 					for (int s = 0; s < num_samples; s++)
 						for (int k = 0; k < num_latent; k++)
 							sum += latents[s][k] * U[d][s][k];
@@ -71,17 +71,18 @@ void predict_block(
 
 void predict_blocks(
 		int num_blocks,
-		const F_blk features[], 
-		      P_blk predictions[],
+		int num_devices,
+		struct predict_data *data,
 		const U_arr U,
 		const M_arr M,
-		const B_arr B 
+		const B_arr B
 )
 {
-	for(int i=0; i<num_blocks; ++i)
-	{
-		predict_block(features[i], predictions[i], U, M, B);
-	}
-	
+	for(int d=0; d<num_devices; ++d)
+		for(int i=0; i<num_blocks; ++i)
+		{
+			predict_block(data[d].input[i], data[d].output[i], U, M, B);
+		}
+
 #pragma oss taskwait
 }

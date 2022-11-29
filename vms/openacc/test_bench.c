@@ -83,6 +83,7 @@ static char args_doc[] = "";
 static struct argp_option options[] = {
   {"num-blocks",     'b', "NUM",      0,  "Number of blocks (1)." },
   {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
+  {"num-devices",    'g', "NUM",      0,  "Number of GPUs touse (1)." },
   {"no-check",       'n',     0,      0,  "Do not check for errors." },
   {"check",          'd',     0,      0,  "Do check for errors." },
   {"verbose",        'v',     0,      0,  "Verbose messages" },
@@ -96,6 +97,7 @@ struct arguments
 {
   int num_repeat;
   int num_blocks;
+  int num_devices;
   int check;
 };
 
@@ -111,6 +113,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     {
     case 'r': arguments->num_repeat = atoi(arg); break;
     case 'b': arguments->num_blocks = atoi(arg); break;
+    case 'g': arguments->num_devices = atoi(arg); break;
     case 'n': arguments->check = 0; break;
     case 'd': arguments->check = 1; break;
     case 'v': verbose++; break;
@@ -127,6 +130,7 @@ main (int argc, char **argv)
 {
     struct arguments args;
     args.num_repeat = 3;
+    args.num_devices = 1;
     args.num_blocks = 10;
     args.check = 1;
 
@@ -135,6 +139,7 @@ main (int argc, char **argv)
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
     printf("  nrep:  %d\n", args.num_repeat);
+    printf("  ndevs: %d\n", args.num_devices);
     printf("  nblk:  %d\n", args.num_blocks);
     printf("  blksz: %d\n", block_size);
     printf("  nprot: %d\n", num_proteins);
@@ -142,10 +147,16 @@ main (int argc, char **argv)
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    float (*tb_output_blocks)[block_size][num_proteins] = (float *) malloc(args.num_blocks*block_size*num_proteins*sizeof(float));
-    float (*tb_input_blocks)[block_size][num_features] = (float *)malloc(args.num_blocks*block_size*num_features*sizeof(float));
+    struct predict_data *device_data =  (struct predict_data *) malloc(sizeof(struct predict_data) * args.num_devices);
 
-    prepare_tb_input(args.num_blocks, tb_input, tb_input_blocks);
+    for (int i=0; i<args.num_devices; ++i) {
+        size_t total_input_size = args.num_blocks*block_size*num_features*sizeof(float);
+        device_data[i].input = (float *) malloc(total_input_size);
+        size_t total_output_size = args.num_blocks*block_size*num_proteins*sizeof(float);
+        device_data[i].output = (float *) malloc(total_output_size);
+
+        prepare_tb_input(args.num_blocks, tb_input, device_data[i].input);
+    }
 
     int nerrors = 0;
 
@@ -154,26 +165,32 @@ main (int argc, char **argv)
     for (int i = 0; i< args.num_repeat; ++i)
     {
         double start = tick();
-        predict_blocks(args.num_blocks, tb_input_blocks, tb_output_blocks, U, M, B);
+        predict_blocks(args.num_blocks, args.num_devices, device_data, U, M, B);
         double stop = tick();
-	if (stop-start < elapsed) elapsed = stop-start;
+        if (stop-start < elapsed) elapsed = stop-start;
         printf("%d: took %.2f sec; %.2f compounds/sec\n", i, stop-start, block_size * args.num_blocks / elapsed);
     }
 
-    if (args.check)
-        nerrors += check_result(args.num_blocks, tb_output_blocks, tb_ref);
+    if (args.check) {
+        for (int i=0; i<args.num_devices; ++i) {
+            nerrors += check_result(args.num_blocks, device_data[i].output, tb_ref);
+        }
+    }
 
     printf("minimum time %.2f sec; %.2f compounds/sec\n", elapsed, block_size * args.num_blocks / elapsed);
 
     // terra-ops aka 10^12 ops
-    double tops = (double)args.num_blocks * (double)num_samples * (double)block_size * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
+    double tops = (double) args.num_devices * (double)args.num_blocks * (double)num_samples * (double)block_size * (double)num_latent * (double)(num_features + num_proteins) / 1e12;
     const int op_size = sizeof(float) * 8;
 
     printf("%.4f tera-ops; %.4f tera-ops/second (%d-bit float ops)\n", tops, tops/elapsed, op_size);
     printf("%.4f giga-ops; %.4f giga-ops/second (%d-bit float ops)\n", 1e3 * tops, 1e3 * tops/elapsed, op_size);
 
-    free(tb_output_blocks);
-    free(tb_input_blocks);
+
+    for (int i=0; i<args.num_devices; ++i) {
+        free(device_data[i].input);
+        free(device_data[i].output);
+    }
 
     return nerrors;
 }
