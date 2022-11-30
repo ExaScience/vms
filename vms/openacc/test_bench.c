@@ -205,6 +205,8 @@ main (int argc, char **argv)
 
 
     for (int i=0; i<args.num_devices; ++i) {
+        free(device_data[i]->features);
+        free(device_data[i]->predictions);
         free(device_data[i]);
     }
 
