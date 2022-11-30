@@ -75,8 +75,8 @@ void predict_blocks(
 		struct predict_data *data[]
 )
 {
-	for(int d=0; d<num_devices; ++d)
-		for(int i=0; i<num_blocks; ++i)
+	for(int i=0; i<num_blocks; ++i)
+		for(int d=0; d<num_devices; ++d)
 		{
 			predict_block(data[d]->features[i], data[d]->predictions[i], data[d]->U, data[d]->M, data[d]->B);
 		}
