@@ -9,20 +9,22 @@ typedef float U_arr[num_proteins][num_samples][num_latent];
 typedef float M_arr              [num_samples][num_latent];
 typedef float B_arr[num_features][num_samples][num_latent];
 
+#define MAX_NUM_DEVICES 10
+
 struct predict_data
 {
-    float (*output)[block_size][num_proteins];
-    float (*input)[block_size][num_features];
+	F_blk *features;
+	P_blk *predictions;
+	U_arr U;
+	M_arr M;
+	B_arr B;
 };
 
 
 void predict_blocks(
 		int num_blocks,
 		int num_devices,
-		struct predict_data *data,
-		const U_arr U,
-		const M_arr M,
-		const B_arr B
+		struct predict_data *data[]
 );
 
 #define UNUSED(x) (void)(x)

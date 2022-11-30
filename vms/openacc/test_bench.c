@@ -16,6 +16,7 @@ int atoi(const char *nptr);
 
 #endif /* ugly hack */
 
+#include <string.h>
 #include <time.h>
 #include <argp.h>
 
@@ -42,12 +43,17 @@ double tick() {
 void prepare_tb_input(
     int num_blocks,
     const float in[][num_features],
-    float out[][block_size][num_features])
+    struct predict_data *device_data
+)
 {
+    memcpy(device_data->U, U, sizeof(U_arr));
+    memcpy(device_data->M, M, sizeof(M_arr));
+    memcpy(device_data->B, B, sizeof(B_arr));
+
     for (int b = 0; b < num_blocks; b++)
         for (int c = 0; c < block_size; c++)
             for (int p = 0; p < num_features; p++)
-                out[b][c][p] = in[c % tb_num_compounds][p];
+                device_data->features[b][c][p] = in[c % tb_num_compounds][p];
 }
 
 
@@ -157,16 +163,16 @@ main (int argc, char **argv)
     printf("  nlat:  %d\n", num_latent);
     printf("  nsmpl: %d\n", num_samples);
 
-    struct predict_data *device_data =  (struct predict_data *) malloc(sizeof(struct predict_data) * args.num_devices);
-
+    struct predict_data *device_data[MAX_NUM_DEVICES];
 
     for (int i=0; i<args.num_devices; ++i) {
-        size_t total_input_size = args.num_blocks*block_size*num_features*sizeof(float);
-        device_data[i].input = (float *) device_alloc(total_input_size, i);
-        size_t total_output_size = args.num_blocks*block_size*num_proteins*sizeof(float);
-        device_data[i].output = (float *) device_alloc(total_output_size, i);
+        device_data[i] = (struct predict_data *) device_alloc(sizeof(struct predict_data), i);
+        size_t total_input_size = args.num_blocks*sizeof(F_blk);
+        device_data[i]->features = (F_blk *) device_alloc(total_input_size, i);
+        size_t total_output_size = args.num_blocks*sizeof(P_blk);
+        device_data[i]->predictions = (P_blk *) device_alloc(total_output_size, i);
 
-        prepare_tb_input(args.num_blocks, tb_input, device_data[i].input);
+        prepare_tb_input(args.num_blocks, tb_input, device_data[i]);
     }
 
     int nerrors = 0;
@@ -176,7 +182,7 @@ main (int argc, char **argv)
     for (int i = 0; i< args.num_repeat; ++i)
     {
         double start = tick();
-        predict_blocks(args.num_blocks, args.num_devices, device_data, U, M, B);
+        predict_blocks(args.num_blocks, args.num_devices, device_data);
         double stop = tick();
         if (stop-start < elapsed) elapsed = stop-start;
         printf("%d: took %.2f sec; %.2f compounds/sec\n", i, stop-start, block_size * args.num_blocks * args.num_devices / elapsed);
@@ -184,7 +190,7 @@ main (int argc, char **argv)
 
     if (args.check) {
         for (int i=0; i<args.num_devices; ++i) {
-            nerrors += check_result(args.num_blocks, device_data[i].output, tb_ref);
+            nerrors += check_result(args.num_blocks, device_data[i]->predictions, tb_ref);
         }
     }
 
@@ -199,8 +205,7 @@ main (int argc, char **argv)
 
 
     for (int i=0; i<args.num_devices; ++i) {
-        free(device_data[i].input);
-        free(device_data[i].output);
+        free(device_data[i]);
     }
 
     return nerrors;

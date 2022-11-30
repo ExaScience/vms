@@ -72,16 +72,13 @@ void predict_block(
 void predict_blocks(
 		int num_blocks,
 		int num_devices,
-		struct predict_data *data,
-		const U_arr U,
-		const M_arr M,
-		const B_arr B
+		struct predict_data *data[]
 )
 {
 	for(int d=0; d<num_devices; ++d)
 		for(int i=0; i<num_blocks; ++i)
 		{
-			predict_block(data[d].input[i], data[d].output[i], U, M, B);
+			predict_block(data[d]->features[i], data[d]->predictions[i], data[d]->U, data[d]->M, data[d]->B);
 		}
 
 #pragma oss taskwait
