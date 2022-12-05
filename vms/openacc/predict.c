@@ -28,6 +28,7 @@ void predict_block(
 		const B_arr B
 )
 {
+#ifndef OMPSS_OPENACC
 #pragma acc data \
 	copyin( \
 		U[:num_proteins][:num_samples][:num_latent], \
@@ -35,6 +36,7 @@ void predict_block(
 		B[:num_features][:num_samples][:num_latent], \
 		features[:block_size][:num_features]) \
 	copyout(predictions[:block_size][:num_proteins])
+#endif /* OMPSS_OPENACC */
 #pragma acc parallel loop
 		for (int i = 0; i < block_size; ++i)
 		{
