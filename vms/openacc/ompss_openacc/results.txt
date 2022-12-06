@@ -1,0 +1,196 @@
+Tue Dec  6 08:42:16 2022       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 520.61.05    Driver Version: 520.61.05    CUDA Version: 11.8     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A100-SXM...  On   | 00000000:01:00.0 Off |                    0 |
+| N/A   31C    P0    60W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A100-SXM...  On   | 00000000:41:00.0 Off |                    0 |
+| N/A   27C    P0    62W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   2  NVIDIA A100-SXM...  On   | 00000000:81:00.0 Off |                    0 |
+| N/A   29C    P0    62W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   3  NVIDIA A100-SXM...  On   | 00000000:C1:00.0 Off |                    0 |
+| N/A   27C    P0    57W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+======= 1 =======
+  nrep:  3
+  ndevs: 1
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.56 sec; 295058.74 compounds/sec
+1: took 0.49 sec; 336329.64 compounds/sec
+2: took 0.49 sec; 336905.60 compounds/sec
+0 errors (out of 18677760)
+minimum time 0.49 sec; 336905.60 compounds/sec
+0.3912 tera-ops; 0.8045 tera-ops/second (32-bit float ops)
+391.2447 giga-ops; 804.5198 giga-ops/second (32-bit float ops)
+======= 2 =======
+  nrep:  3
+  ndevs: 2
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.56 sec; 580797.34 compounds/sec
+1: took 0.49 sec; 671676.69 compounds/sec
+2: took 0.49 sec; 674335.20 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.49 sec; 674335.20 compounds/sec
+0.7825 tera-ops; 1.6103 tera-ops/second (32-bit float ops)
+782.4894 giga-ops; 1610.2909 giga-ops/second (32-bit float ops)
+======= 3 =======
+  nrep:  3
+  ndevs: 3
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.62 sec; 786825.50 compounds/sec
+1: took 0.49 sec; 997078.92 compounds/sec
+2: took 0.49 sec; 999083.25 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.49 sec; 999083.25 compounds/sec
+1.1737 tera-ops; 2.3858 tera-ops/second (32-bit float ops)
+1173.7340 giga-ops; 2385.7788 giga-ops/second (32-bit float ops)
+======= 4 =======
+  nrep:  3
+  ndevs: 4
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.65 sec; 1012227.27 compounds/sec
+1: took 0.50 sec; 1314663.71 compounds/sec
+2: took 0.50 sec; 1322585.20 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.50 sec; 1322585.20 compounds/sec
+1.5650 tera-ops; 3.1583 tera-ops/second (32-bit float ops)
+1564.9787 giga-ops; 3158.2911 giga-ops/second (32-bit float ops)
+======= 5 =======
+  nrep:  3
+  ndevs: 5
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.95 sec; 861051.80 compounds/sec
+1: took 0.87 sec; 942988.25 compounds/sec
+2: took 0.87 sec; 942988.25 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.87 sec; 942988.25 compounds/sec
+1.9562 tera-ops; 2.2518 tera-ops/second (32-bit float ops)
+1956.2234 giga-ops; 2251.8258 giga-ops/second (32-bit float ops)
+======= 6 =======
+  nrep:  3
+  ndevs: 6
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.96 sec; 1025645.72 compounds/sec
+1: took 0.87 sec; 1126788.01 compounds/sec
+2: took 0.87 sec; 1129113.37 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.87 sec; 1129113.37 compounds/sec
+2.3475 tera-ops; 2.6963 tera-ops/second (32-bit float ops)
+2347.4681 giga-ops; 2696.2866 giga-ops/second (32-bit float ops)
+======= 7 =======
+  nrep:  3
+  ndevs: 7
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 1.12 sec; 1025372.84 compounds/sec
+1: took 0.87 sec; 1311873.87 compounds/sec
+2: took 0.87 sec; 1311873.87 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.87 sec; 1311873.87 compounds/sec
+2.7387 tera-ops; 3.1327 tera-ops/second (32-bit float ops)
+2738.7127 giga-ops; 3132.7128 giga-ops/second (32-bit float ops)
+======= 8 =======
+  nrep:  3
+  ndevs: 8
+  nblk:  40
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.95 sec; 1372589.73 compounds/sec
+1: took 0.87 sec; 1503955.69 compounds/sec
+2: took 0.87 sec; 1504958.20 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.87 sec; 1504958.20 compounds/sec
+3.1300 tera-ops; 3.5938 tera-ops/second (32-bit float ops)
+3129.9574 giga-ops; 3593.7920 giga-ops/second (32-bit float ops)
