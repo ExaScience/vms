@@ -80,6 +80,9 @@ void predict_blocks(
 	for(int i=0; i<num_blocks; ++i)
 		for(int d=0; d<num_devices; ++d)
 		{
+#ifdef OPENACC_ONLY
+#pragma acc set device_num(d)
+#endif
 			predict_block(data[d]->features[i], data[d]->predictions[i], data[d]->U, data[d]->M, data[d]->B);
 		}
 

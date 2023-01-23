@@ -99,7 +99,7 @@ static char args_doc[] = "";
 static struct argp_option options[] = {
   {"num-blocks",     'b', "NUM",      0,  "Number of blocks (1)." },
   {"num-repeat",     'r', "NUM",      0,  "Number of time to repeat (1)." },
-  {"num-devices",    'g', "NUM",      0,  "Number of GPUs touse (1)." },
+  {"num-devices",    'g', "NUM",      0,  "Number of GPUs to use (1)." },
   {"no-check",       'n',     0,      0,  "Do not check for errors." },
   {"check",          'd',     0,      0,  "Do check for errors." },
   {"verbose",        'v',     0,      0,  "Verbose messages" },
@@ -166,6 +166,9 @@ main (int argc, char **argv)
     struct predict_data *device_data[MAX_NUM_DEVICES];
 
     for (int i=0; i<args.num_devices; ++i) {
+#ifdef OPENACC_ONLY
+#pragma acc set device_num(i)
+#endif
         device_data[i] = (struct predict_data *) device_alloc(sizeof(struct predict_data), i);
         size_t total_input_size = args.num_blocks*sizeof(F_blk);
         device_data[i]->features = (F_blk *) device_alloc(total_input_size, i);
@@ -174,6 +177,11 @@ main (int argc, char **argv)
 
         prepare_tb_input(args.num_blocks, tb_input, device_data[i]);
     }
+#if 0
+#ifdef OPENACC_ONLY
+#pragma acc set device_num(1) /* return to default device 1 after a loop of allocations */
+#endif
+#endif
 
     int nerrors = 0;
 
@@ -205,6 +213,9 @@ main (int argc, char **argv)
 
 
     for (int i=0; i<args.num_devices; ++i) {
+#ifdef OPENACC_ONLY
+#pragma acc set device_num(i)
+#endif
         free(device_data[i]->features);
         free(device_data[i]->predictions);
         free(device_data[i]);
