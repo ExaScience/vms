@@ -1,0 +1,164 @@
+====== 1 =====
+  nrep:  3
+  ndevs: 1
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.70 sec; 294020.47 compounds/sec
+1: took 0.56 sec; 368764.69 compounds/sec
+2: took 0.56 sec; 368764.69 compounds/sec
+0 errors (out of 23347200)
+minimum time 0.56 sec; 368764.69 compounds/sec
+0.4891 tera-ops; 0.8806 tera-ops/second (32-bit float ops)
+489.0558 giga-ops; 880.5983 giga-ops/second (32-bit float ops)
+====== 2 =====
+  nrep:  3
+  ndevs: 2
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.66 sec; 616192.62 compounds/sec
+1: took 0.56 sec; 735089.37 compounds/sec
+2: took 0.55 sec; 743011.58 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 0.55 sec; 743011.58 compounds/sec
+0.9781 tera-ops; 1.7743 tera-ops/second (32-bit float ops)
+978.1117 giga-ops; 1774.2879 giga-ops/second (32-bit float ops)
+====== 3 =====
+  nrep:  3
+  ndevs: 3
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.64 sec; 958290.21 compounds/sec
+1: took 0.55 sec; 1107816.89 compounds/sec
+2: took 0.55 sec; 1107816.89 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 0.55 sec; 1107816.89 compounds/sec
+1.4672 tera-ops; 2.6454 tera-ops/second (32-bit float ops)
+1467.1675 giga-ops; 2645.4313 giga-ops/second (32-bit float ops)
+====== 4 =====
+  nrep:  3
+  ndevs: 4
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 0.64 sec; 1277776.35 compounds/sec
+1: took 0.55 sec; 1477336.23 compounds/sec
+2: took 0.56 sec; 1477336.23 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 0.55 sec; 1477336.23 compounds/sec
+1.9562 tera-ops; 3.5278 tera-ops/second (32-bit float ops)
+1956.2234 giga-ops; 3527.8316 giga-ops/second (32-bit float ops)
+====== 5 =====
+  nrep:  3
+  ndevs: 5
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 1.28 sec; 801232.45 compounds/sec
+1: took 1.08 sec; 951262.71 compounds/sec
+2: took 1.08 sec; 951434.66 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 1.08 sec; 951434.66 compounds/sec
+2.4453 tera-ops; 2.2720 tera-ops/second (32-bit float ops)
+2445.2792 giga-ops; 2271.9955 giga-ops/second (32-bit float ops)
+====== 6 =====
+  nrep:  3
+  ndevs: 6
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 1.32 sec; 931014.74 compounds/sec
+1: took 1.07 sec; 1147513.56 compounds/sec
+2: took 1.07 sec; 1147513.56 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 1.07 sec; 1147513.56 compounds/sec
+2.9343 tera-ops; 2.7402 tera-ops/second (32-bit float ops)
+2934.3351 giga-ops; 2740.2257 giga-ops/second (32-bit float ops)
+====== 7 =====
+  nrep:  3
+  ndevs: 7
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 1.24 sec; 1159035.67 compounds/sec
+1: took 1.08 sec; 1326740.30 compounds/sec
+2: took 1.08 sec; 1326740.30 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 1.08 sec; 1326740.30 compounds/sec
+3.4234 tera-ops; 3.1682 tera-ops/second (32-bit float ops)
+3423.3909 giga-ops; 3168.2134 giga-ops/second (32-bit float ops)
+====== 8 =====
+  nrep:  3
+  ndevs: 8
+  nblk:  50
+  blksz: 4096
+  nprot: 114
+  nfeat: 469
+  nlat:  32
+  nsmpl: 128
+Predicting
+0: took 1.26 sec; 1301874.85 compounds/sec
+1: took 1.08 sec; 1516301.73 compounds/sec
+2: took 1.08 sec; 1518506.09 compounds/sec
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+0 errors (out of 23347200)
+minimum time 1.08 sec; 1518506.09 compounds/sec
+3.9124 tera-ops; 3.6261 tera-ops/second (32-bit float ops)
+3912.4468 giga-ops; 3626.1439 giga-ops/second (32-bit float ops)
