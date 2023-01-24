@@ -1,164 +1,196 @@
+Tue Jan 24 13:46:24 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.161.03   Driver Version: 470.161.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A100-SXM...  On   | 00000000:01:00.0 Off |                    0 |
+| N/A   31C    P0    55W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A100-SXM...  On   | 00000000:41:00.0 Off |                    0 |
+| N/A   29C    P0    53W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   2  NVIDIA A100-SXM...  On   | 00000000:81:00.0 Off |                    0 |
+| N/A   28C    P0    52W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   3  NVIDIA A100-SXM...  On   | 00000000:C1:00.0 Off |                    0 |
+| N/A   27C    P0    52W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 ====== 1 =====
   nrep:  3
   ndevs: 1
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 0.70 sec; 294020.47 compounds/sec
-1: took 0.56 sec; 368764.69 compounds/sec
-2: took 0.56 sec; 368764.69 compounds/sec
-0 errors (out of 23347200)
-minimum time 0.56 sec; 368764.69 compounds/sec
-0.4891 tera-ops; 0.8806 tera-ops/second (32-bit float ops)
-489.0558 giga-ops; 880.5983 giga-ops/second (32-bit float ops)
+0: took 0.54 sec; 302158.07 compounds/sec
+1: took 0.44 sec; 370373.34 compounds/sec
+2: took 0.44 sec; 370373.34 compounds/sec
+0 errors (out of 18677760)
+minimum time 0.44 sec; 370373.34 compounds/sec
+0.3912 tera-ops; 0.8844 tera-ops/second (32-bit float ops)
+391.2447 giga-ops; 884.4397 giga-ops/second (32-bit float ops)
 ====== 2 =====
   nrep:  3
   ndevs: 2
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 0.66 sec; 616192.62 compounds/sec
-1: took 0.56 sec; 735089.37 compounds/sec
-2: took 0.55 sec; 743011.58 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 0.55 sec; 743011.58 compounds/sec
-0.9781 tera-ops; 1.7743 tera-ops/second (32-bit float ops)
-978.1117 giga-ops; 1774.2879 giga-ops/second (32-bit float ops)
+0: took 0.55 sec; 596913.66 compounds/sec
+1: took 0.44 sec; 744169.10 compounds/sec
+2: took 0.44 sec; 744298.86 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.44 sec; 744298.86 compounds/sec
+0.7825 tera-ops; 1.7774 tera-ops/second (32-bit float ops)
+782.4894 giga-ops; 1777.3619 giga-ops/second (32-bit float ops)
 ====== 3 =====
   nrep:  3
   ndevs: 3
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 0.64 sec; 958290.21 compounds/sec
-1: took 0.55 sec; 1107816.89 compounds/sec
-2: took 0.55 sec; 1107816.89 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 0.55 sec; 1107816.89 compounds/sec
-1.4672 tera-ops; 2.6454 tera-ops/second (32-bit float ops)
-1467.1675 giga-ops; 2645.4313 giga-ops/second (32-bit float ops)
+0: took 0.57 sec; 865630.32 compounds/sec
+1: took 0.44 sec; 1109018.43 compounds/sec
+2: took 0.44 sec; 1110172.84 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.44 sec; 1110172.84 compounds/sec
+1.1737 tera-ops; 2.6511 tera-ops/second (32-bit float ops)
+1173.7340 giga-ops; 2651.0572 giga-ops/second (32-bit float ops)
 ====== 4 =====
   nrep:  3
   ndevs: 4
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 0.64 sec; 1277776.35 compounds/sec
-1: took 0.55 sec; 1477336.23 compounds/sec
-2: took 0.56 sec; 1477336.23 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 0.55 sec; 1477336.23 compounds/sec
-1.9562 tera-ops; 3.5278 tera-ops/second (32-bit float ops)
-1956.2234 giga-ops; 3527.8316 giga-ops/second (32-bit float ops)
+0: took 0.53 sec; 1225379.14 compounds/sec
+1: took 0.44 sec; 1481288.98 compounds/sec
+2: took 0.44 sec; 1481745.72 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.44 sec; 1481745.72 compounds/sec
+1.5650 tera-ops; 3.5384 tera-ops/second (32-bit float ops)
+1564.9787 giga-ops; 3538.3614 giga-ops/second (32-bit float ops)
 ====== 5 =====
   nrep:  3
   ndevs: 5
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 1.28 sec; 801232.45 compounds/sec
-1: took 1.08 sec; 951262.71 compounds/sec
-2: took 1.08 sec; 951434.66 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 1.08 sec; 951434.66 compounds/sec
-2.4453 tera-ops; 2.2720 tera-ops/second (32-bit float ops)
-2445.2792 giga-ops; 2271.9955 giga-ops/second (32-bit float ops)
+0: took 0.96 sec; 855975.29 compounds/sec
+1: took 0.87 sec; 946050.18 compounds/sec
+2: took 0.86 sec; 950618.59 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.86 sec; 950618.59 compounds/sec
+1.9562 tera-ops; 2.2700 tera-ops/second (32-bit float ops)
+1956.2234 giga-ops; 2270.0468 giga-ops/second (32-bit float ops)
 ====== 6 =====
   nrep:  3
   ndevs: 6
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 1.32 sec; 931014.74 compounds/sec
-1: took 1.07 sec; 1147513.56 compounds/sec
-2: took 1.07 sec; 1147513.56 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 1.07 sec; 1147513.56 compounds/sec
-2.9343 tera-ops; 2.7402 tera-ops/second (32-bit float ops)
-2934.3351 giga-ops; 2740.2257 giga-ops/second (32-bit float ops)
+0: took 1.00 sec; 984192.13 compounds/sec
+1: took 0.86 sec; 1148763.88 compounds/sec
+2: took 0.86 sec; 1148763.88 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.86 sec; 1148763.88 compounds/sec
+2.3475 tera-ops; 2.7432 tera-ops/second (32-bit float ops)
+2347.4681 giga-ops; 2743.2114 giga-ops/second (32-bit float ops)
 ====== 7 =====
   nrep:  3
   ndevs: 7
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 1.24 sec; 1159035.67 compounds/sec
-1: took 1.08 sec; 1326740.30 compounds/sec
-2: took 1.08 sec; 1326740.30 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 1.08 sec; 1326740.30 compounds/sec
-3.4234 tera-ops; 3.1682 tera-ops/second (32-bit float ops)
-3423.3909 giga-ops; 3168.2134 giga-ops/second (32-bit float ops)
+0: took 1.09 sec; 1050429.10 compounds/sec
+1: took 0.87 sec; 1324233.25 compounds/sec
+2: took 0.87 sec; 1325168.97 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.87 sec; 1325168.97 compounds/sec
+2.7387 tera-ops; 3.1645 tera-ops/second (32-bit float ops)
+2738.7127 giga-ops; 3164.4611 giga-ops/second (32-bit float ops)
 ====== 8 =====
   nrep:  3
   ndevs: 8
-  nblk:  50
+  nblk:  40
   blksz: 4096
   nprot: 114
   nfeat: 469
   nlat:  32
   nsmpl: 128
 Predicting
-0: took 1.26 sec; 1301874.85 compounds/sec
-1: took 1.08 sec; 1516301.73 compounds/sec
-2: took 1.08 sec; 1518506.09 compounds/sec
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-0 errors (out of 23347200)
-minimum time 1.08 sec; 1518506.09 compounds/sec
-3.9124 tera-ops; 3.6261 tera-ops/second (32-bit float ops)
-3912.4468 giga-ops; 3626.1439 giga-ops/second (32-bit float ops)
+0: took 1.08 sec; 1214670.40 compounds/sec
+1: took 0.86 sec; 1516687.42 compounds/sec
+2: took 0.86 sec; 1519115.27 compounds/sec
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+0 errors (out of 18677760)
+minimum time 0.86 sec; 1519115.27 compounds/sec
+3.1300 tera-ops; 3.6276 tera-ops/second (32-bit float ops)
+3129.9574 giga-ops; 3627.5986 giga-ops/second (32-bit float ops)
