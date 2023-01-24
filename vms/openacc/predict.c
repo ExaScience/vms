@@ -21,6 +21,7 @@
 #warning Not using OMPSS (define either OMPSS_SMP or OMPSS_OPENACC)
 #endif
 void predict_block(
+		int queue,
 		const F_blk features,
 		      P_blk predictions,
 		const U_arr U,
@@ -37,7 +38,11 @@ void predict_block(
 		features[:block_size][:num_features]) \
 	copyout(predictions[:block_size][:num_proteins])
 #endif /* OMPSS_OPENACC */
+#ifdef OPENACC_ONLY
+#pragma acc parallel loop async(queue)
+#else
 #pragma acc parallel loop
+#endif
 		for (int i = 0; i < block_size; ++i)
 		{
 			float latents[num_samples][num_latent];
@@ -69,6 +74,7 @@ void predict_block(
 				} // end proteins
 			}
 		}
+
 }
 
 void predict_blocks(
@@ -78,13 +84,22 @@ void predict_blocks(
 )
 {
 	for(int i=0; i<num_blocks; ++i)
+	{
 		for(int d=0; d<num_devices; ++d)
 		{
 #ifdef OPENACC_ONLY
 #pragma acc set device_num(d)
 #endif
-			predict_block(data[d]->features[i], data[d]->predictions[i], data[d]->U, data[d]->M, data[d]->B);
+			predict_block(d, data[d]->features[i], data[d]->predictions[i], data[d]->U, data[d]->M, data[d]->B);
 		}
+	}
+
+#ifdef OPENACC_ONLY
+		for(int d=0; d<num_devices; ++d)
+		{
+#pragma acc wait(d)
+		}
+#endif
 
 #pragma oss taskwait
 }
