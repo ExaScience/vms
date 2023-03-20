@@ -1,0 +1,98 @@
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/nvtxsum.py]... 
+SKIPPED: report2.sqlite does not contain NV Tools Extension (NVTX) data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/osrtsum.py]... 
+SKIPPED: report2.sqlite does not contain OS Runtime trace data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/cudaapisum.py]... 
+
+ ** CUDA API Summary (cudaapisum):
+
+ Time (%)  Total Time (ns)  Num Calls    Avg (ns)     Med (ns)    Min (ns)    Max (ns)    StdDev (ns)          Name       
+ --------  ---------------  ---------  ------------  -----------  ---------  -----------  ------------  ------------------
+     48.5      468,221,388         64   7,315,959.2      2,863.0      1,885  168,736,008  33,243,019.2  cudaStreamCreate  
+     19.6      188,805,450        132   1,430,344.3  1,657,612.0     42,533    5,218,149   1,348,700.9  cuMemAllocHost_v2 
+     18.3      176,486,758         12  14,707,229.8  7,767,057.5  1,354,054   38,903,068  14,667,890.0  cuMemFree_v2      
+      6.6       63,772,875        132     483,127.8    291,721.0     14,806    3,031,955     638,584.4  cuMemAlloc_v2     
+      2.5       23,671,776         12   1,972,648.0     96,937.5     56,640   22,023,489   6,315,324.7  cudaMallocManaged 
+      2.0       19,098,947        128     149,210.5     69,141.5      9,079    1,486,959     217,362.2  cuStreamCreate    
+      2.0       18,859,180        480      39,290.0     27,656.5     15,575      390,823      42,648.9  cuLaunchKernel    
+      0.4        4,186,266          4   1,046,566.5  1,083,599.0    552,432    1,466,636     477,023.8  cuModuleLoadDataEx
+      0.1          700,639        128       5,473.7      4,365.5      1,466       33,453       4,059.2  cuEventCreate     
+      0.1          639,517         64       9,992.5      8,310.5      4,749       45,675       6,835.5  cudaStreamDestroy 
+      0.0           10,057          1      10,057.0     10,057.0     10,057       10,057           0.0  cuInit            
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/gpukernsum.py]... 
+
+ ** CUDA GPU Kernel Summary (gpukernsum):
+
+ Time (%)  Total Time (ns)  Instances    Avg (ns)      Med (ns)     Min (ns)    Max (ns)   StdDev (ns)          Name        
+ --------  ---------------  ---------  ------------  ------------  ----------  ----------  -----------  --------------------
+    100.0    5,960,312,271        480  12,417,317.2  11,094,843.0  10,948,573  24,301,471  2,134,821.2  predict_block_52_gpu
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/gpumemtimesum.py]... 
+
+ ** GPU MemOps Summary (by Time) (gpumemtimesum):
+
+ Time (%)  Total Time (ns)  Count  Avg (ns)  Med (ns)  Min (ns)  Max (ns)  StdDev (ns)              Operation            
+ --------  ---------------  -----  --------  --------  --------  --------  -----------  ---------------------------------
+     75.9      186,511,289  7,797  23,920.9   7,936.0     2,208   293,375     42,053.9  [CUDA Unified Memory memcpy HtoD]
+     24.1       59,346,909  2,015  29,452.6   2,240.0     1,567   697,280     85,444.0  [CUDA Unified Memory memcpy DtoH]
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/gpumemsizesum.py]... 
+
+ ** GPU MemOps Summary (by Size) (gpumemsizesum):
+
+ Total (MB)  Count  Avg (MB)  Med (MB)  Min (MB)  Max (MB)  StdDev (MB)              Operation            
+ ----------  -----  --------  --------  --------  --------  -----------  ---------------------------------
+  1,270.051  7,797     0.163     0.041     0.004     1.044        0.276  [CUDA Unified Memory memcpy HtoD]
+    301.167  2,015     0.149     0.004     0.004     1.044        0.282  [CUDA Unified Memory memcpy DtoH]
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/openmpevtsum.py]... 
+SKIPPED: report2.sqlite does not contain OpenMP event data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/khrdebugsum.py]... 
+SKIPPED: report2.sqlite does not contain KHR Extension (KHR_DEBUG) data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/khrdebuggpusum.py]... 
+SKIPPED: report2.sqlite does not contain GPU KHR Extension (KHR_DEBUG) data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/vulkanmarkerssum.py]... 
+SKIPPED: report2.sqlite does not contain Vulkan Debug Extension (Vulkan Debug Util) data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/vulkangpumarkersum.py]... 
+SKIPPED: report2.sqlite does not contain GPU Vulkan Debug Extension (GPU Vulkan Debug markers) data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/dx11pixsum.py]... 
+SKIPPED: report2.sqlite does not contain DX11 CPU debug markers.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/dx12gpumarkersum.py]... 
+SKIPPED: report2.sqlite does not contain DX12 GPU debug markers.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/dx12pixsum.py]... 
+SKIPPED: report2.sqlite does not contain DX12 CPU debug markers.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/wddmqueuesdetails.py]... 
+SKIPPED: report2.sqlite does not contain WDDM context data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/unifiedmemory.py]... 
+SKIPPED: report2.sqlite does not contain CUDA Unified Memory CPU page faults data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/unifiedmemorytotals.py]... 
+SKIPPED: report2.sqlite does not contain CUDA Unified Memory CPU page faults data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/umcpupagefaults.py]... 
+SKIPPED: report2.sqlite does not contain CUDA Unified Memory CPU page faults data.
+
+Processing [report2.sqlite] with [/local/nvme/scratch/vanderaa/epeec/spack/opt/spack/linux-ubuntu20.04-zen2/gcc-9.4.0/nvhpc-22.9-37kb5vnbcqaqndieacb2n4q4ubdprhni/Linux_x86_64/22.9/profilers/Nsight_Systems/host-linux-x64/reports/openaccsum.py]... 
+
+ ** OpenACC Summary (openaccsum):
+
+ Time(%)  Total Time (ns)  Num Calls   Avg (ns)     Med (ns)    Min (ns)   Max (ns)   StdDev (ns)                  Name                 
+ -------  ---------------  ---------  -----------  -----------  ---------  ---------  -----------  -------------------------------------
+    79.3      287,228,359        480    598,392.4     48,852.5     24,793  7,654,581  1,320,876.0  Compute Construct@pgimcc_predict.i:52
+     7.2       25,908,176        480     53,975.4     12,606.0      2,444    798,618     90,575.0  Enter Data@pgimcc_predict.i:52       
+     6.7       24,092,489        480     50,192.7     37,295.0     20,184    403,604     44,952.3  Enqueue Launch@pgimcc_predict.i:52   
+     5.4       19,692,866          4  4,923,216.5  4,997,526.0  1,525,790  8,172,024  2,762,460.3  Device Init                          
+     1.4        5,095,157        480     10,614.9      4,679.0      2,374    593,778     46,579.9  Exit Data@pgimcc_predict.i:52        
+
