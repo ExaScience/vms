@@ -12,3 +12,34 @@ This repo contains several implementations of VMS generated from a Matrix Factor
  * vms/smurfference: Python NumPy, Tensorflow implementation
  * vms/fpga: Xilinx FPGA implementation, with OpenCL and with OmpSs@FPGA
 
+
+ ## Results
+
+ The paper [Virtual Screening on FPGA: Performance and Energy versus Effort](https://arxiv.org/abs/2210.10386)
+ contains a comparison of VMS on FPGA, CPU and GPU.
+
+Comparison of energy performance of the VMS application implemented on an Nvidia
+A100 GPU, an Intel Skylake CPU (24 cores @ 2.7Ghz) and a Xilinx Alveo U200 FPGA:
+
+|                               | CPU  |   GPU | FPGA |
+| Peak Performance (GF/s)       | 3072 | 19500 | 684  |
+| Achieved Performance (GF/s)   | 402  |  3265 | 260  |
+| % of Peak Performance         | 13%  |   17% | 38%  |
+| Measured Power Drain (Watt)   | 205  |   200 |  37  |
+| Energy Efficiency (GF/s/Watt) | 1.8  |   10  |  3   |
+
+
+```
+N (#samples)	100
+K (latent dim)	64
+F (#features/compound)	500
+P (#proteins)	500
+
+Flops/compound	6400000
+achieved gflops/second	3265
+compounds/second	510156
+mega-compounds/second	0.510
+seconds/billion compounds	1960
+minutes/billion compounds	33
+```
+
