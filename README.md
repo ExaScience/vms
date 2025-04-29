@@ -21,13 +21,17 @@ This repo contains several implementations of VMS generated from a Matrix Factor
 Comparison of energy performance of the VMS application implemented on an Nvidia
 A100 GPU, an Intel Skylake CPU (24 cores @ 2.7Ghz) and a Xilinx Alveo U200 FPGA:
 
+
 |                               | CPU  |   GPU | FPGA |
+|-------------------------------|------|-------|------|
 | Peak Performance (GF/s)       | 3072 | 19500 | 684  |
 | Achieved Performance (GF/s)   | 402  |  3265 | 260  |
 | % of Peak Performance         | 13%  |   17% | 38%  |
 | Measured Power Drain (Watt)   | 205  |   200 |  37  |
 | Energy Efficiency (GF/s/Watt) | 1.8  |   10  |  3   |
 
+
+1 billion compounds, on a A100 GPU, would take 33 minutes:
 
 ```
 N (#samples)	100
